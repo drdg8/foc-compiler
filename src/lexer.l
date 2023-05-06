@@ -14,8 +14,14 @@ extern "C" int yywrap() { }
 
 %%
 
+//匹配一个空格（ ）、制表符（\t）或换行符
 [ \t\n]					        ;
+
+//匹配多行注释
 "/*"[^*]*[*]+([^*/][^*]*[*]+)*"/"						 ; 
+
+
+//C语言基本语句
 "extern"                        return TOKEN(TEXTERN);
 "return"				        return TOKEN(TRETURN);
 "for"                   return TOKEN(FOR);
@@ -27,6 +33,8 @@ extern "C" int yywrap() { }
 "default"               return TOKEN(DEFAULT);
 "array"               return TOKEN(ARRAY);
 "const"                return TOKEN(CONST);
+
+//类型系统
 "int"                   return TOKEN(INT);
 "char"                  return TOKEN(CHAR);
 "float"                 return TOKEN(FLOAT);
