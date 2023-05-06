@@ -147,17 +147,17 @@ public:
 		type(type), id(id), arguments(arguments), block(block) { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
-class NTypeDeclaration : public NDeclaration {
-public:
-    NStatement *initial;
-    NExpression *condition;
-    NExpression *tail;
-    NStatement *body;
-    NTypeDeclaration(NStatement *initial,NExpression *condition,
-    NExpression *tail,NStatement *body):
-        initial(initial), condition(condition),tail(tail),body(body){}
-    virtual llvm::Value* codeGen(CodeGenContext& context);
-};
+// class NTypeDeclaration : public NDeclaration {
+// public:
+//     NStatement *initial;
+//     NExpression *condition;
+//     NExpression *tail;
+//     NStatement *body;
+//     NTypeDeclaration(NStatement *initial,NExpression *condition,
+//     NExpression *tail,NStatement *body):
+//         initial(initial), condition(condition),tail(tail),body(body){}
+//     virtual llvm::Value* codeGen(CodeGenContext& context);
+// };
 class NLoopStatement : public NStatement {
 	public:
 		
@@ -173,9 +173,9 @@ class NForStatement : public NLoopStatement {
 		//待改
 		NStatement* _Initial;
 		NExpression* _Tail;
-		NStatement* _LoopBody;
+		NBlock* _LoopBody;
 
-		NForStatement(NStatement* __Initial, NExpression* __Condition, NExpression* __Tail, NStatement* __LoopBody) :
+		NForStatement(NStatement* __Initial, NExpression* __Condition, NExpression* __Tail, NBlock* __LoopBody) :
 			_Initial(__Initial), NLoopStatement(__Condition), _Tail(__Tail), _LoopBody(__LoopBody) {}
 		~NForStatement(void) {}
 		llvm::Value* codeGen(CodeGenContext& context);
@@ -185,9 +185,9 @@ class NWhileStatement : public NLoopStatement {
 	public:
 		//待改
 
-		NStatement* _LoopBody;
+		NBlock* _LoopBody;
 
-		NWhileStatement(NExpression* __Condition, NStatement* __LoopBody) :
+		NWhileStatement(NExpression* __Condition, NBlock* __LoopBody) :
 			 NLoopStatement(__Condition),_LoopBody(__LoopBody) {}
 		~NWhileStatement(void) {}
 		llvm::Value* codeGen(CodeGenContext& context);
@@ -198,12 +198,12 @@ class NIfStatement : public NStatement {
 		//待改
 
 		NExpression* condition;
-		NStatement* next;
-    NStatement* else_next;
+		NBlock* next;
+    NBlock* else_next;
 
-		NIfStatement(NExpression* condition, NStatement* next,NStatement* else_next) :
+		NIfStatement(NExpression* condition, NBlock* next,NBlock* else_next) :
 			 condition(condition),next(next),else_next(else_next) {}
-    NIfStatement(NExpression* condition, NStatement* next) :
+    NIfStatement(NExpression* condition, NBlock* next) :
 			 condition(condition),next(next) {else_next=nullptr;}
 		~NIfStatement(void) {}
 		llvm::Value* codeGen(CodeGenContext& context);
@@ -227,10 +227,12 @@ class NCaseStatement : public NStatement {
 		//待改
 
 		NExpression* condition;
-		NStatement* body;
+		NBlock* body;
 
-		NCaseStatement(NExpression* condition, NStatement* body) :
+		NCaseStatement(NExpression* condition, NBlock* body) :
 			 condition(condition),body(body) {}
+    NCaseStatement(NBlock* body) :
+			 body(body) {}
 		~NCaseStatement(void) {}
 		llvm::Value* codeGen(CodeGenContext& context);
 		

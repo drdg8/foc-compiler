@@ -21,7 +21,6 @@ extern "C" int yywrap() { }
 "for"                   return TOKEN(FOR);
 "if"                    return TOKEN(IF);
 "else"                  return TOKEN(ELSE);
-"do"                    return TOKEN(DO);
 "while"                 return TOKEN(WHILE);
 "switch"                return TOKEN(SWITCH);
 "case"                  return TOKEN(CASE);
@@ -38,9 +37,9 @@ extern "C" int yywrap() { }
 "continue"              return TOKEN(CONTINUE);
 "until"                 return TOKEN(UNTIL);
 "break"                 return TOKEN(BREAK);
-[a-zA-Z_][a-zA-Z0-9_]*  SAVE_TOKEN; return TIDENTIFIER;
-[0-9]+\.[0-9]* 			    SAVE_TOKEN; return TDOUBLE;
-[0-9]+					        SAVE_TOKEN; return TINTEGER;
+[a-zA-Z_][a-zA-Z0-9_]*  SAVE_IDENTIFIER; return TIDENTIFIER;
+[0-9]+\.[0-9]* 			    SAVE_DOUBLE; return TDOUBLE;
+[0-9]+					        SAVE_INTEGER; return TINTEGER;
 
 "="						          return TOKEN(TEQUAL);
 "=="				          	return TOKEN(TCEQ);
@@ -62,6 +61,9 @@ extern "C" int yywrap() { }
 "~"                     return TOKEN(BNOT);
 "."         						return TOKEN(TDOT);
 ","				          		return TOKEN(TCOMMA);
+"&"				          		return TOKEN(GAD);
+";"				          		return TOKEN(SEMI);
+":"                     return TOKEN(COLON);
 
 "+"				          		return TOKEN(TPLUS);
 "-"		          				return TOKEN(TMINUS);
