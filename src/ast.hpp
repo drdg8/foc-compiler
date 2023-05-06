@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <string>
 #include <llvm/IR/Value.h>
 
 class CodeGenContext;
@@ -22,29 +23,46 @@ class NExpression : public Node {
 
 class NStatement : public Node {
 };
-class NFuncBody : public Node {//函数体
-	public:
-		//Its content
-		NStatement* Content;
+// class NFuncBody : public Node {//函数体
+// 	public:
+// 		//Its content
+// 		NStatement* Content;
 
-		NFuncBody(NStatement* Content) :Content(Content) {}
-		~NFuncBody(void) {}
-		llvm::Value* codeGen(CodeGenContext& context);
+// 		NFuncBody(NStatement* Content) :Content(Content) {}
+// 		~NFuncBody(void) {}
+// 		llvm::Value* codeGen(CodeGenContext& context);
 		
-	};
-// class NInteger : public NExpression {
-// public:
-// 	long long value;
-// 	NInteger(long long value) : value(value) { }
-// 	virtual llvm::Value* codeGen(CodeGenContext& context);
-// };
+// 	};
+class NInteger : public NExpression {
+public:
+	long long value;
+	NInteger(long long value) : value(value) { }
+	llvm::Value* codeGen(CodeGenContext& context);
+};
 
-// class NDouble : public NExpression {
-// public:
-// 	double value;
-// 	NDouble(double value) : value(value) { }
-// 	virtual llvm::Value* codeGen(CodeGenContext& context);
-// };
+class NDouble : public NExpression {
+public:
+	double value;
+	NDouble(double value) : value(value) { }
+	llvm::Value* codeGen(CodeGenContext& context);
+};
+class NChar : public NExpression {
+public:
+  NChar(std::string &value) : value(value) {}
+  llvm::Value* codeGen(CodeGenContext& context);
+  
+public:
+  std::string &value;
+};
+
+class NString : public NExpression {
+public:
+  NString(std::string &value) : value(value) {}
+  llvm::Value* codeGen(CodeGenContext& context);
+  llvm::Value *getAddr(CodeGenContext& context);
+public:
+  std::string &value;
+};
 
 class NIdentifier : public NExpression {
 public:
@@ -88,6 +106,43 @@ public:
 	NBlock() { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
+
+class ArrayElement : public NExpression {   //identifier[expression] 表示数组中某个元素
+public:
+  ArrayElement(NIdentifier& identifier, NExpression &index) :identifier(identifier), index(index) {}
+  llvm::Value *codeGen(CodeGenContext& context);
+  llvm::Value *getAddr(CodeGenContext& context);
+public:
+  NIdentifier &identifier;
+  NExpression &index;
+};
+
+class ArrayElementAssign : public NExpression {   //identifier[expression] 表示数组中某个元素
+public:
+  ArrayElementAssign(NIdentifier &identifier, NExpression &index, NExpression &rhs) :identifier(identifier), index(index), rhs(rhs) {}
+  llvm::Value *codeGen(CodeGenContext& context);
+public:
+  NIdentifier& identifier;
+  NExpression &index;
+  NExpression &rhs;
+};
+class getAddr : public NExpression {  //取地址运算符
+public:
+  getAddr(NIdentifier &rhs) : rhs(rhs) {}
+  llvm::Value *codeGen(CodeGenContext& context);
+public:
+  NIdentifier& rhs;
+};
+class getArrayAddr : public NExpression {  //取地址运算符
+public:
+  getArrayAddr(NIdentifier &rhs, NExpression &index) :index(index), rhs(rhs) {}
+  llvm::Value *codeGen(CodeGenContext& context);
+public:
+  NExpression& index;
+  NIdentifier& rhs;
+};
+
+
 class NDeclaration : public NStatement {
 	public:
 		NDeclaration(void) {}
@@ -105,26 +160,36 @@ public:
 
 class NReturnStatement : public NStatement {
 public:
-	NExpression& expression;
-	NReturnStatement(NExpression& expression) : 
+	NExpression* expression;
+	NReturnStatement(NExpression* expression) : 
 		expression(expression) { }
-  NReturnStatement() : 
-		 {}
+  NReturnStatement()
+		 {expression=nullptr;}
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
 class NVariableDeclaration : public NDeclaration {
 public:
+  int size;
 	const NIdentifier& type;
 	NIdentifier& id;
 	NExpression *assignmentExpr;
 	NVariableDeclaration(const NIdentifier& type, NIdentifier& id) :
-		type(type), id(id) { assignmentExpr = NULL; }
+		type(type), id(id) { assignmentExpr = nullptr; }
+  NVariableDeclaration(const NIdentifier& type, NIdentifier& id,int size) :
+		type(type), id(id) { assignmentExpr = nullptr; }
 	NVariableDeclaration(const NIdentifier& type, NIdentifier& id, NExpression *assignmentExpr) :
 		type(type), id(id), assignmentExpr(assignmentExpr) { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
+class NArrayDeclaration : public NVariableDeclaration {
+  public:
+  int size;
+  NArrayDeclaration(const NIdentifier& type, NIdentifier& id,int size) :
+		NVariableDeclaration(type,id),size(size) {}
+  virtual llvm::Value* codeGen(CodeGenContext& context);
 
+};
 class NExternDeclaration : public NDeclaration {
 public:
     const NIdentifier& type;
