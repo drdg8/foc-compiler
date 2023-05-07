@@ -1,3 +1,6 @@
+#ifndef CODEGEN_H
+#define CODEGEN_H
+
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Value.h>
 #include <map>
@@ -28,3 +31,5 @@ using namespace std;
 
 extern llvm::LLVMContext myContext; //定义全局context
 extern llvm::IRBuilder<> myBuilder; //定义全局IRbuilder
+
+#endif

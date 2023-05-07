@@ -1,22 +1,22 @@
 all : c_compiler
-LLVM_CONFIG = /usr/bin/llvm-config-14
 
+LLVMCONFIG = llvm-config
 CPPFLAGS = `$(LLVMCONFIG) --cppflags` -std=c++14
-LDFLAGS = `$(LLVMCONFIG) --ldflags` -lpthread -ldl -lz -lncurses -rdynamic
+LDFLAGS = `$(LLVMCONFIG) --ldflags` -lpthread -ldl -lncurses -rdynamic
 LIBS = `$(LLVMCONFIG) --libs`
 
 OBJS = parser.o lexer.o ast.o CodeGenerator.o main.o 
 
-lexer.cpp: src/lexer.l src/parser.hpp
-	flex -o $@ $^
-
-parser.cpp: src/parser.y 
+parser.cpp: parser.y 
 	bison -d -o $@ $^
 
 parser.hpp: parser.cpp
 
-%.o: src/%.cpp src/ast.hpp src/CodeGenerator.hpp
-	g++ -c $(CXXFLAGS) -g -o $@ $< 
+lexer.cpp: lexer.l parser.hpp
+	flex -o $@ $^
+
+%.o: %.cpp ast.hpp CodeGenerator.hpp
+	g++ -c $(CPPFLAGS) -g -o $@ $< 
 
 c_compiler: $(OBJS)
 	g++ -o $@ $(OBJS) $(LIBS) $(LDFLAGS)

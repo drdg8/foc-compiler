@@ -1,3 +1,6 @@
+#ifndef AST_HPP
+#define AST_HPP
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -276,10 +279,10 @@ class NIfStatement : public NStatement {
 	public:
 		//待改
 
-		NExpression* matches;
-		CaseList* caseList;
+		NExpression& matches;
+		CaseList& caseList;
 
-		NSwitchStatement(NExpression* matches, CaseList* caseList) :
+		NSwitchStatement(NExpression& matches, CaseList& caseList) :
 			 matches(matches),caseList(caseList) {}
 		~NSwitchStatement(void) {}
 		llvm::Value* codeGen(CodeGenContext& context);
@@ -290,12 +293,12 @@ class NCaseStatement : public NStatement {
 		//待改
 
 		NExpression* condition;
-		NBlock* body;
+		NBlock& body;
 
-		NCaseStatement(NExpression* condition, NBlock* body) :
+		NCaseStatement(NExpression* condition, NBlock& body) :
 			 condition(condition),body(body) {}
-    NCaseStatement(NBlock* body) :
-			 body(body) {}
+    NCaseStatement(NBlock& body) :
+			 body(body) {condition=nullptr;}
 		~NCaseStatement(void) {}
 		llvm::Value* codeGen(CodeGenContext& context);
 		
@@ -306,3 +309,5 @@ class NBreakStatement : public NStatement {
 		~NBreakStatement(void) {}
 		llvm::Value* codeGen(CodeGenContext& context);
 	};
+
+#endif
