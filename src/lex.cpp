@@ -537,13 +537,12 @@ char *yytext;
 #include <string>
 #include "ast.hpp"
 //#include "parser.hpp"
-extern "C" int yywrap() { }
 #define SAVE_IDENTIFIER  yylval.sVal = new std::string(yytext, yyleng)
 #define SAVE_DOUBLE  yylval.dVal = stod(new std::string(yytext, yyleng))
 #define SAVE_INTEGER  yylval.iVal = stoi(new std::string(yytext, yyleng))
 #define TOKEN(t)    (yylval.token = t)
+#line 545 "lex.yy.c"
 #line 546 "lex.yy.c"
-#line 547 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -760,10 +759,10 @@ YY_DECL
 		}
 
 	{
-#line 15 "lexer.l"
+#line 14 "lexer.l"
 
 
-#line 767 "lex.yy.c"
+#line 766 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -823,281 +822,281 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 17 "lexer.l"
+#line 16 "lexer.l"
 ;//匹配回车
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 18 "lexer.l"
+#line 17 "lexer.l"
 ; //匹配注释
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 20 "lexer.l"
+#line 19 "lexer.l"
 return TOKEN(TEXTERN);//c语言关键字
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 21 "lexer.l"
+#line 20 "lexer.l"
 return TOKEN(TRETURN);
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 22 "lexer.l"
+#line 21 "lexer.l"
 return TOKEN(FOR);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 23 "lexer.l"
+#line 22 "lexer.l"
 return TOKEN(IF);
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 24 "lexer.l"
+#line 23 "lexer.l"
 return TOKEN(ELSE);
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 25 "lexer.l"
+#line 24 "lexer.l"
 return TOKEN(WHILE);
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 26 "lexer.l"
+#line 25 "lexer.l"
 return TOKEN(SWITCH);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 27 "lexer.l"
+#line 26 "lexer.l"
 return TOKEN(CASE);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 28 "lexer.l"
+#line 27 "lexer.l"
 return TOKEN(DEFAULT);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 29 "lexer.l"
+#line 28 "lexer.l"
 return TOKEN(ARRAY);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 30 "lexer.l"
+#line 29 "lexer.l"
 return TOKEN(CONST);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 31 "lexer.l"
+#line 30 "lexer.l"
 return TOKEN(INT);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 32 "lexer.l"
+#line 31 "lexer.l"
 return TOKEN(CHAR);
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 33 "lexer.l"
+#line 32 "lexer.l"
 return TOKEN(FLOAT);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 34 "lexer.l"
+#line 33 "lexer.l"
 return TOKEN(DOUBLE);
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 35 "lexer.l"
+#line 34 "lexer.l"
 return TOKEN(VOID);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 36 "lexer.l"
+#line 35 "lexer.l"
 return TOKEN(BOOL);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 37 "lexer.l"
+#line 36 "lexer.l"
 return TOKEN(LONG);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 38 "lexer.l"
+#line 37 "lexer.l"
 return TOKEN(CONTINUE);
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 39 "lexer.l"
+#line 38 "lexer.l"
 return TOKEN(UNTIL);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 40 "lexer.l"
+#line 39 "lexer.l"
 return TOKEN(BREAK);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 42 "lexer.l"
+#line 41 "lexer.l"
 {SAVE_IDENTIFIER; return TIDENTIFIER;}//标识符
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 43 "lexer.l"
+#line 42 "lexer.l"
 {SAVE_DOUBLE; return TDOUBLE;}//浮点
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 44 "lexer.l"
+#line 43 "lexer.l"
 {SAVE_INTEGER; return TINTEGER;}//整型
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 46 "lexer.l"
+#line 45 "lexer.l"
 return TOKEN(AND);//逻辑运算符
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 47 "lexer.l"
+#line 46 "lexer.l"
 return TOKEN(OR); 
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 48 "lexer.l"
+#line 47 "lexer.l"
 return TOKEN(BXOR);
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 49 "lexer.l"
+#line 48 "lexer.l"
 return TOKEN(BNOT);
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 52 "lexer.l"
+#line 51 "lexer.l"
 return TOKEN(TEQUAL);//赋值和比较
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 53 "lexer.l"
+#line 52 "lexer.l"
 return TOKEN(TCEQ);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 54 "lexer.l"
+#line 53 "lexer.l"
 return TOKEN(TCNE);
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 55 "lexer.l"
+#line 54 "lexer.l"
 return TOKEN(TCLT);
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 56 "lexer.l"
+#line 55 "lexer.l"
 return TOKEN(TCLE);
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 57 "lexer.l"
+#line 56 "lexer.l"
 return TOKEN(TCGT);
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 58 "lexer.l"
+#line 57 "lexer.l"
 return TOKEN(TCGE);
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 61 "lexer.l"
+#line 60 "lexer.l"
 return TOKEN(TLPAREN);//括号
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 62 "lexer.l"
+#line 61 "lexer.l"
 return TOKEN(TRPAREN);
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 63 "lexer.l"
+#line 62 "lexer.l"
 return TOKEN(TLBRACK);
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 64 "lexer.l"
+#line 63 "lexer.l"
 return TOKEN(RLBRACK);
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 65 "lexer.l"
+#line 64 "lexer.l"
 return TOKEN(TLBRACE);
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 66 "lexer.l"
+#line 65 "lexer.l"
 return TOKEN(TRBRACE);
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 70 "lexer.l"
+#line 69 "lexer.l"
 return TOKEN(TPLUS);//算术运算符
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 71 "lexer.l"
+#line 70 "lexer.l"
 return TOKEN(TMINUS);
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 72 "lexer.l"
+#line 71 "lexer.l"
 return TOKEN(TMUL);
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 73 "lexer.l"
+#line 72 "lexer.l"
 return TOKEN(TDIV);
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 76 "lexer.l"
+#line 75 "lexer.l"
 return TOKEN(TDOT);//其他
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 77 "lexer.l"
+#line 76 "lexer.l"
 return TOKEN(TCOMMA);
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 78 "lexer.l"
+#line 77 "lexer.l"
 return TOKEN(GAD);//取地址
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 79 "lexer.l"
+#line 78 "lexer.l"
 return TOKEN(SEMI);
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 80 "lexer.l"
+#line 79 "lexer.l"
 return TOKEN(COLON);
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 81 "lexer.l"
+#line 80 "lexer.l"
 return TOKEN(ARW);//箭头（暂未实现）
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 84 "lexer.l"
+#line 83 "lexer.l"
 printf("Unknown token!\n"); yyterminate();
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 86 "lexer.l"
+#line 85 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 1101 "lex.yy.c"
+#line 1100 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2102,6 +2101,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 86 "lexer.l"
+#line 85 "lexer.l"
 
 

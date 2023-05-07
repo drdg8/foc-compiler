@@ -32,17 +32,18 @@
   NVariableDeclaration *var_decl;
 	std::vector<NVariableDeclaration*> *var_decls;
 //函数定义
-  NFunctionDeclaration *func_decl
-  //std::vector<NFunctionDeclaration*> *func_decls
+  NFunctionDeclaration *func_decl;
+  //std::vector<NFunctionDeclaration*> *func_decls;
   
 
   NExpression *expr;//表达式
-	NStatement *statement;//声明
+	NStatement *stmt;//声明
 	NIdentifier *ident;//标识符
   
   //关键词
 	NForStatement *forStatement;
   NIfStatement *ifStatement;
+  NSwitchStatement *switchStatement;
   NWhileStatement *whileStatement;
   NCaseStatement *caseStatement;
   NLoopStatement *loopStatement;
@@ -74,7 +75,7 @@ VOID BOOL CONTINUE LONG UNTIL BREAK GAD SEMI COLON
 %type <ident> ident
 %type <expr> const_value expression 
 %type <block> program stmts block
-%type <statement> stmt var_decl func_decl extern_decl
+%type <stmt> stmt var_decl func_decl extern_decl
 %type<ifStatement>							IfStmt
 %type<forStatement>							ForStmt
 %type<whileStatement>						WhileStmt
@@ -115,7 +116,7 @@ program:
   var_decl| func_decl | extern_decl
 	 | expression { $$ = new NExpressionStatement(*$1); }
 	 | TRETURN expression { $$ = new NReturnStatement(*$2); }
-   | TRETURN { $$ = new NReturnStatement(); }
+   //| TRETURN { $$ = new NReturnStatement(); }
 	 | BreakStmt  { $$ = $1; }
    | SwitchStmt	{  $$ = $1;} 
    |IfStmt { $$ = $1; }
@@ -129,7 +130,7 @@ program:
         $$ = new NIfStatement(*$3, *$5);
     }
   | IF TLPAREN expression TRPAREN block ELSE block {
-        $$ = new NIfStatement(*$3, *$5, *$7);
+        $$ = new NIfStatement(*$3, *$5, $7);
     }
   
   LoopStmt:
@@ -172,7 +173,7 @@ program:
   var_decl : ident ident { $$ = new NVariableDeclaration(*$1, *$2); }
       | ident ident TEQUAL expression { $$ = new NVariableDeclaration(*$1, *$2, $4); }
       | ident ident TLBRACK TINTEGER TRBRACK { // 定义数组
-        $$ = new NArrayDeclaration(*$1, *$2, $4,);
+        $$ = new NArrayDeclaration(*$1, *$2, $4);
     }
       ;
   extern_decl : TEXTERN ident ident TLPAREN func_decl_args TRPAREN
@@ -232,9 +233,9 @@ program:
 		  ;
 
 
-    const_value : TINTEGER { $$ = new NInteger($1); delete $1; }//const值
-		| TDOUBLE { $$ = new NDouble($1); delete $1; }
-    | CHARACTER { $$ = new NChar(*$1); delete $1; }
-    | STRING { $$ = new NString(*$1); delete $1; }
+    const_value : TINTEGER { $$ = new NInteger($1); }//const值
+		| TDOUBLE { $$ = new NDouble($1); }
+    | CHARACTER { $$ = new NChar($1);}
+    | STRING { $$ = new NString(*$1); }
 		;
 %%

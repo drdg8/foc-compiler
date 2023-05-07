@@ -2,8 +2,7 @@
 #include <iostream>
 #include <string>
 #include "ast.hpp"
-//#include "parser.hpp"
-extern "C" int yywrap() { }
+#include "parser.hpp"
 #define SAVE_IDENTIFIER  yylval.sVal = new std::string(yytext, yyleng)
 #define SAVE_DOUBLE  yylval.dVal = stod(new std::string(yytext, yyleng))
 #define SAVE_INTEGER  yylval.iVal = stoi(new std::string(yytext, yyleng))
