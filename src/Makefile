@@ -2,7 +2,7 @@ all : c_compiler
 
 LLVMCONFIG = llvm-config
 CPPFLAGS = `$(LLVMCONFIG) --cppflags` -std=c++14
-LDFLAGS = `$(LLVMCONFIG) --ldflags` -lpthread -ldl -lz -lncurses -rdynamic
+LDFLAGS = `$(LLVMCONFIG) --ldflags` -lpthread -ldl -lncurses -rdynamic
 LIBS = `$(LLVMCONFIG) --libs`
 
 OBJS = parser.o lexer.o ast.o CodeGenerator.o main.o 

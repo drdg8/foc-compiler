@@ -1,5 +1,5 @@
 #include"ast.hpp"
-//#include "parsing.hpp"
+#include "parser.hpp"
 #include "CodeGenerator.hpp"
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/ADT/ArrayRef.h>
@@ -13,6 +13,30 @@
 #include <string>
 #include <vector>
 using namespace std;
+llvm::Instruction::CastOps getCastInst(llvm::Type* src, llvm::Type* dst) {
+    if (src == llvm::Type::getFloatTy(myContext) && dst == llvm::Type::getInt32Ty(myContext)) { //llvm下float到int
+        return llvm::Instruction::FPToSI;  
+    }
+    else if (src == llvm::Type::getInt32Ty(myContext) && dst == llvm::Type::getFloatTy(myContext)) { //llvm下int到float
+        return llvm::Instruction::SIToFP;
+    }
+    else if (src == llvm::Type::getInt8Ty(myContext) && dst == llvm::Type::getFloatTy(myContext)) {
+        return llvm::Instruction::UIToFP;
+    }
+    else if (src == llvm::Type::getInt8Ty(myContext) && dst == llvm::Type::getInt32Ty(myContext)) {
+        return llvm::Instruction::ZExt;
+    }
+    else if (src == llvm::Type::getInt32Ty(myContext) && dst == llvm::Type::getInt8Ty(myContext)) {
+        return llvm::Instruction::Trunc;
+    }
+    else {
+        throw logic_error("[ERROR] Wrong typecast");
+    }
+}
+llvm::Value* typeCast(llvm::Value* src, llvm::Type* dst) {
+    llvm::Instruction::CastOps op = getCastInst(src->getType(), dst);
+    return myBuilder.CreateCast(op, src, dst, "tmptypecast");
+}
 llvm::Value* NBinaryOperator::codeGen(CodeGenContext& context){
     cout << "BinaryOpNode : " << op << endl;
     llvm::Value* left = lhs.codeGen(context);
@@ -95,6 +119,10 @@ llvm::Value* NBinaryOperator::codeGen(CodeGenContext& context){
         }
         return NULL;
     }
+}
+llvm::Value* NInteger::codeGen(CodeGenContext& context){
+    cout << "IntNode : " << value <<endl;
+    return llvm::ConstantInt::get(llvm::Type::getInt32Ty(myContext),value,true);
 }
 int main()
 {

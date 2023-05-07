@@ -18,7 +18,6 @@
   std::string *sVal;
   double dVal;
   char cVal;
-  bool bVal;
   std::string *strVal;
 
 	Node *node;
@@ -147,15 +146,15 @@ program:
         $$ = new NForStatement(*$5, *$3,*$7,*$9);
     };
   SwitchStmt:	SWITCH TLPAREN expression TRPAREN TLBRACE CaseList TRBRACE		
-      {  $$ = new NSwitchStatement($3,$6);   }
+      {  $$ = new NSwitchStatement(*$3,*$6);   }
         ;
 
   CaseList:	CaseList CaseStmt										{  $$ = $1; $$->push_back($2);   }	
         |														{  $$ = new CaseList();   }
         ;
 
-  CaseStmt:	CASE expression COLON block									{  $$ = new NCaseStatement($2,$4);   }
-        | DEFAULT COLON block									{  $$ = new NCaseStatement($3);   }
+  CaseStmt:	CASE expression COLON block									{  $$ = new NCaseStatement($2,*$4);   }
+        | DEFAULT COLON block									{  $$ = new NCaseStatement(*$3);   }
         ;
   BreakStmt:	BREAK {  $$ = new NBreakStatement();   }
   ;
@@ -198,6 +197,7 @@ program:
   | ident TLPAREN call_args TRPAREN { $$ = new NMethodCall(*$1, *$3); delete $3; }
   | ident { $<ident>$ = $1; }
   | const_value
+  /*以下$2的值为yyval.token，在实现ast.cpp时需要yacc生成的宏*/
   | expression AND expression {$$ = new NBinaryOperator(*$1, $2, *$3);}
   | expression OR expression {$$ = new NBinaryOperator(*$1, $2, *$3);}
   | expression TMUL expression { $$ = new NBinaryOperator(*$1, $2, *$3); }
