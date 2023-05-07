@@ -28,16 +28,6 @@
 "case"                  return TOKEN(CASE);
 "default"               return TOKEN(DEFAULT);
 "array"               return TOKEN(ARRAY);
-"const"                return TOKEN(CONST);
-
-
-"int"                   return TOKEN(INT); //类型系统
-"char"                  return TOKEN(CHAR);
-"float"                 return TOKEN(FLOAT);
-"double"                return TOKEN(DOUBLE);
-"void"                  return TOKEN(VOID);
-"bool"                  return TOKEN(BOOL);
-"long"                  return TOKEN(LONG);
 "continue"              return TOKEN(CONTINUE);
 "until"                 return TOKEN(UNTIL);
 "break"                 return TOKEN(BREAK);
