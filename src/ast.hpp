@@ -265,7 +265,7 @@ class NIfStatement : public NStatement {
 
 		NExpression& condition;
 		NBlock& next;
-    NBlock* else_next;
+    	NBlock* else_next;
 
 		NIfStatement(NExpression& condition, NBlock& next,NBlock* else_next) :
 			 condition(condition),next(next),else_next(else_next) {}
