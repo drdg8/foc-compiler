@@ -1,3 +1,6 @@
+#ifndef AST_HPP
+#define AST_HPP
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -306,3 +309,5 @@ class NBreakStatement : public NStatement {
 		~NBreakStatement(void) {}
 		llvm::Value* codeGen(CodeGenContext& context);
 	};
+
+#endif
