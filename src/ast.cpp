@@ -1,7 +1,7 @@
 #include"ast.hpp"
 //#include "parsing.hpp"
 #include "CodeGenerator.hpp"
-#include <llvm-10/llvm/IR/BasicBlock.h>
+#include <llvm/IR/BasicBlock.h>
 #include <llvm/ADT/ArrayRef.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/Function.h>

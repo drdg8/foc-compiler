@@ -4,8 +4,8 @@
 #include "ast.hpp"
 #include "parser.hpp"
 #define SAVE_IDENTIFIER  yylval.sVal = new std::string(yytext, yyleng)
-#define SAVE_DOUBLE  yylval.dVal = stod(new std::string(yytext, yyleng))
-#define SAVE_INTEGER  yylval.iVal = stoi(new std::string(yytext, yyleng))
+#define SAVE_DOUBLE  yylval.dVal = stod(std::string(yytext, yyleng))
+#define SAVE_INTEGER  yylval.iVal = stoi(std::string(yytext, yyleng))
 #define TOKEN(t)    (yylval.token = t)
 %}
 
@@ -61,9 +61,9 @@
 
 "("	          					return TOKEN(TLPAREN);//括号
 ")"					          	return TOKEN(TRPAREN);
-"["                     return TOKEN(TLBRACK);
-"]"                     return TOKEN(RLBRACK);
-"{"         						return TOKEN(TLBRACE);
+"["                             return TOKEN(TLBRACK);
+"]"                             return TOKEN(TRBRACK);
+"{"         					return TOKEN(TLBRACE);
 "}"					          	return TOKEN(TRBRACE);
 
 

@@ -539,8 +539,8 @@ char *yytext;
 #include "ast.hpp"
 #include "parser.hpp"
 #define SAVE_IDENTIFIER  yylval.sVal = new std::string(yytext, yyleng)
-#define SAVE_DOUBLE  yylval.dVal = stod(new std::string(yytext, yyleng))
-#define SAVE_INTEGER  yylval.iVal = stoi(new std::string(yytext, yyleng))
+#define SAVE_DOUBLE  yylval.dVal = stod(std::string(yytext, yyleng))
+#define SAVE_INTEGER  yylval.iVal = stoi(std::string(yytext, yyleng))
 #define TOKEN(t)    (yylval.token = t)
 #line 546 "lexer.cpp"
 #line 547 "lexer.cpp"
@@ -1025,7 +1025,7 @@ return TOKEN(TLBRACK);
 case 41:
 YY_RULE_SETUP
 #line 65 "lexer.l"
-return TOKEN(RLBRACK);
+return TOKEN(TRBRACK);
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
