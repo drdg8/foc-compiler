@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_YY_PARSER_HPP_INCLUDED
 # define YY_YY_PARSER_HPP_INCLUDED
@@ -44,65 +45,70 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    TEXTERN = 258,
-    TRETURN = 259,
-    FOR = 260,
-    IF = 261,
-    ELSE = 262,
-    WHILE = 263,
-    SWITCH = 264,
-    CASE = 265,
-    DEFAULT = 266,
-    ARRAY = 267,
-    CONST = 268,
-    INT = 269,
-    CHAR = 270,
-    FLOAT = 271,
-    DOUBLE = 272,
-    VOID = 273,
-    BOOL = 274,
-    CONTINUE = 275,
-    LONG = 276,
-    UNTIL = 277,
-    BREAK = 278,
-    GAD = 279,
-    SEMI = 280,
-    COLON = 281,
-    TCEQ = 282,
-    TCNE = 283,
-    TCLT = 284,
-    TCLE = 285,
-    TCGT = 286,
-    TCGE = 287,
-    TEQUAL = 288,
-    TLPAREN = 289,
-    TRPAREN = 290,
-    TLBRACE = 291,
-    TRBRACE = 292,
-    TLBRACK = 293,
-    TRBRACK = 294,
-    TCOMMA = 295,
-    TDOT = 296,
-    ARW = 297,
-    BXOR = 298,
-    BNOT = 299,
-    OR = 300,
-    AND = 301,
-    TPLUS = 302,
-    TMINUS = 303,
-    TMUL = 304,
-    TDIV = 305,
-    TINTEGER = 306,
-    TIDENTIFIER = 307,
-    TDOUBLE = 308,
-    CHARACTER = 309,
-    STRING = 310
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    TEXTERN = 258,                 /* TEXTERN  */
+    TRETURN = 259,                 /* TRETURN  */
+    FOR = 260,                     /* FOR  */
+    IF = 261,                      /* IF  */
+    ELSE = 262,                    /* ELSE  */
+    WHILE = 263,                   /* WHILE  */
+    SWITCH = 264,                  /* SWITCH  */
+    CASE = 265,                    /* CASE  */
+    DEFAULT = 266,                 /* DEFAULT  */
+    ARRAY = 267,                   /* ARRAY  */
+    CONST = 268,                   /* CONST  */
+    INT = 269,                     /* INT  */
+    CHAR = 270,                    /* CHAR  */
+    FLOAT = 271,                   /* FLOAT  */
+    DOUBLE = 272,                  /* DOUBLE  */
+    VOID = 273,                    /* VOID  */
+    BOOL = 274,                    /* BOOL  */
+    CONTINUE = 275,                /* CONTINUE  */
+    LONG = 276,                    /* LONG  */
+    UNTIL = 277,                   /* UNTIL  */
+    BREAK = 278,                   /* BREAK  */
+    GAD = 279,                     /* GAD  */
+    SEMI = 280,                    /* SEMI  */
+    COLON = 281,                   /* COLON  */
+    TCEQ = 282,                    /* TCEQ  */
+    TCNE = 283,                    /* TCNE  */
+    TCLT = 284,                    /* TCLT  */
+    TCLE = 285,                    /* TCLE  */
+    TCGT = 286,                    /* TCGT  */
+    TCGE = 287,                    /* TCGE  */
+    TEQUAL = 288,                  /* TEQUAL  */
+    TLPAREN = 289,                 /* TLPAREN  */
+    TRPAREN = 290,                 /* TRPAREN  */
+    TLBRACE = 291,                 /* TLBRACE  */
+    TRBRACE = 292,                 /* TRBRACE  */
+    TLBRACK = 293,                 /* TLBRACK  */
+    TRBRACK = 294,                 /* TRBRACK  */
+    TCOMMA = 295,                  /* TCOMMA  */
+    TDOT = 296,                    /* TDOT  */
+    ARW = 297,                     /* ARW  */
+    BXOR = 298,                    /* BXOR  */
+    BNOT = 299,                    /* BNOT  */
+    OR = 300,                      /* OR  */
+    AND = 301,                     /* AND  */
+    TPLUS = 302,                   /* TPLUS  */
+    TMINUS = 303,                  /* TMINUS  */
+    TMUL = 304,                    /* TMUL  */
+    TDIV = 305,                    /* TDIV  */
+    TINTEGER = 306,                /* TINTEGER  */
+    TIDENTIFIER = 307,             /* TIDENTIFIER  */
+    TDOUBLE = 308,                 /* TDOUBLE  */
+    CHARACTER = 309,               /* CHARACTER  */
+    STRING = 310                   /* STRING  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
@@ -155,7 +161,7 @@ union YYSTYPE
 	
 	
 
-#line 159 "parser.hpp"
+#line 165 "parser.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -166,6 +172,8 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
+
 int yyparse (void);
+
 
 #endif /* !YY_YY_PARSER_HPP_INCLUDED  */

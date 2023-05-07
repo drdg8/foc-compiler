@@ -28,8 +28,8 @@
 "array"               return TOKEN(ARRAY);
 "const"                return TOKEN(CONST);
 
-//类型系统
-"int"                   return TOKEN(INT);
+
+"int"                   return TOKEN(INT); //类型系统
 "char"                  return TOKEN(CHAR);
 "float"                 return TOKEN(FLOAT);
 "double"                return TOKEN(DOUBLE);

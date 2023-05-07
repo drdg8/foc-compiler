@@ -1,8 +1,8 @@
 %{
 	#include "ast.hpp"
-        #include <cstdio>
-        #include <cstdlib>
-        #include <string>
+  #include <cstdio>
+  #include <cstdlib>
+  #include <string>
 #include <iostream>
 	NBlock *programBlock; /* the top level root node of our final AST */
 
