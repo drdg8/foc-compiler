@@ -6,6 +6,8 @@
 #define SAVE_IDENTIFIER  yylval.sVal = new std::string(yytext, yyleng)
 #define SAVE_DOUBLE  yylval.dVal = stod(std::string(yytext, yyleng))
 #define SAVE_INTEGER  yylval.iVal = stoi(std::string(yytext, yyleng))
+#define SAVE_CHAR     yylval.cVal = yytext[1]
+#define SAVE_STRING     yylval.strVal = new std::string(yytext, yyleng)
 #define TOKEN(t)    (yylval.token = t)
 %}
 
@@ -26,16 +28,6 @@
 "case"                  return TOKEN(CASE);
 "default"               return TOKEN(DEFAULT);
 "array"               return TOKEN(ARRAY);
-"const"                return TOKEN(CONST);
-
-
-"int"                   return TOKEN(INT); //类型系统
-"char"                  return TOKEN(CHAR);
-"float"                 return TOKEN(FLOAT);
-"double"                return TOKEN(DOUBLE);
-"void"                  return TOKEN(VOID);
-"bool"                  return TOKEN(BOOL);
-"long"                  return TOKEN(LONG);
 "continue"              return TOKEN(CONTINUE);
 "until"                 return TOKEN(UNTIL);
 "break"                 return TOKEN(BREAK);
@@ -43,7 +35,8 @@
 [a-zA-Z_][a-zA-Z0-9_]*  {SAVE_IDENTIFIER; return TIDENTIFIER;}//标识符
 [0-9]+\.[0-9]* 			    {SAVE_DOUBLE; return TDOUBLE;}//浮点
 [0-9]+					        {SAVE_INTEGER; return TINTEGER;}//整型
-
+\'"[^\\']"\'          {SAVE_CHAR; return CHARACTER;}//字符
+\"(\\.|[^"\\])*\"       {SAVE_STRING; return STRING; }//字符串
 "&&"                    return TOKEN(AND);//逻辑运算符
 "||"                    return TOKEN(OR); 
 "^"                     return TOKEN(BXOR);
