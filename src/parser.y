@@ -104,10 +104,10 @@ program:
     };
 	stmts: //多个声明
     stmt {
-        $$ = new Block(); $$->statements.push_back($<stmt>1);
+        $$ = new Block(); $$->statementList.push_back($<stmt>1);
     }
     | stmts stmt {
-       $1->statements.push_back($<stmt>2);
+       $1->statementList.push_back($<stmt>2);
     };
 
 

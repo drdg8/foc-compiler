@@ -26,44 +26,37 @@ class Expression : public Node {
 
 class Statement : public Node {
 };
-// class NFuncBody : public Node {//函数体
-// 	public:
-// 		//Its content
-// 		Statement* Content;
-
-// 		NFuncBody(Statement* Content) :Content(Content) {}
-// 		~NFuncBody(void) {}
-// 		llvm::Value* codeGen(CodeGenContext& context);
-		
-// 	};
-class Integer : public Expression {
+class ConstVal : public Expression {
+	public:
+	ConstVal() {}
+	~ConstVal() {}
+	virtual llvm::Value* codeGen(CodeGenContext& context) = 0;
+};
+class Integer : public ConstVal {
 public:
 	long long value;
 	Integer(long long value) : value(value) { }
 	llvm::Value* codeGen(CodeGenContext& context);
 };
 
-class Double : public Expression {
+class Double : public ConstVal {
 public:
 	double value;
 	Double(double value) : value(value) { }
 	llvm::Value* codeGen(CodeGenContext& context);
 };
-class Char : public Expression {
+class Char : public ConstVal {
 public:
   Char(char value) : value(value) {}
   llvm::Value* codeGen(CodeGenContext& context);
-  
-public:
   char value;
 };
 
-class String : public Expression {
+class String : public ConstVal {
 public:
   String(std::string &value) : value(value) {}
   llvm::Value* codeGen(CodeGenContext& context);
   llvm::Value *GetAddr(CodeGenContext& context);
-public:
   std::string &value;
 };
 
@@ -90,22 +83,22 @@ public:
 	Expression& lhs;
 	Expression& rhs;
 	BinaryOp(Expression& lhs, int op, Expression& rhs) :
-		lhs(lhs), rhs(rhs), op(op) { }
+		lhs(lhs), op(op) ,rhs(rhs) { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
 class Assign : public Expression {
 public:
-	Identifier& lhs;
-	Expression& rhs;
-	Assign(Identifier& lhs, Expression& rhs) : 
-		lhs(lhs), rhs(rhs) { }
+	Identifier& ident;
+	Expression& expr;
+	Assign(Identifier& ident, Expression& expr) : 
+		ident(ident), expr(expr) { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
 class Block : public Expression {//Function body
 public:
-	StatementList statements;
+	StatementList statementList;
 	Block() { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
@@ -125,7 +118,7 @@ public:
   ArrayAssign(Identifier &identifier, Expression &index, Expression &rhs) :identifier(identifier), index(index), rhs(rhs) {}
   llvm::Value *codeGen(CodeGenContext& context);
 public:
-  Identifier& identifier;
+  Identifier &identifier;
   Expression &index;
   Expression &rhs;
 };
@@ -148,35 +141,33 @@ public:
 
 class Declaration : public Statement {
 	public:
-		Declaration(void) {}
-		~Declaration(void) {}
+		Declaration() {}
+		~Declaration() {}
 		virtual llvm::Value* codeGen(CodeGenContext& context) = 0;
 		
 	};
 class ExpressionStatement : public Statement {
 public:
-	Expression& expression;
 	ExpressionStatement(Expression& expression) : 
 		expression(expression) { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
+public:
+	Expression& expression;
 };
 
 class Return : public Statement {
 public:
-	Expression* expression;
 	Return(Expression* expression) : 
 		expression(expression) { }
 	Return() : 
 		expression(nullptr) { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
+public:
+	Expression* expression;
 };
 
 class VariableDeclaration : public Declaration {
 public:
-  int size;
-	const Identifier& type;
-	Identifier& id;
-	Expression *assignmentExpr;
 	VariableDeclaration(const Identifier& type, Identifier& id) :
 		type(type), id(id) { assignmentExpr = nullptr; }
   VariableDeclaration(const Identifier& type, Identifier& id,int size) :
@@ -184,131 +175,112 @@ public:
 	VariableDeclaration(const Identifier& type, Identifier& id, Expression *assignmentExpr) :
 		type(type), id(id), assignmentExpr(assignmentExpr) { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
+public:
+  int size;
+	const Identifier& type;
+	Identifier& id;
+	Expression *assignmentExpr;
 };
 class ArrayDeclaration : public VariableDeclaration {
-  public:
-  int size;
+public:
   ArrayDeclaration(const Identifier& type, Identifier& id,int size) :
 		VariableDeclaration(type,id),size(size) {}
   virtual llvm::Value* codeGen(CodeGenContext& context);
-
+public:
+  int size;
 };
 class ExternDeclaration : public Declaration {
-public:
-    const Identifier& type;
-    const Identifier& id;
-    VariableList arguments;
+	public:
     ExternDeclaration(const Identifier& type, const Identifier& id,
             const VariableList& arguments) :
         type(type), id(id), arguments(arguments) {}
     virtual llvm::Value* codeGen(CodeGenContext& context);
+	public:
+    const Identifier& type;
+    const Identifier& id;
+    VariableList arguments;
 };
 
 class FunctionDeclaration : public Declaration {
+public:
+	FunctionDeclaration(const Identifier& type, const Identifier& id, 
+		const VariableList& arguments, Block& block) :
+		type(type), id(id), arguments(arguments), block(block) { }
+	virtual llvm::Value* codeGen(CodeGenContext& context);
 public:
 	const Identifier& type;
 	const Identifier& id;
 	VariableList arguments;
 	Block& block;
-	FunctionDeclaration(const Identifier& type, const Identifier& id, 
-			const VariableList& arguments, Block& block) :
-		type(type), id(id), arguments(arguments), block(block) { }
-	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
-// class NTypeDeclaration : public Declaration {
-// public:
-//     Statement *initial;
-//     Expression *condition;
-//     Expression *tail;
-//     Statement *body;
-//     NTypeDeclaration(Statement *initial,Expression *condition,
-//     Expression *tail,Statement *body):
-//         initial(initial), condition(condition),tail(tail),body(body){}
-//     virtual llvm::Value* codeGen(CodeGenContext& context);
-// };
 class LoopStatement : public Statement {
 	public:
-		
-		Expression& _Condition;
-
-		LoopStatement(Expression& __Condition) :_Condition(__Condition) {}
-		~LoopStatement(void) {}
+		LoopStatement(Expression& condition) :condition(condition) {}
+		~LoopStatement() {}
 		llvm::Value* codeGen(CodeGenContext& context);
-		
+	public:
+		Expression& condition;
 	};
 class ForStatement : public LoopStatement {
 	public:
-		//待改
-		Expression& _Initial;
-		Expression& _Tail;
-		Block& _LoopBody;
-
-		ForStatement(Expression& __Initial, Expression& __Condition, Expression& __Tail, Block& __LoopBody) :
-			_Initial(__Initial), LoopStatement(__Condition), _Tail(__Tail), _LoopBody(__LoopBody) {}
-		~ForStatement(void) {}
+		ForStatement(Expression& Initial, Expression& Condition, Expression& Tail, Block& LoopBody) :
+			Initial(Initial), LoopStatement(Condition), Tail(Tail), LoopBody(LoopBody) {}
+		~ForStatement() {}
 		llvm::Value* codeGen(CodeGenContext& context);
+	public:
+	  Expression& Initial;
+		Expression& Tail;
+		Block& LoopBody;
 		
 	};
 class WhileStatement : public LoopStatement {
 	public:
-		//待改
-
-		Block& _LoopBody;
-
-		WhileStatement(Expression& __Condition, Block& __LoopBody) :
-			 LoopStatement(__Condition),_LoopBody(__LoopBody) {}
-		~WhileStatement(void) {}
+		WhileStatement(Expression& condition, Block& LoopBody) :
+			 LoopStatement(condition),LoopBody(LoopBody) {}
+		~WhileStatement() {}
 		llvm::Value* codeGen(CodeGenContext& context);
-		
+	public:
+	Block& LoopBody;
 	};
 class IfStatement : public Statement {
 	public:
-		//待改
-
-		Expression& condition;
-		Block& next;
-    Block* else_next;
-
 		IfStatement(Expression& condition, Block& next,Block* else_next) :
 			 condition(condition),next(next),else_next(else_next) {}
     IfStatement(Expression& condition, Block& next) :
 			 condition(condition),next(next) {else_next=nullptr;}
-		~IfStatement(void) {}
+		~IfStatement( ) {}
 		llvm::Value* codeGen(CodeGenContext& context);
-		
+	public:
+		Expression& condition;
+		Block& next;
+    Block* else_next;
 	};
   class SwitchStatement : public Statement {
 	public:
-		//待改
-
-		Expression& matches;
-		CaseList& caseList;
-
 		SwitchStatement(Expression& matches, CaseList& caseList) :
 			 matches(matches),caseList(caseList) {}
-		~SwitchStatement(void) {}
+		~SwitchStatement( ) {}
 		llvm::Value* codeGen(CodeGenContext& context);
-		
+	public:
+		Expression& matches;
+		CaseList& caseList;
 	};
 class CaseStatement : public Statement {
 	public:
-		//待改
-
-		Expression* condition;
-		Block& body;
-
 		CaseStatement(Expression* condition, Block& body) :
 			 condition(condition),body(body) {}
     CaseStatement(Block& body) :
 			 body(body) {condition=nullptr;}
-		~CaseStatement(void) {}
+		~CaseStatement() {}
 		llvm::Value* codeGen(CodeGenContext& context);
-		
+	public:
+		Expression* condition;
+		Block& body;
 	};
 class BreakStatement : public Statement {
 	public:
-		BreakStatement(void) {}
-		~BreakStatement(void) {}
+		BreakStatement() {}
+		~BreakStatement() {}
 		llvm::Value* codeGen(CodeGenContext& context);
 	};
 
