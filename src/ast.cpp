@@ -37,13 +37,13 @@ llvm::Value* typeCast(llvm::Value* src, llvm::Type* dst) {
     llvm::Instruction::CastOps op = getCastInst(src->getType(), dst);
     return myBuilder.CreateCast(op, src, dst, "tmptypecast");
 }
-llvm::Value* NBinaryOperator::codeGen(CodeGenContext& context){
+llvm::Value* BinaryOp::codeGen(CodeGenContext& context){
     cout << "BinaryOpNode : " << op << endl;
     llvm::Value* left = lhs.codeGen(context);
     llvm::Value* right = rhs.codeGen(context);
     llvm::Instruction::BinaryOps bi_op;
 
-    if(op == TPLUS || op == TMINUS || op == TMUL || op == TDIV){
+    if(op == PLUS || op == MINUS || op == MUL || op == DIV){
         if (left->getType() != right->getType()) {
             if (left->getType() == llvm::Type::getFloatTy(myContext)) {
                 right = typeCast(right, llvm::Type::getFloatTy(myContext));
@@ -61,10 +61,10 @@ llvm::Value* NBinaryOperator::codeGen(CodeGenContext& context){
                 }
             }
         }
-        if(op == TPLUS){bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FAdd : llvm::Instruction::Add;}
-        else if(op == TMINUS){bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FSub : llvm::Instruction::Sub;}
-        else if(op == TMUL){bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FMul : llvm::Instruction::Mul;}
-        else if(op == TDIV){bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FDiv : llvm::Instruction::SDiv;}
+        if(op == PLUS){bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FAdd : llvm::Instruction::Add;}
+        else if(op == MINUS){bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FSub : llvm::Instruction::Sub;}
+        else if(op == MUL){bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FMul : llvm::Instruction::Mul;}
+        else if(op == DIV){bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FDiv : llvm::Instruction::SDiv;}
         return llvm::BinaryOperator::Create(bi_op,left,right,"", myBuilder.GetInsertBlock());
     }
     else if(op == AND){
@@ -99,28 +99,28 @@ llvm::Value* NBinaryOperator::codeGen(CodeGenContext& context){
                 }
             }
         }
-        else if (op == TEQUAL) {
+        else if (op == EQUAL) {
             return (left->getType() == llvm::Type::getFloatTy(myContext)) ? myBuilder.CreateFCmpOEQ(left, right, "fcmptmp") : myBuilder.CreateICmpEQ(left, right, "icmptmp");
         }
-        else if (op == TCGE) {
+        else if (op == CGE) {
             return (left->getType() == llvm::Type::getFloatTy(myContext)) ? myBuilder.CreateFCmpOGE(left, right, "fcmptmp") : myBuilder.CreateICmpSGE(left, right, "icmptmp");
         }
-        else if (op == TCLE) {
+        else if (op == CLE) {
             return (left->getType() == llvm::Type::getFloatTy(myContext)) ? myBuilder.CreateFCmpOLE(left, right, "fcmptmp") : myBuilder.CreateICmpSLE(left, right, "icmptmp");
         }
-        else if (op == TCGT) {
+        else if (op == CGT) {
             return (left->getType() == llvm::Type::getFloatTy(myContext)) ? myBuilder.CreateFCmpOGT(left, right, "fcmptmp") : myBuilder.CreateICmpSGT(left, right, "icmptmp");
         }
-        else if (op == TCLT) {
+        else if (op == CLT) {
             return (left->getType() == llvm::Type::getFloatTy(myContext)) ? myBuilder.CreateFCmpOLT(left, right, "fcmptmp") : myBuilder.CreateICmpSLT(left, right, "icmptmp");
         }
-        else if (op == TCNE) {
+        else if (op == CNE) {
             return (left->getType() == llvm::Type::getFloatTy(myContext)) ? myBuilder.CreateFCmpONE(left, right, "fcmptmp") : myBuilder.CreateICmpNE(left, right, "icmptmp");
         }
         return NULL;
     }
 }
-llvm::Value* NInteger::codeGen(CodeGenContext& context){
+llvm::Value* Integer::codeGen(CodeGenContext& context){
     cout << "IntNode : " << value <<endl;
     return llvm::ConstantInt::get(llvm::Type::getInt32Ty(myContext),value,true);
 }
