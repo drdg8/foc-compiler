@@ -34,22 +34,25 @@ class ConstVal : public Expression {
 };
 class Integer : public ConstVal {
 public:
-	long long value;
 	Integer(long long value) : value(value) { }
 	llvm::Value* codeGen(CodeGenContext& context);
+public:
+	long long value;
 };
 
 class Double : public ConstVal {
 public:
-	double value;
 	Double(double value) : value(value) { }
 	llvm::Value* codeGen(CodeGenContext& context);
+public:
+	double value;
 };
 class Char : public ConstVal {
 public:
   Char(char value) : value(value) {}
   llvm::Value* codeGen(CodeGenContext& context);
-  char value;
+public:  
+	char value;
 };
 
 class String : public ConstVal {
@@ -57,50 +60,56 @@ public:
   String(std::string &value) : value(value) {}
   llvm::Value* codeGen(CodeGenContext& context);
   llvm::Value *GetAddr(CodeGenContext& context);
+public:
   std::string &value;
 };
 
 class Identifier : public Expression {
 public:
-	std::string name;
 	Identifier(const std::string& name) : name(name) { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
+public:
+	std::string name;
 };
 
 class Call : public Expression {
 public:
-	const Identifier& id;
-	ExpressionList arguments;
 	Call(const Identifier& id, ExpressionList& arguments) :
 		id(id), arguments(arguments) { }
 	Call(const Identifier& id) : id(id) { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
+public:
+	const Identifier& id;
+	ExpressionList arguments;
 };
 
 class BinaryOp : public Expression {
 public:
-	int op;
-	Expression& lhs;
-	Expression& rhs;
 	BinaryOp(Expression& lhs, int op, Expression& rhs) :
 		lhs(lhs), op(op) ,rhs(rhs) { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
+public:
+	int op;
+	Expression& lhs;
+	Expression& rhs;
 };
 
 class Assign : public Expression {
 public:
-	Identifier& ident;
-	Expression& expr;
 	Assign(Identifier& ident, Expression& expr) : 
 		ident(ident), expr(expr) { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
+public:
+	Identifier& ident;
+	Expression& expr;
 };
 
 class Block : public Expression {//Function body
 public:
-	StatementList statementList;
 	Block() { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
+public:
+	StatementList statementList;
 };
 
 class ArrayElement : public Expression {   //identifier[expression] 表示数组中某个元素
