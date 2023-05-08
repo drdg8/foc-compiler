@@ -1,5 +1,5 @@
-#include <llvm-10/llvm/IR/GlobalVariable.h>
-#include <llvm-10/llvm/IR/Type.h>
+#include <llvm/IR/GlobalVariable.h>
+#include <llvm/IR/Type.h>
 #include <llvm/ADT/Twine.h>
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Function.h>
