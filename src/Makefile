@@ -16,10 +16,10 @@ lexer.cpp: lexer.l parser.hpp
 	flex -o $@ $^
 
 %.o: %.cpp ast.hpp CodeGenerator.hpp
-	g++ -c $(CPPFLAGS) -g -o $@ $< 
+	g++ -c $(CPPFLAGS) -g -o $@ $< -I /usr/local/llvm/include/
 
 c_compiler: $(OBJS)
-	g++ -o $@ $(OBJS) $(LIBS) $(LDFLAGS)
+	g++ -o $@ $(OBJS) $(LIBS) $(LDFLAGS) -I /usr/local/llvm/include/
 
 clean:
 	$(RM) -rf parser.cpp parser.hpp c_compiler lexer.cpp $(OBJS) 
