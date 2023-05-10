@@ -35,10 +35,53 @@ extern llvm::IRBuilder<> IRBuilder; //定义全局IRbuilder
 
 
 //symbol table的定义
+class Symbol{
+public:
+    Symbol(void) : Content(NULL), Type(UNDEFINED) {}
+    Symbol(llvm::Function* Func) : Content(Func), Type(FUNCTION) {}
+    Symbol(llvm::Value* Value) : Content(Value), Type(VARIABLE) {}
+private:
+    void* Content;
+    enum{
+        FUNCTION,
+        VARIABLE,
+        UNDEFINED
+    } Type;   
+
+}
+
 class CodeGenerator{
     public:
         llvm::Module* Module;
-    
+        llvm::Function* currentFunc;
+        llvm::BasicBlock* returnBB;
+        llvm::Value* returnVal;
+    public:
+        CodeGenerator(void);
+        //sizeof() 空位，待实现
+
+        void PushSymbolTable(void);
+
+        void PopSymbolTable(void);
+
+        llvm::Function* FindFunction(std::string Name);
+
+        bool AddFunction(std::string Name, llvm::Function* Function);
+
+        llvm::Value* FindVariable(std::string Name);
+
+        bool AddVariable(std::string Name, llvm::Value* Variable);
+
+        using SymbolTable = std::map<std::string, Symbol>;
+
+        llvm::Function* GetCurrentFunction(void);
+
+    private:
+        std::vector<SymbolTable*> SymbolTableStack;
+        llvm::Function* CurrFunction;	
+        llvm::BasicBlock* returnBB;
+        llvm::Value* returnVal;
+
 }
 
 
