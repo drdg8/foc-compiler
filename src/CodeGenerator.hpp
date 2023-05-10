@@ -53,7 +53,8 @@ private:
 class CodeGenerator{
     public:
         llvm::Module* Module;
-        llvm::Function* currentFunc;
+        std::vector<SymbolTable*> SymbolTableStack;
+        llvm::Function* CurrFunction;	
         llvm::BasicBlock* returnBB;
         llvm::Value* returnVal;
     public:
@@ -77,10 +78,7 @@ class CodeGenerator{
         llvm::Function* GetCurrentFunction(void);
 
     private:
-        std::vector<SymbolTable*> SymbolTableStack;
-        llvm::Function* CurrFunction;	
-        llvm::BasicBlock* returnBB;
-        llvm::Value* returnVal;
+        
 
 }
 

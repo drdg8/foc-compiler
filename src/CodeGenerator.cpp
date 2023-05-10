@@ -12,4 +12,15 @@
 
 llvm::LLVMContext Context; //定义全局context
 llvm::IRBuilder<> IRBuilder(Context); //定义全局IRbuilder
-
+//Constructor
+CodeGenerator::CodeGenerator(void) :
+	Module(new llvm::Module("main", Context)),
+	DL(new llvm::DataLayout(Module)),
+	CurrFunction(NULL),
+	StructTyTable(NULL),
+	SymbolTableStack(),
+	ContinueBlockStack(),
+	BreakBlockStack(),
+	TmpBB(NULL),
+	TmpFunc(NULL)
+{}
