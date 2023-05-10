@@ -10,5 +10,5 @@
 #include <vector>
 #include "CodeGenerator.hpp"
 
-llvm::LLVMContext myContext; //定义全局context
-llvm::IRBuilder<> myBuilder(myContext); //定义全局IRbuilder
+llvm::LLVMContext Context; //定义全局context
+llvm::IRBuilder<> IRBuilder(Context); //定义全局IRbuilder

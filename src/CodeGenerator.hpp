@@ -29,7 +29,17 @@
 #include "ast.hpp"
 using namespace std;
 
-extern llvm::LLVMContext myContext; //定义全局context
-extern llvm::IRBuilder<> myBuilder; //定义全局IRbuilder
+extern llvm::LLVMContext Context; //定义全局context
+extern llvm::IRBuilder<> IRBuilder; //定义全局IRbuilder
+
+
+
+//symbol table的定义
+class CodeGenerator{
+    public:
+        llvm::Module* Module;
+    
+}
+
 
 #endif
