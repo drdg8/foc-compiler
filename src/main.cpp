@@ -46,5 +46,31 @@ int main(int argc, const char* argv[]){
     auto it = argMap.find("i");
     if(it == argMap.end())
         std::cout << "error：无输入文件" << std::endl;
+    InputFile = it->second;
+    freopen(InputFile.c_str(), "r", stdin);
+
+    //处理输出文件
+    auto it = argMap.find("o");
+    if(it == argMap.end() || OutputObjectFile == "")
+    {
+        OutputObjectFile = "a.o";
+    }
+    else{
+        OutputObjectFile = it->second;
+        if(OutputObjectFile.length() <= 2 || OutputObjectFile.substr(OutputObjectFile.length() - 2) != ".o")
+        {
+            OutputObjectFile = OutputObjectFile + ".o";
+        }
+    }
+    yyparse();
+    CodeGenerator* generator = new CodeGenerator();
+
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmParser();
+    llvm::InitializeNativeTargetAsmPrinter();
+
+    std::cout<<"program begin"<<std::endl;
+
+    //将目标代码写入output file中(待实现)
     
 }
