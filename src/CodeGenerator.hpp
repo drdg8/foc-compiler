@@ -40,7 +40,8 @@ public:
     Symbol(void) : Content(NULL), Type(UNDEFINED) {}
     Symbol(llvm::Function* Func) : Content(Func), Type(FUNCTION) {}
     Symbol(llvm::Value* Value) : Content(Value), Type(VARIABLE) {}
-private:
+    llvm::Value* GetVariable(void) { return this->Type == VARIABLE ? (llvm::Value*)Content : NULL; }
+public:
     void* Content;
     enum{
         FUNCTION,
@@ -73,9 +74,11 @@ class CodeGenerator{
 
         bool AddVariable(std::string Name, llvm::Value* Variable);
 
+        llvm::Function* GetCurrentFunction(void);
+
         using SymbolTable = std::map<std::string, Symbol>;
 
-        llvm::Function* GetCurrentFunction(void);
+        
 
     private:
         

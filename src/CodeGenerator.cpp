@@ -31,9 +31,51 @@ void CodeGenerator::PopSymbolTable(void) {
 	this->SymbolTableStack.pop_back();
 }
 
+llvm::Function*  CodeGenerator::FindFunction(std::string Name){
+	if (this->SymbolTableStack.size() == 0) return NULL;
+	for (auto TableIter = this->SymbolTableStack.end() - 1; TableIter >= this->SymbolTableStack.begin(); TableIter--) {
+		auto PairIter = (**TableIter).find(Name);
+		if (PairIter != (**TableIter).end())
+			return PairIter->second.GetFunction();
+	}
+	return NULL;
+}
 
+bool CodeGenerator:: AddFunction(std::string Name, llvm::Function* Function){
+	if (this->SymbolTableStack.size() == 0) return false;
+	auto& TopTable = *(this->SymbolTableStack.back());
+	auto PairIter = TopTable.find(Name);
+	if (PairIter != TopTable.end())
+		return false;
+	TopTable[Name] = Symbol(Function);
+	return true;
+}
 
+llvm::Value* CodeGenerator::  FindVariable(std::string Name){
+	//先找局部变量
+	if (this->SymbolTableStack.size() == 0) return NULL;
+	for (auto TableIter = this->SymbolTableStack.end() - 1; TableIter >= this->SymbolTableStack.begin(); TableIter--) {
+		auto PairIter = (**TableIter).find(Name);
+		if (PairIter != (**TableIter).end())
+			return PairIter->second.GetVariable();
+	}
+	//再找全局变量
+	return this->myModule->getGlobalVariable(variableName, true);
+}
 
+bool CodeGenerator:: AddVariable(std::string Name, llvm::Value* Variable){
+	f (this->SymbolTableStack.size() == 0) return false;
+	auto& TopTable = *(this->SymbolTableStack.back());
+	auto PairIter = TopTable.find(Name);
+	if (PairIter != TopTable.end())
+		return false;
+	TopTable[Name] = Symbol(Variable, false);
+	return true;
+}
+
+llvm::Function* CodeGenerator:: GetCurrentFunction(void){
+	return this->CurrFunction;
+}
 
 
 
