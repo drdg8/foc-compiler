@@ -48,7 +48,7 @@
   LoopStatement *loopStatement;
   CaseList *caseList;
   BreakStatement *breakStatement;
-  
+  ContinueStatement *continueStatement;
 
 	std::vector<Expression*> *expressionList;
 
@@ -83,6 +83,7 @@
 %type<caseList>							CaseList
 %type<caseStatement>							CaseStmt
 %type<breakStatement>						BreakStmt
+%type<continueStatement>						ContinueStmt
 %type<loopStatement>            LoopStmt
 %type <expressionList>             call_args
 %type <var_decls>               func_decl_args
@@ -117,6 +118,7 @@ program:
 	 | RETURN expression { $$ = new Return($2); }
    | RETURN { $$ = new Return(); }
 	 | BreakStmt  { $$ = $1; }
+   | ContinueStmt  { $$ = $1; }
    | SwitchStmt	{  $$ = $1;} 
    |IfStmt { $$ = $1; }
    |LoopStmt { $$ = $1; }
@@ -157,6 +159,8 @@ program:
         | DEFAULT COLON block									{  $$ = new CaseStatement(*$3);   }
         ;
   BreakStmt:	BREAK {  $$ = new BreakStatement();   }
+  ;
+    ContinueStmt:	CONTINUE {  $$ = new ContinueStatement();   }
   ;
   
   //代码块

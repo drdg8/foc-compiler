@@ -292,5 +292,10 @@ class BreakStatement : public Statement {
 		~BreakStatement() {}
 		llvm::Value* codeGen(CodeGenContext& context);
 	};
-
+class ContinueStatement : public Statement {
+	public:
+		ContinueStatement() {}
+		~ContinueStatement() {}
+		llvm::Value* codeGen(CodeGenContext& context);
+	};
 #endif
