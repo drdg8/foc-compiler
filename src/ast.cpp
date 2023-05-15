@@ -1,6 +1,6 @@
-#include"ast.hpp"
+#include "ast.hpp"
 #include "parser.hpp"
-#include "codeGenerator.hpp"
+#include "CodeGenerator.hpp"
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/ADT/ArrayRef.h>
 #include <llvm/IR/Constants.h>
@@ -77,58 +77,62 @@ llvm::Value* typeCast(llvm::Value* src, llvm::Type* dst) {
     return IRBuilder.CreateCast(op, src, dst, "tmptypecast");
 }
 
-llvm::Value* Integer::codeGen(codeGenerator& context) {
+llvm::Value* Integer::codeGen(CodeGenerator& context) {
     cout << "INT: " << value << endl;
     return IRBuilder.getInt32(value);
 }
 
-llvm::Value* Double::codeGen(codeGenerator& context) {
+llvm::Value* Double::codeGen(CodeGenerator& context) {
     cout << "DOUBLE: " << value << endl;
     return llvm::ConstantFP::get(IRBuilder.getDoubleTy(), value);
 }
 
-llvm::Value* Char::codeGen(codeGenerator& context) {
+llvm::Value* Char::codeGen(CodeGenerator& context) {
     cout << "CHAR: " << value << endl;
     return IRBuilder.getInt8(value);
 }
 
-llvm::Value* String::codeGen(codeGenerator& context) {
+llvm::Value* String::codeGen(CodeGenerator& context) {
     cout << "STRING: " << value << endl;
     return IRBuilder.CreateGlobalStringPtr(value.c_str());
 }
 
-llvm::Value* Identifier::codeGen(codeGenerator& context) {
+
+llvm::Value* Identifier::codeGen(CodeGenerator& context) {
     cout << "IDENTIFIER: " << name << endl;
 
-    llvm::Value* variable = context.FindVariable(name);
-    if(variable == nullptr){
+    llvm::Value* var = context.FindVariable(name);
+    if(var == nullptr){
         std::cerr << "undeclared variable " << name << endl;
         return nullptr;
     }
-    // ?
-    // llvm::Type* tp = variable->getType()->getPointerElementType();
-    // llvm::outs()<<"identifier type:"<<*tp;
-    // cout<<endl;
+
+    llvm::Type* tp = var->getType()->getPointerElementType();
+    llvm::outs() << "identifier type:" << *tp << "\n";
 
     llvm::Value* res = nullptr;
-    // 如果传入的是一个数组的 ID
+    /*
+    // if array
     if(tp->isArrayTy()) {
+        // 2-dimension
         vector<llvm::Value*> indexList;
         indexList.push_back(IRBuilder.getInt32(0));
         indexList.push_back(IRBuilder.getInt32(0));
-        res = IRBuilder.CreateInBoundsGEP(variable, indexList, "arrayPtr");
+        // the first argument is a pointer to the base address of the array, and the remaining arguments are the indices of the element to access.
+        res = IRBuilder.CreateInBoundsGEP(var, llvm::ArrayRef<llvm::Value*>(indexList), "arrayPtr");
     }
     else {
-        res = new llvm::LoadInst(tp, variable, "LoadInst", false, IRBuilder.GetInsertBlock());
-    }
+    */
+    res = new llvm::LoadInst(tp, var, "LoadInst", false, IRBuilder.GetInsertBlock());
+
     return res;
 }
 
-llvm::Value* Call::codeGen(codeGenerator& context){
+llvm::Value* Call::codeGen(CodeGenerator& context){
     // find the same name function in module
-    llvm::Function *func = context.module->FindFunction(id.c_str());
+    llvm::Function *func = context.Module->getFunction(id.name.c_str());
     if (func == NULL) {
-		std::cerr << "no such function " << id << endl;
+		std::cerr << "no such function " << id.name << endl;
 	}
 
     // !! no type upgrade or type check
@@ -142,12 +146,12 @@ llvm::Value* Call::codeGen(codeGenerator& context){
     }
     // llvm::CallInst *call = IRBuilder.CreateCall(Func, ArgList);
     llvm::CallInst *call = llvm::CallInst::Create(func, llvm::makeArrayRef(tmp),"",IRBuilder.GetInsertBlock());
-    cout << "Creating method call: " << id << endl;
+    cout << "Creating method call: " << id.name << endl;
 	return call;
 }
 
 
-llvm::Value* BinaryOp::codeGen(codeGenerator& context){
+llvm::Value* BinaryOp::codeGen(CodeGenerator& context){
     cout << "BinaryOp: " << op << endl;
     llvm::Value* left = lhs.codeGen(context);
     llvm::Value* right = rhs.codeGen(context);
@@ -244,7 +248,7 @@ llvm::Value* BinaryOp::codeGen(codeGenerator& context){
 
 // idk but in yacc ASSIGN is EQUAL
 // identifier = expression
-llvm::Value* Assign::codeGen(CodeGenContext &context){
+llvm::Value* Assign::codeGen(CodeGenerator &context){
     cout << "ASSIGN: lhs " << ident.name << endl;
     
     llvm::Value* result = context.FindVariable(ident.name);
@@ -264,7 +268,7 @@ llvm::Value* Assign::codeGen(CodeGenContext &context){
     return new llvm::StoreInst(right, result, false, CurrentBlock);
 }
 
-llvm::Value* Block::codeGen(CodeGenContext &context){
+llvm::Value* Block::codeGen(CodeGenerator &context){
     llvm::Value* tmp = NULL;
     for(auto i : statementList){
         cout << "Generating code for " << typeid(*i).name() << endl;
@@ -279,7 +283,7 @@ llvm::Value* Block::codeGen(CodeGenContext &context){
 }
 
 // e.g a[2];
-llvm::Value* ArrayElement::codeGen(CodeGenContext &context){
+llvm::Value* ArrayElement::codeGen(CodeGenerator &context){
     cout << "ArrayElement: " << identifier.name << "[]" << endl;
 
     llvm::Value* arrayValue = context.FindVariable(identifier.name);
@@ -288,7 +292,7 @@ llvm::Value* ArrayElement::codeGen(CodeGenContext &context){
 		return nullptr;
     }
 
-    llvm::Value* indexValue = index.CodeGen(context);
+    llvm::Value* indexValue = index.codeGen(context);
     vector<llvm::Value*> indexList;
 
     // here dont understand
@@ -303,13 +307,13 @@ llvm::Value* ArrayElement::codeGen(CodeGenContext &context){
         indexList.push_back(indexValue);    
     }
 
-    llvm::Value* elePtr =  IRBuilder.CreateInBoundsGEP(arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmparray");
+    llvm::Value* elePtr =  IRBuilder.CreateInBoundsGEP(arrayValue->getType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmparray");
     return IRBuilder.CreateLoad(elePtr->getType()->getPointerElementType(), elePtr, "tmpvar");
     //return IRBuilder.CreateAlignedLoad(elePtr, 4);
 }
 
 // 返回数组 array[index]的地址用来函数传参
-llvm::Value* ArrayElement::getAddr(CodeGenContext &context){
+llvm::Value* ArrayElement::getAddr(CodeGenerator &context){
     cout << "getArrayElementAddr : " << identifier.name << "[]" << endl;
 
     llvm::Value* arrayValue = context.FindVariable(identifier.name);
@@ -332,12 +336,12 @@ llvm::Value* ArrayElement::getAddr(CodeGenContext &context){
         indexList.push_back(indexValue);    
     }
 
-    llvm::Value* elePtr =  IRBuilder.CreateInBoundsGEP(arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmparray");
+    llvm::Value* elePtr =  IRBuilder.CreateInBoundsGEP(arrayValue->getType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmparray");
     return elePtr;
     //return IRBuilder.CreateAlignedLoad(elePtr, 4);
 }
 
-llvm::Value* ArrayAssign::codeGen(CodeGenContext &context){
+llvm::Value* ArrayAssign::codeGen(CodeGenerator &context){
     cout << "ArrayAssign: " << identifier.name << "[]" << endl;
 
     llvm::Value* arrayValue = context.FindVariable(identifier.name);
@@ -363,7 +367,7 @@ llvm::Value* ArrayAssign::codeGen(CodeGenContext &context){
         indexList.push_back(IRBuilder.getInt32(0));
         indexList.push_back(indexValue);    
     }
-    llvm::Value* left =  IRBuilder.CreateInBoundsGEP(arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmpvar");
+    llvm::Value* left =  IRBuilder.CreateInBoundsGEP(arrayValue->getType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmpvar");
     llvm::Value *right = rhs.codeGen(context);
 
     llvm::outs()<<*(left->getType()->getPointerElementType());
@@ -375,7 +379,7 @@ llvm::Value* ArrayAssign::codeGen(CodeGenContext &context){
     //return nullptr;
 }
 
-llvm::Value* GetAddr::CodeGen(CodeGenContext &context){
+llvm::Value* GetAddr::codeGen(CodeGenerator &context){
     cout << "GetAddr : " << rhs.name << endl;
     // 在符号表和全局变量中查找
     llvm::Value* result = context.FindVariable(rhs.name);
@@ -386,7 +390,7 @@ llvm::Value* GetAddr::CodeGen(CodeGenContext &context){
     return result;
 }
 
-llvm::Value* GetArrayAddr::CodeGen(CodeGenContext &context){
+llvm::Value* GetArrayAddr::codeGen(CodeGenerator &context){
     cout<<"get arrayElement Addr:"<<rhs.name<<"[]"<<endl;
 
     llvm::Value* arrayValue = context.FindVariable(rhs.name);
@@ -395,7 +399,7 @@ llvm::Value* GetArrayAddr::CodeGen(CodeGenContext &context){
 		return nullptr;
     }
     // llvm::Value* arrayValue = context.getTop()[identifier.name];
-    llvm::Value* indexValue = index.CodeGen(context);
+    llvm::Value* indexValue = index.codeGen(context);
     vector<llvm::Value*> indexList;
 
 
@@ -410,7 +414,7 @@ llvm::Value* GetArrayAddr::CodeGen(CodeGenContext &context){
         indexList.push_back(indexValue);    
     }
 
-    llvm::Value* elePtr =  IRBuilder.CreateInBoundsGEP(arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "elePtr");
+    llvm::Value* elePtr = IRBuilder.CreateInBoundsGEP(arrayValue->getType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "elePtr");
     return elePtr;
     //return nullptr;
 }

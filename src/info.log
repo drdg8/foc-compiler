@@ -1,0 +1,42 @@
+/bin/sh: 1: llvm-config: not found
+/bin/sh: 1: llvm-config: not found
+CodeGenerator.cpp: In constructor ‘CodeGenerator::CodeGenerator()’:
+CodeGenerator.cpp:21:1: error: expected identifier before ‘{’ token
+   21 | {}
+      | ^
+CodeGenerator.cpp: In member function ‘llvm::Function* CodeGenerator::FindFunction(std::string)’:
+CodeGenerator.cpp:40:49: error: ‘class Symbol’ has no member named ‘GetFunction’
+   40 |                         return PairIter->second.GetFunction();
+      |                                                 ^~~~~~~~~~~
+CodeGenerator.cpp: In member function ‘llvm::Value* CodeGenerator::FindVariable(std::string)’:
+CodeGenerator.cpp:70:22: error: ‘class CodeGenerator’ has no member named ‘myModule’; did you mean ‘Module’?
+   70 |         return this->myModule->getGlobalVariable(variableName, true);
+      |                      ^~~~~~~~
+      |                      Module
+CodeGenerator.cpp:70:50: error: ‘variableName’ was not declared in this scope
+   70 |         return this->myModule->getGlobalVariable(variableName, true);
+      |                                                  ^~~~~~~~~~~~
+CodeGenerator.cpp: In member function ‘bool CodeGenerator::AddVariable(std::string, llvm::Value*)’:
+CodeGenerator.cpp:79:48: error: no matching function for call to ‘Symbol::Symbol(llvm::Value*&, bool)’
+   79 |         TopTable[Name] = Symbol(Variable, false);
+      |                                                ^
+In file included from CodeGenerator.cpp:11:
+CodeGenerator.hpp:40:5: note: candidate: ‘Symbol::Symbol(llvm::Value*)’
+   40 |     Symbol(llvm::Value* Value) : Content(Value), Type(VARIABLE) {}
+      |     ^~~~~~
+CodeGenerator.hpp:40:5: note:   candidate expects 1 argument, 2 provided
+CodeGenerator.hpp:39:5: note: candidate: ‘Symbol::Symbol(llvm::Function*)’
+   39 |     Symbol(llvm::Function* Func) : Content(Func), Type(FUNCTION) {}
+      |     ^~~~~~
+CodeGenerator.hpp:39:5: note:   candidate expects 1 argument, 2 provided
+CodeGenerator.hpp:38:5: note: candidate: ‘Symbol::Symbol()’
+   38 |     Symbol(void) : Content(NULL), Type(UNDEFINED) {}
+      |     ^~~~~~
+CodeGenerator.hpp:38:5: note:   candidate expects 0 arguments, 2 provided
+CodeGenerator.hpp:36:7: note: candidate: ‘constexpr Symbol::Symbol(const Symbol&)’
+   36 | class Symbol{
+      |       ^~~~~~
+CodeGenerator.hpp:36:7: note:   candidate expects 1 argument, 2 provided
+CodeGenerator.hpp:36:7: note: candidate: ‘constexpr Symbol::Symbol(Symbol&&)’
+CodeGenerator.hpp:36:7: note:   candidate expects 1 argument, 2 provided
+make: *** [Makefile:19: CodeGenerator.o] Error 1

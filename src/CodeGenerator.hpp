@@ -32,8 +32,6 @@ using namespace std;
 extern llvm::LLVMContext Context; //定义全局context
 extern llvm::IRBuilder<> IRBuilder; //定义全局IRbuilder
 
-
-
 //symbol table的定义
 class Symbol{
 public:
@@ -53,6 +51,8 @@ public:
 
 class CodeGenerator{
     public:
+        using SymbolTable = std::map<std::string, Symbol>;
+
         llvm::Module* Module;
         std::vector<SymbolTable*> SymbolTableStack;
         llvm::Function* CurrFunction;	
@@ -76,7 +76,6 @@ class CodeGenerator{
 
         llvm::Function* GetCurrentFunction(void);
 
-        using SymbolTable = std::map<std::string, Symbol>;
 
         
 

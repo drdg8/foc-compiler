@@ -52,6 +52,12 @@ bool CodeGenerator::AddFunction(std::string Name, llvm::Function* Function){
 	return true;
 }
 
+// std::vector<SymbolTable*> SymbolTableStack;
+// iter is iterator to symboltable stack
+// *iter is the element of symboltable stack, which is pointer to symboltable
+// **iter is symboltable
+// using SymbolTable = std::map<std::string, Symbol>;
+// so return iter->second.GetVariable() which is (llvm::Value*)Content, that is the poiter to value
 llvm::Value* CodeGenerator::FindVariable(std::string Name){
 	//先找局部变量
 	if (this->SymbolTableStack.size() == 0) return NULL;
