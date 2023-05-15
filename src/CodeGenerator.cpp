@@ -78,6 +78,18 @@ llvm::Function* CodeGenerator::GetCurrentFunction(void){
 	return this->CurrFunction;
 }
 
+void CodeGenerator:: GenIR(Block* programBlock,const string& filename ){
+	program->codeGen(*this);
+	llvm::verifyModule(*this->myModule, &llvm::outs());
+    std::error_code EC;
+    llvm::raw_fd_ostream dest(filename, EC, llvm::sys::fs::F_None);
+	if (EC) {
+        llvm::errs() << "Could not open file: " << EC.message();
+        return;
+    }
+    this->myModule->print(dest, nullptr);
+
+}
 
 
 

@@ -71,7 +71,7 @@ int main(int argc, const char* argv[]){
 
     std::cout<<"program begin"<<std::endl;
 
-    //将目标代码写入output file中(待实现)
-    generator->Run(programBlock,OutputObjectFile);
-
+    //将目标代码写入output file中
+    generator->GenIR(programBlock,OutputObjectFile);
+    // programBlock->CodeGen
 }

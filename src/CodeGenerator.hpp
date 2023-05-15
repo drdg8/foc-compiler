@@ -78,7 +78,7 @@ class CodeGenerator{
 
         using SymbolTable = std::map<std::string, Symbol>;
 
-        
+        void GenIR(Block* programBlock,const string& filename);
 
     private:
         
