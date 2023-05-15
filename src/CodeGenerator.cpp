@@ -12,6 +12,7 @@
 
 llvm::LLVMContext Context; //定义全局context
 llvm::IRBuilder<> IRBuilder(Context); //定义全局IRbuilder
+
 //Constructor
 CodeGenerator::CodeGenerator(void) :
 	Module(new llvm::Module("main", Context)),
@@ -41,7 +42,7 @@ llvm::Function*  CodeGenerator::FindFunction(std::string Name){
 	return NULL;
 }
 
-bool CodeGenerator:: AddFunction(std::string Name, llvm::Function* Function){
+bool CodeGenerator::AddFunction(std::string Name, llvm::Function* Function){
 	if (this->SymbolTableStack.size() == 0) return false;
 	auto& TopTable = *(this->SymbolTableStack.back());
 	auto PairIter = TopTable.find(Name);
@@ -51,7 +52,7 @@ bool CodeGenerator:: AddFunction(std::string Name, llvm::Function* Function){
 	return true;
 }
 
-llvm::Value* CodeGenerator::  FindVariable(std::string Name){
+llvm::Value* CodeGenerator::FindVariable(std::string Name){
 	//先找局部变量
 	if (this->SymbolTableStack.size() == 0) return NULL;
 	for (auto TableIter = this->SymbolTableStack.end() - 1; TableIter >= this->SymbolTableStack.begin(); TableIter--) {
@@ -63,8 +64,8 @@ llvm::Value* CodeGenerator::  FindVariable(std::string Name){
 	return this->myModule->getGlobalVariable(variableName, true);
 }
 
-bool CodeGenerator:: AddVariable(std::string Name, llvm::Value* Variable){
-	f (this->SymbolTableStack.size() == 0) return false;
+bool CodeGenerator::AddVariable(std::string Name, llvm::Value* Variable){
+	if (this->SymbolTableStack.size() == 0) return false;
 	auto& TopTable = *(this->SymbolTableStack.back());
 	auto PairIter = TopTable.find(Name);
 	if (PairIter != TopTable.end())
@@ -73,7 +74,7 @@ bool CodeGenerator:: AddVariable(std::string Name, llvm::Value* Variable){
 	return true;
 }
 
-llvm::Function* CodeGenerator:: GetCurrentFunction(void){
+llvm::Function* CodeGenerator::GetCurrentFunction(void){
 	return this->CurrFunction;
 }
 

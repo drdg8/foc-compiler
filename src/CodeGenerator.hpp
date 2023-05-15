@@ -49,7 +49,7 @@ public:
         UNDEFINED
     } Type;   
 
-}
+};
 
 class CodeGenerator{
     public:
@@ -83,7 +83,7 @@ class CodeGenerator{
     private:
         
 
-}
+};
 
 
 #endif
