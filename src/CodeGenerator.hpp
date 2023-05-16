@@ -39,6 +39,7 @@ public:
     Symbol(llvm::Function* Func) : Content(Func), Type(FUNCTION) {}
     Symbol(llvm::Value* Value) : Content(Value), Type(VARIABLE) {}
     llvm::Value* GetVariable(void) { return this->Type == VARIABLE ? (llvm::Value*)Content : NULL; }
+    llvm::Function* GetFunction(void) { return this->Type == FUNCTION ? (llvm::Function*)Content : NULL; }
 public:
     void* Content;
     enum{

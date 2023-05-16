@@ -17,7 +17,7 @@ llvm::IRBuilder<> IRBuilder(Context); //定义全局IRbuilder
 CodeGenerator::CodeGenerator(void) :
 	Module(new llvm::Module("main", Context)),
 	CurrFunction(NULL),
-	SymbolTableStack(),
+	SymbolTableStack()
 {}
 
 //Create and push an empty symbol table
@@ -67,7 +67,7 @@ llvm::Value* CodeGenerator::FindVariable(std::string Name){
 			return PairIter->second.GetVariable();
 	}
 	//再找全局变量
-	return this->myModule->getGlobalVariable(variableName, true);
+	return this->Module->getGlobalVariable(Name, true);
 }
 
 bool CodeGenerator::AddVariable(std::string Name, llvm::Value* Variable){
@@ -76,7 +76,7 @@ bool CodeGenerator::AddVariable(std::string Name, llvm::Value* Variable){
 	auto PairIter = TopTable.find(Name);
 	if (PairIter != TopTable.end())
 		return false;
-	TopTable[Name] = Symbol(Variable, false);
+	TopTable[Name] = Symbol(Variable);
 	return true;
 }
 
