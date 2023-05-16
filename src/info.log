@@ -10,10 +10,7 @@ main.cpp:53:10: error: conflicting declaration ‘auto it’
 main.cpp:46:10: note: previous declaration as ‘std::_Rb_tree_iterator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > > it’
    46 |     auto it = argMap.find("i");
       |          ^~
-main.cpp:75:16: error: ‘class CodeGenerator’ has no member named ‘Run’
-   75 |     generator->Run(programBlock,OutputObjectFile);
-      |                ^~~
-main.cpp:75:20: error: ‘programBlock’ was not declared in this scope
-   75 |     generator->Run(programBlock,OutputObjectFile);
-      |                    ^~~~~~~~~~~~
+main.cpp:75:22: error: ‘programBlock’ was not declared in this scope
+   75 |     generator->GenIR(programBlock,OutputObjectFile);
+      |                      ^~~~~~~~~~~~
 make: *** [Makefile:19: main.o] Error 1

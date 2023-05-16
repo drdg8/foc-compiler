@@ -111,6 +111,7 @@ llvm::Value* Identifier::codeGen(CodeGenerator& context) {
     llvm::outs() << "identifier type:" << *tp << "\n";
 
     llvm::Value* res = nullptr;
+
     /*
     // if array
     if(tp->isArrayTy()) {
@@ -123,6 +124,7 @@ llvm::Value* Identifier::codeGen(CodeGenerator& context) {
     }
     else {
     */
+
     res = new llvm::LoadInst(tp, var, "LoadInst", false, IRBuilder.GetInsertBlock());
 
     return res;
@@ -275,8 +277,8 @@ llvm::Value* Block::codeGen(CodeGenerator &context){
         tmp = (*i).codeGen(context);
 
         // 若当前语句为 reutrn , 则后面的语句需要截断
-        // if(context.hasReturn == true)
-        //     break;
+        if(i == true)
+            break;
     }
     cout << endl;
 	return tmp;
