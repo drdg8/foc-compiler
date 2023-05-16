@@ -41,12 +41,8 @@ public:
     llvm::Value* GetVariable(void) { return this->Type == VARIABLE ? (llvm::Value*)Content : NULL; }
     llvm::Function* GetFunction(void) { return this->Type == FUNCTION ? (llvm::Function*)Content : NULL; }
 public:
-    void* Content;
-    enum{
-        FUNCTION,
-        VARIABLE,
-        UNDEFINED
-    } Type;   
+    llvm::Value* Content;
+    llvm::Type* Type;   
 
 };
 
@@ -63,19 +59,22 @@ class CodeGenerator{
         CodeGenerator(void);
         //sizeof() 空位，待实现
 
+        //如果需要Mini中的getTop或getTopType，直接用函数里的内容吧
+
         void PushSymbolTable(void);
 
         void PopSymbolTable(void);
 
-        llvm::Function* FindFunction(std::string Name);
+        // llvm::Function* FindFunction(std::string Name);
 
-        bool AddFunction(std::string Name, llvm::Function* Function);
+        // bool AddFunction(std::string Name, llvm::Function* Function);
 
         llvm::Value* FindVariable(std::string Name);
 
         bool AddVariable(std::string Name, llvm::Value* Variable);
 
         llvm::Function* GetCurrentFunction(void);
+
 
 
         void GenIR(Block* programBlock,const string& filename);

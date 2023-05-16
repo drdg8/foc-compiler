@@ -32,25 +32,25 @@ void CodeGenerator::PopSymbolTable(void) {
 	this->SymbolTableStack.pop_back();
 }
 
-llvm::Function*  CodeGenerator::FindFunction(std::string Name){
-	if (this->SymbolTableStack.size() == 0) return NULL;
-	for (auto TableIter = this->SymbolTableStack.end() - 1; TableIter >= this->SymbolTableStack.begin(); TableIter--) {
-		auto PairIter = (**TableIter).find(Name);
-		if (PairIter != (**TableIter).end())
-			return PairIter->second.GetFunction();
-	}
-	return NULL;
-}
+// llvm::Function*  CodeGenerator::FindFunction(std::string Name){
+// 	if (this->SymbolTableStack.size() == 0) return NULL;
+// 	for (auto TableIter = this->SymbolTableStack.end() - 1; TableIter >= this->SymbolTableStack.begin(); TableIter--) {
+// 		auto PairIter = (**TableIter).find(Name);
+// 		if (PairIter != (**TableIter).end())
+// 			return PairIter->second.GetFunction();
+// 	}
+// 	return NULL;
+// }
 
-bool CodeGenerator::AddFunction(std::string Name, llvm::Function* Function){
-	if (this->SymbolTableStack.size() == 0) return false;
-	auto& TopTable = *(this->SymbolTableStack.back());
-	auto PairIter = TopTable.find(Name);
-	if (PairIter != TopTable.end())
-		return false;
-	TopTable[Name] = Symbol(Function);
-	return true;
-}
+// bool CodeGenerator::AddFunction(std::string Name, llvm::Function* Function){
+// 	if (this->SymbolTableStack.size() == 0) return false;
+// 	auto& TopTable = *(this->SymbolTableStack.back());
+// 	auto PairIter = TopTable.find(Name);
+// 	if (PairIter != TopTable.end())
+// 		return false;
+// 	TopTable[Name] = Symbol(Function);
+// 	return true;
+// }
 
 // std::vector<SymbolTable*> SymbolTableStack;
 // iter is iterator to symboltable stack
