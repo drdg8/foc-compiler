@@ -6,7 +6,7 @@
 
 
 extern int yyparse(void);
-extern BlockNode* programBlock;
+extern Block* programBlock;
 
  //存储参数
 std::vector<std::string> args;
@@ -43,20 +43,20 @@ int main(int argc, const char* argv[]){
     std::string OutputObjectFile;	
     
     //处理输入文件
-    auto it = argMap.find("i");
-    if(it == argMap.end())
+    auto it_0 = argMap.find("i");
+    if(it_0 == argMap.end())
         std::cout << "error：无输入文件" << std::endl;
-    InputFile = it->second;
+    InputFile = it_0->second;
     freopen(InputFile.c_str(), "r", stdin);
 
     //处理输出文件
-    auto it = argMap.find("o");
-    if(it == argMap.end() || OutputObjectFile == "")
+    auto it_1 = argMap.find("o");
+    if(it_1 == argMap.end() || OutputObjectFile == "")
     {
         OutputObjectFile = "a.ll";
     }
     else{
-        OutputObjectFile = it->second;
+        OutputObjectFile = it_1->second;
         if(OutputObjectFile.length() <= 3 || OutputObjectFile.substr(OutputObjectFile.length() - 3) != ".ll")
         {
             OutputObjectFile = OutputObjectFile + ".ll";

@@ -84,6 +84,7 @@ llvm::Function* CodeGenerator::GetCurrentFunction(void){
 	return this->CurrFunction;
 }
 
+/*
 void CodeGenerator:: GenIR(Block* programBlock,const string& filename ){
 	program->codeGen(*this);
 	llvm::verifyModule(*this->Module, &llvm::outs());
@@ -95,5 +96,5 @@ void CodeGenerator:: GenIR(Block* programBlock,const string& filename ){
     }
     this->Module->print(dest, nullptr);
 }
-
+*/
 
