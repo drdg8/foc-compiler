@@ -53,13 +53,13 @@ int main(int argc, const char* argv[]){
     auto it = argMap.find("o");
     if(it == argMap.end() || OutputObjectFile == "")
     {
-        OutputObjectFile = "a.o";
+        OutputObjectFile = "a.ll";
     }
     else{
         OutputObjectFile = it->second;
-        if(OutputObjectFile.length() <= 2 || OutputObjectFile.substr(OutputObjectFile.length() - 2) != ".o")
+        if(OutputObjectFile.length() <= 3 || OutputObjectFile.substr(OutputObjectFile.length() - 3) != ".ll")
         {
-            OutputObjectFile = OutputObjectFile + ".o";
+            OutputObjectFile = OutputObjectFile + ".ll";
         }
     }
     yyparse();
@@ -71,7 +71,7 @@ int main(int argc, const char* argv[]){
 
     std::cout<<"program begin"<<std::endl;
 
-    //将目标代码写入output file中(待实现)
-    generator->Run(programBlock,OutputObjectFile);
-
+    //将目标代码写入output file中
+    generator->GenIR(programBlock,OutputObjectFile);
+    // programBlock->CodeGen
 }

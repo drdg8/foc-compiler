@@ -33,7 +33,7 @@ extern llvm::LLVMContext Context; //定义全局context
 extern llvm::IRBuilder<> IRBuilder; //定义全局IRbuilder
 
 //symbol table的定义
-class Symbol{
+class SymbolTabl{
 public:
     Symbol(void) : Content(NULL), Type(UNDEFINED) {}
     Symbol(llvm::Function* Func) : Content(Func), Type(FUNCTION) {}
@@ -78,7 +78,7 @@ class CodeGenerator{
         llvm::Function* GetCurrentFunction(void);
 
 
-        
+        void GenIR(Block* programBlock,const string& filename);
 
     private:
         

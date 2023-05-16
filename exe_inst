@@ -1,0 +1,5 @@
+llvm-as-14 easy.ll
+llc-14 easy.bc
+clang-14 -c easy.s 
+clang-14 easy.o -o easy
+./easy
