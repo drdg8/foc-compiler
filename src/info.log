@@ -1,19 +1,41 @@
-/bin/sh: 1: llvm-config: not found
-/bin/sh: 1: llvm-config: not found
-main.cpp:9:8: error: ‘BlockNode’ does not name a type
-    9 | extern BlockNode* programBlock;
-      |        ^~~~~~~~~
-main.cpp: In function ‘int main(int, const char**)’:
-main.cpp:53:10: error: conflicting declaration ‘auto it’
-   53 |     auto it = argMap.find("o");
-      |          ^~
-main.cpp:46:10: note: previous declaration as ‘std::_Rb_tree_iterator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > > it’
-   46 |     auto it = argMap.find("i");
-      |          ^~
-main.cpp:75:16: error: ‘class CodeGenerator’ has no member named ‘Run’
-   75 |     generator->Run(programBlock,OutputObjectFile);
-      |                ^~~
-main.cpp:75:20: error: ‘programBlock’ was not declared in this scope
-   75 |     generator->Run(programBlock,OutputObjectFile);
-      |                    ^~~~~~~~~~~~
-make: *** [Makefile:19: main.o] Error 1
+g++ -c `llvm-config --cppflags` -std=c++14 -g -o CodeGenerator.o CodeGenerator.cpp -I /usr/include/llvm-14 -I /usr/include/llvm-c-14
+g++ -c `llvm-config --cppflags` -std=c++14 -g -o main.o main.cpp -I /usr/include/llvm-14 -I /usr/include/llvm-c-14
+g++ -o c_compiler parser.o lexer.o ast.o CodeGenerator.o main.o  `llvm-config --libs` `llvm-config --ldflags` -lpthread -ldl -lncurses -rdynamic -I /usr/include/llvm-14 -I /usr/include/llvm-c-14
+/usr/bin/ld: parser.o: warning: relocation against `_ZTV14BreakStatement' in read-only section `.text._ZN14BreakStatementC2Ev[_ZN14BreakStatementC5Ev]'
+/usr/bin/ld: parser.o: in function `ExpressionStatement::ExpressionStatement(Expression&)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:169: undefined reference to `vtable for ExpressionStatement'
+/usr/bin/ld: parser.o: in function `Return::Return(Expression*)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:178: undefined reference to `vtable for Return'
+/usr/bin/ld: parser.o: in function `Return::Return()':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:180: undefined reference to `vtable for Return'
+/usr/bin/ld: parser.o: in function `VariableDeclaration::VariableDeclaration(Identifier const&, Identifier&)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:189: undefined reference to `vtable for VariableDeclaration'
+/usr/bin/ld: parser.o: in function `VariableDeclaration::VariableDeclaration(Identifier const&, Identifier&, Expression*)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:193: undefined reference to `vtable for VariableDeclaration'
+/usr/bin/ld: parser.o: in function `ArrayDeclaration::ArrayDeclaration(Identifier const&, Identifier&, int)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:205: undefined reference to `vtable for ArrayDeclaration'
+/usr/bin/ld: parser.o: in function `ExternDeclaration::ExternDeclaration(Identifier const&, Identifier const&, std::vector<VariableDeclaration*, std::allocator<VariableDeclaration*> > const&)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:215: undefined reference to `vtable for ExternDeclaration'
+/usr/bin/ld: parser.o: in function `FunctionDeclaration::FunctionDeclaration(Identifier const&, Identifier const&, std::vector<VariableDeclaration*, std::allocator<VariableDeclaration*> > const&, Block&)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:227: undefined reference to `vtable for FunctionDeclaration'
+/usr/bin/ld: parser.o: in function `LoopStatement::LoopStatement(Expression&)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:238: undefined reference to `vtable for LoopStatement'
+/usr/bin/ld: parser.o: in function `ForStatement::ForStatement(Expression&, Expression&, Expression&, Block&)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:248: undefined reference to `vtable for ForStatement'
+/usr/bin/ld: parser.o: in function `WhileStatement::WhileStatement(Expression&, Block&)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:260: undefined reference to `vtable for WhileStatement'
+/usr/bin/ld: parser.o: in function `IfStatement::IfStatement(Expression&, Block&, Block*)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:271: undefined reference to `vtable for IfStatement'
+/usr/bin/ld: parser.o: in function `IfStatement::IfStatement(Expression&, Block&)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:273: undefined reference to `vtable for IfStatement'
+/usr/bin/ld: parser.o: in function `SwitchStatement::SwitchStatement(Expression&, std::vector<CaseStatement*, std::allocator<CaseStatement*> >&)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:285: undefined reference to `vtable for SwitchStatement'
+/usr/bin/ld: parser.o: in function `CaseStatement::CaseStatement(Expression*, Block&)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:296: undefined reference to `vtable for CaseStatement'
+/usr/bin/ld: parser.o: in function `CaseStatement::CaseStatement(Block&)':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:298: undefined reference to `vtable for CaseStatement'
+/usr/bin/ld: parser.o: in function `BreakStatement::BreakStatement()':
+/home/zhengyihao/2023_foc_complier/src/ast.hpp:308: undefined reference to `vtable for BreakStatement'
+/usr/bin/ld: warning: creating DT_TEXTREL in a PIE
+collect2: error: ld returned 1 exit status
+make: *** [Makefile:22: c_compiler] Error 1
