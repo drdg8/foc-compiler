@@ -85,15 +85,15 @@ llvm::Function* CodeGenerator::GetCurrentFunction(void){
 }
 
 void CodeGenerator:: GenIR(Block* programBlock,const string& filename ){
-	program->codeGen(*this);
-	llvm::verifyModule(*this->myModule, &llvm::outs());
+	programBlock->codeGen(*this);
+	llvm::verifyModule(*this->Module, &llvm::outs());
     std::error_code EC;
-    llvm::raw_fd_ostream dest(filename, EC, llvm::sys::fs::F_None);
+	llvm::raw_fd_ostream dest(filename, EC);
 	if (EC) {
         llvm::errs() << "Could not open file: " << EC.message();
         return;
     }
-    this->myModule->print(dest, nullptr);
+    this->Module->print(dest, nullptr);
 
 }
 
