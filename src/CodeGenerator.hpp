@@ -32,8 +32,8 @@ using namespace std;
 extern llvm::LLVMContext Context; //定义全局context
 extern llvm::IRBuilder<> IRBuilder; //定义全局IRbuilder
 
-//symbol table的定义
-class SymbolTable{
+//symbol 的定义
+class Symbol{
 public:
     Symbol(void) : Content(NULL), Type(UNDEFINED) {}
     Symbol(llvm::Function* Func) : Content(Func), Type(FUNCTION) {}
