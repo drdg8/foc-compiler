@@ -16,40 +16,62 @@ using namespace std;
 
 // we distguish global context and global context use C/context
 
-llvm::Type* getLLvmType(string type){
+llvm::Type* getLLVMType(string type){
     if(type == "int")
         return llvm::Type::getInt32Ty(Context);
     else if(type == "float")
         return llvm::Type::getFloatTy(Context);
     else if(type == "char")
         return llvm::Type::getInt8Ty(Context);
+    else if(type == "bool")
+        return llvm::Type::getInt1Ty(Context);
     else
         return llvm::Type::getVoidTy(Context);
 }
 
 // return the ptr type of llvm
-llvm::Type* getPtrLLvmType(string type){
+llvm::Type* getPtrLLVMType(string type){
     if(type == "int")
         return llvm::Type::getInt32PtrTy(Context);
     else if(type == "float")
         return llvm::Type::getFloatPtrTy(Context);
     else if(type == "char")
         return llvm::Type::getInt8PtrTy(Context);
+    else if(type == "bool")
+        return llvm::Type::getInt1PtrTy(Context);
     else
         return llvm::Type::getVoidTy(Context);
 }
 
 // return the array type of llvm
-llvm::Type* getArrayLLvmType(string type,int size){
+llvm::Type* getArrayLLVMType(string type,int size){
     if(type == "int")
         return llvm::ArrayType::get(llvm::Type::getInt32Ty(Context), size);
     else if(type == "float")
         return llvm::ArrayType::get(llvm::Type::getFloatTy(Context), size);
     else if(type == "char")
         return llvm::ArrayType::get(llvm::Type::getInt8Ty(Context), size);
+    else if(type == "bool")
+        return llvm::ArrayType::get(llvm::Type::getInt1Ty(Context), size);
     else
         return nullptr;
 }
+
+/*
+    Trunc: Truncate a value to a smaller type.
+    ZExt: Zero-extend a value to a larger type.
+    SExt: Sign-extend a value to a larger type.
+    FPToUI: Convert a floating-point value to an unsigned integer type.
+    FPToSI: Convert a floating-point value to a signed integer type.
+    UIToFP: Convert an unsigned integer value to a floating-point type.
+    SIToFP: Convert a signed integer value to a floating-point type.
+    FPTrunc: Truncate a floating-point value to a smaller type.
+    FPExt: Extend a floating-point value to a larger type.
+    PtrToInt: Convert a pointer value to an integer type.
+    IntToPtr: Convert an integer value to a pointer type.
+    BitCast: Bitcast a value to a different type.
+    AddrSpaceCast: Cast a pointer value to a different address space.
+*/
 
 llvm::Instruction::CastOps getCastInst(llvm::Type* src, llvm::Type* dst) {
     if (src == llvm::Type::getFloatTy(Context) && dst == llvm::Type::getInt32Ty(Context)) {
@@ -73,6 +95,28 @@ llvm::Instruction::CastOps getCastInst(llvm::Type* src, llvm::Type* dst) {
 }
 
 llvm::Value* typeCast(llvm::Value* src, llvm::Type* dst) {
+    if(src->getType() == dst){
+        return src;
+    }
+    if (dst == llvm::Type::getInt1Ty(Context)){
+        if (src->getType() == IRBuilder.getInt1Ty()){
+            return src;
+        }
+        else if (src->getType()->isIntegerTy()){
+            // return IRBuilder.CreateICmpNE(Value, llvm::ConstantInt::get((llvm::IntegerType*)Value->getType(), 0, true));
+            return IRBuilder.CreateICmpNE(src, llvm::ConstantInt::get(src->getType(), 0, true));
+        }
+        else if (src->getType()->isFloatingPointTy()){
+            return IRBuilder.CreateFCmpONE(src, llvm::ConstantFP::get(src->getType(), 0.0));
+        }
+        else if (src->getType()->isPointerTy()){
+            return IRBuilder.CreateICmpNE(IRBuilder.CreatePtrToInt(src, IRBuilder.getInt64Ty()), IRBuilder.getInt64(0));
+        }
+        else {
+            throw std::logic_error("Cannot cast to bool type.");
+            return NULL;
+        }
+    }
     llvm::Instruction::CastOps op = getCastInst(src->getType(), dst);
     return IRBuilder.CreateCast(op, src, dst, "tmptypecast");
 }
@@ -111,7 +155,6 @@ llvm::Value* Identifier::codeGen(CodeGenerator& context) {
     llvm::outs() << "identifier type:" << *tp << "\n";
 
     llvm::Value* res = nullptr;
-    /*
     // if array
     if(tp->isArrayTy()) {
         // 2-dimension
@@ -119,11 +162,11 @@ llvm::Value* Identifier::codeGen(CodeGenerator& context) {
         indexList.push_back(IRBuilder.getInt32(0));
         indexList.push_back(IRBuilder.getInt32(0));
         // the first argument is a pointer to the base address of the array, and the remaining arguments are the indices of the element to access.
-        res = IRBuilder.CreateInBoundsGEP(var, llvm::ArrayRef<llvm::Value*>(indexList), "arrayPtr");
+        res = IRBuilder.CreateInBoundsGEP(var->getType(), var, llvm::ArrayRef<llvm::Value*>(indexList), "arrayPtr");
     }
     else {
-    */
-    res = new llvm::LoadInst(tp, var, "LoadInst", false, IRBuilder.GetInsertBlock());
+        res = new llvm::LoadInst(tp, var, "LoadInst", false, IRBuilder.GetInsertBlock());
+    }
 
     return res;
 }
@@ -144,6 +187,7 @@ llvm::Value* Call::codeGen(CodeGenerator& context){
     for(auto i: arguments){
         tmp.push_back((*i).codeGen(context));
     }
+
     // llvm::CallInst *call = IRBuilder.CreateCall(Func, ArgList);
     llvm::CallInst *call = llvm::CallInst::Create(func, llvm::makeArrayRef(tmp),"",IRBuilder.GetInsertBlock());
     cout << "Creating method call: " << id.name << endl;
@@ -261,10 +305,17 @@ llvm::Value* Assign::codeGen(CodeGenerator &context){
 
     auto CurrentBlock = IRBuilder.GetInsertBlock();
 
-    // why getPointerElementType ?
+    // use chatgpt
+    // if Value *src, what's the difference between src->getType() and src->getType()->getPointerElementType()? give a e.g
+    // in all, if src is pointer to int, getType() return llvm::Type *, which is a pointer to int, ->getPointerElementType() is same
+    // if src is pointer to array int, getType() return pointer to llvm::Type array, ->getPointerElementType() return pointer to llvm::Type int 
     if (right->getType() != result->getType()->getPointerElementType())
         right = typeCast(right, result->getType()->getPointerElementType());
 
+    if (right == NULL) {
+		throw std::domain_error("Assignment with values that cannot be cast to the target type.");
+		return NULL;
+	}
     return new llvm::StoreInst(right, result, false, CurrentBlock);
 }
 
@@ -274,8 +325,8 @@ llvm::Value* Block::codeGen(CodeGenerator &context){
         cout << "Generating code for " << typeid(*i).name() << endl;
         tmp = (*i).codeGen(context);
 
-        // 若当前语句为 reutrn , 则后面的语句需要截断
-        // if(context.hasReturn == true)
+        // 若当前语句为 return , 则后面的语句需要截断
+        // if(i == true)
         //     break;
     }
     cout << endl;
@@ -295,8 +346,7 @@ llvm::Value* ArrayElement::codeGen(CodeGenerator &context){
     llvm::Value* indexValue = index.codeGen(context);
     vector<llvm::Value*> indexList;
 
-    // here dont understand
-    // if pointer
+    // if a[2] = &b pointer
     if(arrayValue->getType()->getPointerElementType()->isPointerTy()) {
         arrayValue = IRBuilder.CreateLoad(arrayValue->getType()->getPointerElementType(), arrayValue);
         indexList.push_back(indexValue);    
@@ -391,7 +441,7 @@ llvm::Value* GetAddr::codeGen(CodeGenerator &context){
 }
 
 llvm::Value* GetArrayAddr::codeGen(CodeGenerator &context){
-    cout<<"get arrayElement Addr:"<<rhs.name<<"[]"<<endl;
+    cout << "get arrayElement Addr:" << rhs.name << "[]" << endl;
 
     llvm::Value* arrayValue = context.FindVariable(rhs.name);
     if(arrayValue == nullptr){
@@ -419,3 +469,87 @@ llvm::Value* GetArrayAddr::codeGen(CodeGenerator &context){
     //return nullptr;
 }
 
+llvm::Value* ExpressionStatement::codeGen(CodeGenerator &context){
+    cout << "Generate Expression Statement" << endl;
+    return expression.codeGen(context);
+}
+
+llvm::Value* Return::codeGen(CodeGenerator &context){
+    cout << "Generate Return Statement" << endl;
+    // need to complete
+    return NULL;
+}
+
+llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
+    // not an array
+    // why not codeGen? 
+    llvm::Type* VarType = getLLVMType(type.name);
+    if(context.CurrFunction == NULL){
+        // global variable
+        cout << "declaration global variable " << id.name << " with type " << type.name << endl;
+        // if redefine
+        llvm::Value *tmp = context.Module->getGlobalVariable(id.name, true);
+        if(tmp != nullptr){
+            throw logic_error("Redefined Global Variable: " + id.name);
+            return NULL;
+        }
+        //Create the constant initializer
+        llvm::Constant* Initializer = NULL;
+        Initializer = llvm::ConstantInt::get(VarType, 0);
+        // 3rd argument is const or not, which we don't implement
+        auto Alloc = new llvm::GlobalVariable(
+            *(context.Module),
+            VarType,
+            false,
+            llvm::Function::ExternalLinkage,
+            Initializer,
+            id.name
+        );
+        // if global we check no currfunction
+        if (assignmentExpr) {
+            Assign ass(id, *assignmentExpr);
+            ass.codeGen(context);
+        }
+        return Alloc;
+    }
+    else{
+        // local variable
+        cout << "declaration local variable " << id.name << " with type " << type.name << endl;
+        llvm::Function *Func = context.CurrFunction;
+        // declaration in function
+        llvm::IRBuilder<> TmpB(&Func->getEntryBlock(), Func->getEntryBlock().begin());
+        llvm::AllocaInst* Alloc = TmpB.CreateAlloca(VarType, 0, id.name);
+        if(context.AddVariable(id.name, Alloc) == false) {
+            // 当前域中有该变量, 重复定义
+            Alloc->eraseFromParent();
+            throw logic_error("Redefined Local Variable: " + id.name);
+            return NULL;
+        }
+        /*
+        // 将新定义的变量类型和地址存入符号表中
+        emitContext.getTopType()[identifier.name] = llvmType;
+        emitContext.getTop()[identifier.name] = alloc;
+        */
+        if (assignmentExpr) {
+            Assign ass(id, *assignmentExpr);
+            ass.codeGen(context);
+        }
+
+        return Alloc;
+        /*
+        //Assign the initial value by "store" instruction.
+        if (NewVar->_InitialExpr) {
+            llvm::Value* Initializer = TypeCasting(NewVar->_InitialExpr->CodeGen(__Generator), VarType);
+            if (Initializer == NULL) {
+                throw std::logic_error("Initializing variable " + NewVar->_Name + " with value of different type.");
+                return NULL;
+            }
+            IRBuilder.CreateStore(Initializer, Alloc);
+        }
+        */
+    }
+}
+
+llvm::Value* ArrayDeclaration::codeGen(CodeGenerator &context){
+
+}
