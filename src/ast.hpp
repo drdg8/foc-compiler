@@ -195,7 +195,7 @@ class VarType : public Node {
 		VarType(TypeID __Type) : _BuildInType(__Type) {}
 		~VarType(void) {}
 		
-		llvm::Value* CodeGen(CodeGenerator& context) { return NULL; }
+		llvm::Value* codeGen(CodeGenerator& context) { return NULL; }
 		public:
 		
 		TypeID _BuildInType;
@@ -209,7 +209,7 @@ public:
 		Customtype(type), id(id) { assignmentExpr = nullptr; BuildInType=nullptr;}
 	VariableDeclaration( Identifier* type, Identifier& id, Expression *assignmentExpr) :
 		Customtype(type), id(id), assignmentExpr(assignmentExpr) { BuildInType=nullptr;}
-			VariableDeclaration( VarType* type, Identifier& id) :
+	VariableDeclaration( VarType* type, Identifier& id) :
 		BuildInType(type), id(id) { assignmentExpr = nullptr; Customtype=nullptr;}
 	VariableDeclaration( VarType* type, Identifier& id,int size) :
 		BuildInType(type), id(id) { assignmentExpr = nullptr; Customtype=nullptr;}

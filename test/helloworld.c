@@ -1,4 +1,4 @@
-//无头文件
+#include <stdio.h>
 
 int main(){
     int a = 1;
