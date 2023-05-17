@@ -42,6 +42,8 @@ llvm::Function*  CodeGenerator::FindFunction(std::string Name){
 	return NULL;
 }
 
+// Add a function to the current symbol table
+// If an old value exists (i.e., conflict), return false
 bool CodeGenerator::AddFunction(std::string Name, llvm::Function* Function){
 	if (this->SymbolTableStack.size() == 0) return false;
 	auto& TopTable = *(this->SymbolTableStack.back());
@@ -58,6 +60,9 @@ bool CodeGenerator::AddFunction(std::string Name, llvm::Function* Function){
 // **iter is symboltable
 // using SymbolTable = std::map<std::string, Symbol>;
 // so return iter->second.GetVariable() which is (llvm::Value*)Content, that is the poiter to value
+
+//Add a variable to the current symbol table
+//If an old value exists (i.e., conflict), return false
 llvm::Value* CodeGenerator::FindVariable(std::string Name){
 	//先找局部变量
 	if (this->SymbolTableStack.size() == 0) return NULL;

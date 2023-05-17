@@ -41,13 +41,13 @@ public:
     llvm::Value* GetVariable(void) { return this->Type == VARIABLE ? (llvm::Value*)Content : NULL; }
     llvm::Function* GetFunction(void) { return this->Type == FUNCTION ? (llvm::Function*)Content : NULL; }
 public:
-    void* Content;
+    llvm::Value* Content;
     enum{
         FUNCTION,
         VARIABLE,
         UNDEFINED
     } Type;   
-
+    // llvm::Type* Type;   
 };
 
 class CodeGenerator{
@@ -78,9 +78,6 @@ class CodeGenerator{
         llvm::Function* GetCurrentFunction(void);
 
         void GenIR(Block* programBlock,const string& filename);
-
-    private:
-        
 
 };
 
