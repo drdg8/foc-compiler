@@ -32,6 +32,13 @@
 "until"                 return TOKEN(UNTIL);
 "break"                 return TOKEN(BREAK);
 
+"int"													{return TOKEN(INT); }
+"long"													{return TOKEN(LONG); }
+"char"													{return TOKEN(CHAR); }
+"float"													{return TOKEN(FLOAT); }
+"double"												{return TOKEN(DOUBLE); }
+"void"													{return TOKEN(VOID); }
+
 [a-zA-Z_][a-zA-Z0-9_]*  {SAVE_IDENTIFIER; return IDENTIFIER;}//标识符
 [0-9]+\.[0-9]* 			    {SAVE_DOUBLE; return DOUBLE;}//浮点
 [0-9]+					        {SAVE_INTEGER; return INTEGER;}//整型
@@ -54,9 +61,9 @@
 
 "("	          					return TOKEN(LPAREN);//括号
 ")"					          	return TOKEN(RPAREN);
-"["                             return TOKEN(LBRACK);
-"]"                             return TOKEN(RBRACK);
-"{"         					return TOKEN(LBRACE);
+"["                     return TOKEN(LBRACK);
+"]"                     return TOKEN(RBRACK);
+"{"         					  return TOKEN(LBRACE);
 "}"					          	return TOKEN(RBRACE);
 
 

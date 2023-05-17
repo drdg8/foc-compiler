@@ -9,6 +9,7 @@
 
 	extern int yylex();
 	void yyerror(const char *s) { std::printf("Error: %s\n", s);std::exit(1); }
+  
 %}
 
 /* Represents the many different ways we can access our data */
@@ -53,22 +54,21 @@
   ContinueStatement *continueStatement;
 
 	std::vector<Expression*> *expressionList;
-
-	
-	
+  VarType *varType;
 }
 
 /* 定义终结符token
  */
 %token  <token>EXTERN RETURN FOR IF ELSE WHILE SWITCH CASE DEFAULT ARRAY
 %token  <token> CONTINUE UNTIL BREAK GAD SEMI COLON 
+%token  <token> INT LONG CHAR FLOAT DOUBLE VOID
 %token  <token>CEQ CNE CLT CLE CGT CGE EQUAL
 %token  <token>LPAREN RPAREN LBRACE RBRACE LBRACK RBRACK COMMA DOT
 %token  <token>ARW XOR NOT OR AND
 %token <token> PLUS MINUS MUL DIV
 %token<iVal> INTEGER
 %token<sVal> IDENTIFIER 
-%token<dVal> DOUBLE
+%token<dVal> REAL
 %token<cVal> CHARACTER
 %token<strVal> STRING
 /* 定义我们的非终结符所代表的节点类型。这些类型引用了上面的%union声明
@@ -89,6 +89,7 @@
 %type<loopStatement>            LoopStmt
 %type <expressionList>             call_args
 %type <var_decls>               func_decl_args
+%type<varType>  varType
 /* 数学运算符的运算符优先级 */
 %left OR
 %left AND
@@ -176,11 +177,24 @@ program:
     };
 
   //变量定义、函数定义，函数参数定义，extern定义
-  var_decl : ident ident { $$ = new VariableDeclaration(*$1, *$2); }
-      | ident ident EQUAL expression { $$ = new VariableDeclaration(*$1, *$2, $4); }
-      | ident ident LBRACK INTEGER RBRACK { // 定义数组
-        $$ = new ArrayDeclaration(*$1, *$2, $4);
+  var_decl :varType ident{ $$ = new VariableDeclaration($1, *$2); }
+      | varType ident EQUAL expression { $$ = new VariableDeclaration($1, *$2, $4); }
+      | varType ident LBRACK INTEGER RBRACK { // 定义数组
+              $$ = new ArrayDeclaration($1, *$2, $4);
     }
+      |ident ident { $$ = new VariableDeclaration($1, *$2); }
+      | ident ident EQUAL expression { $$ = new VariableDeclaration($1, *$2, $4); }
+      | ident ident LBRACK INTEGER RBRACK { // 定义数组
+        $$ = new ArrayDeclaration($1, *$2, $4);
+    }
+      ;
+    varType:
+      INT													    {  $$ = new VarType(VarType::_Int); }
+			| LONG													{  $$ = new VarType(VarType::_Long);  }
+			| CHAR													{  $$ = new VarType(VarType::_Char);  }
+			| FLOAT													{  $$ = new VarType(VarType::_Float);  }
+			| DOUBLE												{  $$ = new VarType(VarType::_Double);  }
+			| VOID			                    {  $$ = new VarType(VarType::_Void); }
       ;
   extern_decl : EXTERN ident ident LPAREN func_decl_args RPAREN
                   { $$ = new ExternDeclaration(*$2, *$3, *$5); delete $5; }
@@ -241,7 +255,7 @@ program:
 
 
     const_value : INTEGER { $$ = new Integer($1); }//const值
-		| DOUBLE { $$ = new Double($1); }
+		| REAL { $$ = new Double($1); }
     | CHARACTER { $$ = new Char($1);}
     | STRING { $$ = new String(*$1); }
 		;
