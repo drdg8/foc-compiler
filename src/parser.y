@@ -177,15 +177,10 @@ program:
     };
 
   //变量定义、函数定义，函数参数定义，extern定义
-  var_decl :varType ident{ $$ = new VariableDeclaration($1, *$2); }
-      | varType ident EQUAL expression { $$ = new VariableDeclaration($1, *$2, $4); }
+  var_decl :varType ident{ $$ = new VariableDeclaration(*$1, *$2); }
+      | varType ident EQUAL expression { $$ = new VariableDeclaration(*$1, *$2, $4); }
       | varType ident LBRACK INTEGER RBRACK { // 定义数组
-              $$ = new ArrayDeclaration($1, *$2, $4);
-    }
-      | ident ident { $$ = new VariableDeclaration($1, *$2); }
-      | ident ident EQUAL expression { $$ = new VariableDeclaration($1, *$2, $4); }
-      | ident ident LBRACK INTEGER RBRACK { // 定义数组
-        $$ = new ArrayDeclaration($1, *$2, $4);
+              $$ = new VariableDeclaration(*$1, *$2, $4);
     }
       ;
 

@@ -27,49 +27,6 @@ llvm::Type* VarType::getLLVMType(){
         default: break;
     }
     return LLVMType;
-
-    /*
-    if(type == "int")
-        return llvm::Type::getInt32Ty(Context);
-    else if(type == "float")
-        return llvm::Type::getFloatTy(Context);
-    else if(type == "char")
-        return llvm::Type::getInt8Ty(Context);
-    else if(type == "bool")
-        return llvm::Type::getInt1Ty(Context);
-    else
-        return llvm::Type::getVoidTy(Context);
-    */
-}
-
-// need change
-// return the ptr type of llvm
-llvm::Type* getPtrLLVMType(string type){
-    if(type == "int")
-        return llvm::Type::getInt32PtrTy(Context);
-    else if(type == "float")
-        return llvm::Type::getFloatPtrTy(Context);
-    else if(type == "char")
-        return llvm::Type::getInt8PtrTy(Context);
-    else if(type == "bool")
-        return llvm::Type::getInt1PtrTy(Context);
-    else
-        return llvm::Type::getVoidTy(Context);
-}
-
-// need change
-// return the array type of llvm
-llvm::Type* getArrayLLVMType(string type,int size){
-    if(type == "int")
-        return llvm::ArrayType::get(llvm::Type::getInt32Ty(Context), size);
-    else if(type == "float")
-        return llvm::ArrayType::get(llvm::Type::getFloatTy(Context), size);
-    else if(type == "char")
-        return llvm::ArrayType::get(llvm::Type::getInt8Ty(Context), size);
-    else if(type == "bool")
-        return llvm::ArrayType::get(llvm::Type::getInt1Ty(Context), size);
-    else
-        return nullptr;
 }
 
 /*
@@ -333,21 +290,6 @@ llvm::Value* Assign::codeGen(CodeGenerator &context){
 	}
     return new llvm::StoreInst(right, result, false, CurrentBlock);
 }
-
-llvm::Value* Block::codeGen(CodeGenerator &context){
-    llvm::Value* tmp = NULL;
-    for(auto i : statementList){
-        cout << "Generating code for " << typeid(*i).name() << endl;
-        tmp = (*i).codeGen(context);
-
-        // 若当前语句为 return , 则后面的语句需要截断
-        // if(i == true)
-        //     break;
-    }
-    cout << endl;
-	return tmp;
-}
-
 // e.g a[2];
 llvm::Value* ArrayElement::codeGen(CodeGenerator &context){
     cout << "ArrayElement: " << identifier.name << "[]" << endl;
@@ -479,26 +421,30 @@ llvm::Value* GetArrayAddr::codeGen(CodeGenerator &context){
         indexList.push_back(indexValue);    
     }
 
+    // get element pointer
     llvm::Value* elePtr = IRBuilder.CreateInBoundsGEP(arrayValue->getType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "elePtr");
     return elePtr;
     //return nullptr;
 }
 
-llvm::Value* ExpressionStatement::codeGen(CodeGenerator &context){
-    cout << "Generate Expression Statement" << endl;
-    return expression.codeGen(context);
-}
+llvm::Value* Block::codeGen(CodeGenerator &context){
+    llvm::Value* tmp = NULL;
+    for(auto i : statementList){
+        cout << "Generating code for " << typeid(*i).name() << endl;
+        tmp = (*i).codeGen(context);
 
-llvm::Value* Return::codeGen(CodeGenerator &context){
-    cout << "Generate Return Statement" << endl;
-    // need to complete
-    return NULL;
+        // 若当前语句为 return , 则后面的语句需要截断
+        // if(i == true)
+        //     break;
+    }
+    cout << endl;
+	return tmp;
 }
 
 llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
     // not an array
     // why not codeGen? 
-    llvm::Type* VarType = type->getLLVMType();
+    llvm::Type* VarType = type.getLLVMType();
     if(context.CurrFunction == NULL){
         // global variable
         cout << "declaration global variable " << id.name << endl;
@@ -554,7 +500,7 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
         /*
         //Assign the initial value by "store" instruction.
         if (NewVar->_InitialExpr) {
-            llvm::Value* Initializer = TypeCasting(NewVar->_InitialExpr->CodeGen(__Generator), VarType);
+            llvm::Value* Initializer = TypeCasting(NewVar->_InitialExpr->CodeGen(context), VarType);
             if (Initializer == NULL) {
                 throw std::logic_error("Initializing variable " + NewVar->_Name + " with value of different type.");
                 return NULL;
@@ -565,6 +511,125 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
     }
 }
 
+/*
+// need to implement 
 llvm::Value* ArrayDeclaration::codeGen(CodeGenerator &context){
+    return NULL;
+}
+*/
+
+// to be implement
+llvm::Value* ExternDeclaration::codeGen(CodeGenerator& context){
+    return NULL;
+}
+
+llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
+    // get the ArgTypes
+    std::vector<llvm::Type*> ArgTypes;
+    for(auto i: this->arguments){
+        llvm::Type* tp = i->type.getLLVMType();
+        if (!tp) {
+            throw std::logic_error("Defining a function " + i->id.name + " using unknown type(s).");
+            return NULL;
+        }
+
+        // check if it is a "void" type
+        if (tp->isVoidTy()){
+            if(arguments.size() > 1){
+                throw std::logic_error("function has more than one arguemnt with void type.");
+                return NULL;
+            }
+            else{
+                // no arguments
+                break;
+            }
+        }
+
+        // when the function argument type is an array type, we don't pass the entire array.
+        // we just pass a pointer pointing to its elements
+        if (i->size == 0)
+            tp = tp->getPointerTo();
+
+        ArgTypes.push_back(tp);
+    }
+
+    // get return type
+    // array or pointer need to change in parser.y
+    llvm::Type* RetType = this->type.getLLVMType();
+
+    // get function type
+    // 3rd argument is whether arg has ...
+    llvm::FunctionType* FuncType = llvm::FunctionType::get(RetType, ArgTypes, false);
+
+    // create function
+    llvm::Function* Func = llvm::Function::Create(FuncType, llvm::GlobalValue::ExternalLinkage, this->id.name, context.Module);
+    context.AddFunction(this->id.name, Func);
+
+    /*
+    for now, func def without implement is not allow
+    here if allow func definition, we need to change parser.y
+
+    // if the function name conflictes, there was already something with the same name.
+    // if it already has a body, don't allow redefinition.
+    if (Func->getName() != this->_Name) {
+        //Delete the one we just made and get the existing one.
+        Func->eraseFromParent();
+        Func = context.Module->getFunction(this->_Name);
+        //If this function already has a body,
+        //or the current declaration doesn't have a body,
+        //reject this declaration.
+        if (!Func->empty() || !this->_FuncBody) {
+            throw std::logic_error("Redefining function " + this->_Name);
+            return NULL;
+        }
+        if (Func->getFunctionType() != FuncType) {
+            throw std::logic_error("Redefining function " + this->_Name + " with different arg types.");
+            return NULL;
+        }
+    }
+    */
+
+    // implement function block
+
+    // create a new basic block to start insertion into.
+    llvm::BasicBlock* FuncBlock = llvm::BasicBlock::Create(Context, "entry", Func);
+    IRBuilder.SetInsertPoint(FuncBlock);
+
+    // create allocated space for arguments.
+	// this variable table is only used to store the arguments of the function
+    context.PushSymbolTable();
+    size_t Index = 0;
+    for (auto ArgIter = Func->arg_begin(); ArgIter < Func->arg_end(); ArgIter++, Index++) {
+        // Create alloca
+        auto Alloc = CreateEntryBlockAlloca(Func, this->arguments.at(Index)->id.name, ArgTypes[Index]);
+        // Assign the value by "store" instruction
+        IRBuilder.CreateStore(ArgIter, Alloc);
+        // Add to the symbol table
+        context.AddVariable(this->arguments.at(Index)->name, Alloc);
+    }
+    //Generate code of the function body
+    context.EnterFunction(Func);
+    context.PushSymbolTable();
+    this->block.codeGen(context);
+    context.PopSymbolTable();
+    context.LeaveFunction();
+    context.PopSymbolTable();	//We need to pop out an extra variable table.
+
+    return NULL;
 
 }
+
+
+
+
+llvm::Value* ExpressionStatement::codeGen(CodeGenerator &context){
+    cout << "Generate Expression Statement" << endl;
+    return expression.codeGen(context);
+}
+
+llvm::Value* Return::codeGen(CodeGenerator &context){
+    cout << "Generate Return Statement" << endl;
+    // need to complete
+    return NULL;
+}
+
