@@ -182,26 +182,53 @@ public:
 public:
 	Expression* expression;
 };
+class VarType : public Node {
+	public:
+	enum TypeID {
+			_Int,
+			_Long,
+			_Char,
+			_Float,
+			_Double,
+			_Void
+		};
+		VarType(TypeID __Type) : _BuildInType(__Type) {}
+		~VarType(void) {}
+		
+		llvm::Value* CodeGen(CodeGenerator& context) { return NULL; }
+		public:
+		
+		TypeID _BuildInType;
+	};
 
 class VariableDeclaration : public Declaration {
 public:
-	VariableDeclaration(const Identifier& type, Identifier& id) :
-		type(type), id(id) { assignmentExpr = nullptr; }
-	VariableDeclaration(const Identifier& type, Identifier& id,int size) :
-		type(type), id(id) { assignmentExpr = nullptr; }
-	VariableDeclaration(const Identifier& type, Identifier& id, Expression *assignmentExpr) :
-		type(type), id(id), assignmentExpr(assignmentExpr) { }
+	VariableDeclaration( Identifier* type, Identifier& id) :
+		Customtype(type), id(id) { assignmentExpr = nullptr;BuildInType=nullptr; }
+	VariableDeclaration( Identifier* type, Identifier& id,int size) :
+		Customtype(type), id(id) { assignmentExpr = nullptr; BuildInType=nullptr;}
+	VariableDeclaration( Identifier* type, Identifier& id, Expression *assignmentExpr) :
+		Customtype(type), id(id), assignmentExpr(assignmentExpr) { BuildInType=nullptr;}
+			VariableDeclaration( VarType* type, Identifier& id) :
+		BuildInType(type), id(id) { assignmentExpr = nullptr; Customtype=nullptr;}
+	VariableDeclaration( VarType* type, Identifier& id,int size) :
+		BuildInType(type), id(id) { assignmentExpr = nullptr; Customtype=nullptr;}
+	VariableDeclaration( VarType* type, Identifier& id, Expression *assignmentExpr) :
+		BuildInType(type), id(id), assignmentExpr(assignmentExpr) { Customtype=nullptr;}
 	virtual llvm::Value* codeGen(CodeGenerator& context);
 public:
 	int size;
-	const Identifier& type;
+	VarType* BuildInType;//内置类型，为null时表示这个变量为自定义类型
+	Identifier* Customtype;//自定义类型，为null时表示这个变量为内置类型
 	Identifier& id;
 	Expression *assignmentExpr;
 };
 
 class ArrayDeclaration : public VariableDeclaration {
 public:
-	ArrayDeclaration(const Identifier& type, Identifier& id,int size) :
+	ArrayDeclaration(Identifier* type, Identifier& id,int size) :
+		VariableDeclaration(type,id),size(size) {}
+			ArrayDeclaration(VarType* type, Identifier& id,int size) :
 		VariableDeclaration(type,id),size(size) {}
 	virtual llvm::Value* codeGen(CodeGenerator& context);
 public:
@@ -304,10 +331,15 @@ public:
 };
 
 class BreakStatement : public Statement {
-public:
-	BreakStatement() {}
-	~BreakStatement() {}
-	llvm::Value* codeGen(CodeGenerator& context);
-};
-
+	public:
+		BreakStatement() {}
+		~BreakStatement() {}
+		llvm::Value* codeGen(CodeGenerator& context);
+	};
+class ContinueStatement : public Statement {
+	public:
+		ContinueStatement() {}
+		~ContinueStatement() {}
+		llvm::Value* codeGen(CodeGenerator& context);
+	};
 #endif

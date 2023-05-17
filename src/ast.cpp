@@ -483,10 +483,10 @@ llvm::Value* Return::codeGen(CodeGenerator &context){
 llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
     // not an array
     // why not codeGen? 
-    llvm::Type* VarType = getLLVMType(type.name);
+    llvm::Type* VarType = getLLVMType(type->name);
     if(context.CurrFunction == NULL){
         // global variable
-        cout << "declaration global variable " << id.name << " with type " << type.name << endl;
+        cout << "declaration global variable " << id.name << " with type " << type->name << endl;
         // if redefine
         llvm::Value *tmp = context.Module->getGlobalVariable(id.name, true);
         if(tmp != nullptr){
@@ -514,7 +514,7 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
     }
     else{
         // local variable
-        cout << "declaration local variable " << id.name << " with type " << type.name << endl;
+        cout << "declaration local variable " << id.name << " with type " << type->name << endl;
         llvm::Function *Func = context.CurrFunction;
         // declaration in function
         llvm::IRBuilder<> TmpB(&Func->getEntryBlock(), Func->getEntryBlock().begin());
