@@ -521,6 +521,8 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
             id.name
         );
         // if global we check no currfunction
+
+        //常量的赋值与变量不一样
         if (assignmentExpr) {
             Assign ass(id, *assignmentExpr);
             ass.codeGen(context);
