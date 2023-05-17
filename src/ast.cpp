@@ -16,7 +16,19 @@ using namespace std;
 
 // we distguish global context and global context use C/context
 
-llvm::Type* getLLVMType(string type){
+llvm::Type* VarType::getLLVMType(){
+    llvm::Type *LLVMType;
+    switch (type) {
+        // case _Bool: this->_LLVMType = IRBuilder.getInt1Ty(); break;
+        case _Int: LLVMType = IRBuilder.getInt32Ty(); break;
+        case _Char: LLVMType = IRBuilder.getInt8Ty(); break;
+        case _Double: LLVMType = IRBuilder.getDoubleTy(); break;
+        case _Void: LLVMType = IRBuilder.getVoidTy(); break;
+        default: break;
+    }
+    return LLVMType;
+
+    /*
     if(type == "int")
         return llvm::Type::getInt32Ty(Context);
     else if(type == "float")
@@ -27,8 +39,10 @@ llvm::Type* getLLVMType(string type){
         return llvm::Type::getInt1Ty(Context);
     else
         return llvm::Type::getVoidTy(Context);
+    */
 }
 
+// need change
 // return the ptr type of llvm
 llvm::Type* getPtrLLVMType(string type){
     if(type == "int")
@@ -43,6 +57,7 @@ llvm::Type* getPtrLLVMType(string type){
         return llvm::Type::getVoidTy(Context);
 }
 
+// need change
 // return the array type of llvm
 llvm::Type* getArrayLLVMType(string type,int size){
     if(type == "int")
@@ -483,10 +498,10 @@ llvm::Value* Return::codeGen(CodeGenerator &context){
 llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
     // not an array
     // why not codeGen? 
-    llvm::Type* VarType = getLLVMType(type->name);
+    llvm::Type* VarType = type->getLLVMType();
     if(context.CurrFunction == NULL){
         // global variable
-        cout << "declaration global variable " << id.name << " with type " << type->name << endl;
+        cout << "declaration global variable " << id.name << endl;
         // if redefine
         llvm::Value *tmp = context.Module->getGlobalVariable(id.name, true);
         if(tmp != nullptr){
@@ -514,7 +529,7 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
     }
     else{
         // local variable
-        cout << "declaration local variable " << id.name << " with type " << type->name << endl;
+        cout << "declaration local variable " << id.name << endl;
         llvm::Function *Func = context.CurrFunction;
         // declaration in function
         llvm::IRBuilder<> TmpB(&Func->getEntryBlock(), Func->getEntryBlock().begin());

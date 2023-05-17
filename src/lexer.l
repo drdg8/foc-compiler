@@ -33,9 +33,7 @@
 "break"                 return TOKEN(BREAK);
 
 "int"													{return TOKEN(INT); }
-"long"													{return TOKEN(LONG); }
 "char"													{return TOKEN(CHAR); }
-"float"													{return TOKEN(FLOAT); }
 "double"												{return TOKEN(DOUBLE); }
 "void"													{return TOKEN(VOID); }
 

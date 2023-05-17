@@ -30,10 +30,26 @@ class Statement : public Node {
 };
 
 class ConstVal : public Expression {
-	public:
-	ConstVal() {}
-	~ConstVal() {}
+public:
+	ConstVal(){}
+	~ConstVal(){}
 	virtual llvm::Value* codeGen(CodeGenerator& context) = 0;
+};
+
+class VarType : public Node {
+public:
+	enum TypeID {
+		_Int,
+		_Char,
+		_Double,
+		_Void
+	};
+	VarType(TypeID __Type) : type(__Type) {}
+	~VarType(void) {}
+	virtual llvm::Value* codeGen(CodeGenerator& context);
+	virtual llvm::Type* getLLVMType(void);
+public:
+	TypeID type;
 };
 
 class Integer : public ConstVal {
@@ -182,43 +198,28 @@ public:
 public:
 	Expression* expression;
 };
-class VarType : public Node {
-	public:
-	enum TypeID {
-			_Int,
-			_Long,
-			_Char,
-			_Float,
-			_Double,
-			_Void
-		};
-		VarType(TypeID __Type) : _BuildInType(__Type) {}
-		~VarType(void) {}
-		
-		llvm::Value* CodeGen(CodeGenerator& context) { return NULL; }
-		public:
-		
-		TypeID _BuildInType;
-	};
+
+
 
 class VariableDeclaration : public Declaration {
 public:
 	VariableDeclaration( Identifier* type, Identifier& id) :
-		Customtype(type), id(id) { assignmentExpr = nullptr;BuildInType=nullptr; }
+		Customtype(type), id(id) { assignmentExpr = nullptr; type=nullptr; }
 	VariableDeclaration( Identifier* type, Identifier& id,int size) :
-		Customtype(type), id(id) { assignmentExpr = nullptr; BuildInType=nullptr;}
+		Customtype(type), id(id) { assignmentExpr = nullptr; type=nullptr;}
 	VariableDeclaration( Identifier* type, Identifier& id, Expression *assignmentExpr) :
-		Customtype(type), id(id), assignmentExpr(assignmentExpr) { BuildInType=nullptr;}
-			VariableDeclaration( VarType* type, Identifier& id) :
-		BuildInType(type), id(id) { assignmentExpr = nullptr; Customtype=nullptr;}
+		Customtype(type), id(id), assignmentExpr(assignmentExpr) { type=nullptr;}
+
+	VariableDeclaration( VarType* type, Identifier& id) :
+		type(type), id(id) { assignmentExpr = nullptr; Customtype=nullptr;}
 	VariableDeclaration( VarType* type, Identifier& id,int size) :
-		BuildInType(type), id(id) { assignmentExpr = nullptr; Customtype=nullptr;}
+		type(type), id(id) { assignmentExpr = nullptr; Customtype=nullptr;}
 	VariableDeclaration( VarType* type, Identifier& id, Expression *assignmentExpr) :
-		BuildInType(type), id(id), assignmentExpr(assignmentExpr) { Customtype=nullptr;}
+		type(type), id(id), assignmentExpr(assignmentExpr) { Customtype=nullptr;}
 	virtual llvm::Value* codeGen(CodeGenerator& context);
 public:
 	int size;
-	VarType* BuildInType;//内置类型，为null时表示这个变量为自定义类型
+	VarType* type;//内置类型，为null时表示这个变量为自定义类型
 	Identifier* Customtype;//自定义类型，为null时表示这个变量为内置类型
 	Identifier& id;
 	Expression *assignmentExpr;
@@ -228,7 +229,8 @@ class ArrayDeclaration : public VariableDeclaration {
 public:
 	ArrayDeclaration(Identifier* type, Identifier& id,int size) :
 		VariableDeclaration(type,id),size(size) {}
-			ArrayDeclaration(VarType* type, Identifier& id,int size) :
+
+	ArrayDeclaration(VarType* type, Identifier& id,int size) :
 		VariableDeclaration(type,id),size(size) {}
 	virtual llvm::Value* codeGen(CodeGenerator& context);
 public:
@@ -237,24 +239,24 @@ public:
 
 class ExternDeclaration : public Declaration {
 public:
-    ExternDeclaration(const Identifier& type, const Identifier& id,
+    ExternDeclaration(const VarType& type, const Identifier& id,
             const VariableList& arguments) :
         type(type), id(id), arguments(arguments) {}
     virtual llvm::Value* codeGen(CodeGenerator& context);
 public:
-    const Identifier& type;
+    const VarType& type;
     const Identifier& id;
     VariableList arguments;
 };
 
 class FunctionDeclaration : public Declaration {
 public:
-	FunctionDeclaration(const Identifier& type, const Identifier& id, 
+	FunctionDeclaration(const VarType& type, const Identifier& id, 
 		const VariableList& arguments, Block& block) :
 		type(type), id(id), arguments(arguments), block(block) { }
 	virtual llvm::Value* codeGen(CodeGenerator& context);
 public:
-	const Identifier& type;
+	const VarType& type;
 	const Identifier& id;
 	VariableList arguments;
 	Block& block;

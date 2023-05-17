@@ -182,24 +182,25 @@ program:
       | varType ident LBRACK INTEGER RBRACK { // 定义数组
               $$ = new ArrayDeclaration($1, *$2, $4);
     }
-      |ident ident { $$ = new VariableDeclaration($1, *$2); }
+      | ident ident { $$ = new VariableDeclaration($1, *$2); }
       | ident ident EQUAL expression { $$ = new VariableDeclaration($1, *$2, $4); }
       | ident ident LBRACK INTEGER RBRACK { // 定义数组
         $$ = new ArrayDeclaration($1, *$2, $4);
     }
       ;
+
     varType:
       INT													    {  $$ = new VarType(VarType::_Int); }
-			| LONG													{  $$ = new VarType(VarType::_Long);  }
 			| CHAR													{  $$ = new VarType(VarType::_Char);  }
-			| FLOAT													{  $$ = new VarType(VarType::_Float);  }
 			| DOUBLE												{  $$ = new VarType(VarType::_Double);  }
 			| VOID			                    {  $$ = new VarType(VarType::_Void); }
       ;
-  extern_decl : EXTERN ident ident LPAREN func_decl_args RPAREN
+
+  extern_decl : EXTERN varType ident LPAREN func_decl_args RPAREN
                   { $$ = new ExternDeclaration(*$2, *$3, *$5); delete $5; }
               ;
-  func_decl : ident ident LPAREN func_decl_args RPAREN block 
+
+  func_decl : varType ident LPAREN func_decl_args RPAREN block 
   { $$ = new FunctionDeclaration(*$1, *$2, *$4, *$6); delete $4; }
   ;
 
@@ -252,7 +253,6 @@ program:
 		  | expression { $$ = new ExpressionList(); $$->push_back($1); }
 		  | call_args COMMA expression  { $1->push_back($3); }
 		  ;
-
 
     const_value : INTEGER { $$ = new Integer($1); }//const值
 		| REAL { $$ = new Double($1); }
