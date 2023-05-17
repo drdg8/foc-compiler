@@ -495,6 +495,8 @@ llvm::Value* Return::codeGen(CodeGenerator &context){
     return NULL;
 }
 
+
+//已检查
 llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
     // not an array
     // why not codeGen? 

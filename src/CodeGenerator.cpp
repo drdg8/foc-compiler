@@ -71,7 +71,7 @@ llvm::Value* CodeGenerator::FindVariable(std::string Name){
 		if (PairIter != (**TableIter).end())
 			return PairIter->second.GetVariable();
 	}
-	//再找全局变量
+	//再找全局变量,在 LLVM 中，全局变量不仅存在于符号表栈的底层，还会被存储在 LLVM 的模块中。这个方法中的 this->Module->getGlobalVariable(Name, true) 语句就是在模块中查找全局变量。
 	return this->Module->getGlobalVariable(Name, true);
 }
 
