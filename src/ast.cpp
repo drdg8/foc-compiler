@@ -516,12 +516,13 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
 llvm::Value* ArrayDeclaration::codeGen(CodeGenerator &context){
     return NULL;
 }
-*/
 
 // to be implement
 llvm::Value* ExternDeclaration::codeGen(CodeGenerator& context){
     return NULL;
 }
+
+*/
 
 llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
     // get the ArgTypes
@@ -588,8 +589,9 @@ llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
         }
     }
     */
-
+/*
     // implement function block
+    // here i dont think too much just copy yjj
 
     // create a new basic block to start insertion into.
     llvm::BasicBlock* FuncBlock = llvm::BasicBlock::Create(Context, "entry", Func);
@@ -614,22 +616,50 @@ llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
     context.PopSymbolTable();
     context.LeaveFunction();
     context.PopSymbolTable();	//We need to pop out an extra variable table.
-
+*/
     return NULL;
 
 }
-
-
-
 
 llvm::Value* ExpressionStatement::codeGen(CodeGenerator &context){
     cout << "Generate Expression Statement" << endl;
     return expression.codeGen(context);
 }
 
-llvm::Value* Return::codeGen(CodeGenerator &context){
-    cout << "Generate Return Statement" << endl;
     // need to complete
+llvm::Value* ReturnStatement::codeGen(CodeGenerator &context){
+    cout << "Generate Return Statement" << endl;
     return NULL;
 }
 
+llvm::Value* LoopStatement::codeGen(CodeGenerator &context){
+    return NULL;
+}
+
+llvm::Value* ForStatement::codeGen(CodeGenerator &context){
+    return NULL;
+}
+
+llvm::Value* WhileStatement::codeGen(CodeGenerator &context){
+    return NULL;
+}
+
+llvm::Value* IfStatement::codeGen(CodeGenerator &context){
+    return NULL;
+}
+
+llvm::Value* SwitchStatement::codeGen(CodeGenerator &context){
+    return NULL;
+}
+
+llvm::Value* CaseStatement::codeGen(CodeGenerator &context){
+    return NULL;
+}
+
+llvm::Value* BreakStatement::codeGen(CodeGenerator &context){
+    return NULL;
+}
+
+llvm::Value* ContinueStatement::codeGen(CodeGenerator &context){
+    return NULL;
+}

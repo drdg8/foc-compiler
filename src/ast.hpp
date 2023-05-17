@@ -213,7 +213,6 @@ public:
 public:
 	int size;
 };
-*/
 
 class ExternDeclaration : public Declaration {
 public:
@@ -226,6 +225,7 @@ public:
     const Identifier& id;
     VariableList arguments;
 };
+*/
 
 class FunctionDeclaration : public Declaration {
 public:
@@ -251,11 +251,11 @@ public:
 	Expression& expression;
 };
 
-class Return : public Statement {
+class ReturnStatement : public Statement {
 public:
-	Return(Expression* expression) : 
+	ReturnStatement(Expression* expression) : 
 		expression(expression) { }
-	Return() : 
+	ReturnStatement() : 
 		expression(nullptr) { }
 	virtual llvm::Value* codeGen(CodeGenerator& context);
 public:
