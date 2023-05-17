@@ -29,7 +29,57 @@
 #include "ast.hpp"
 using namespace std;
 
-extern llvm::LLVMContext myContext; //定义全局context
-extern llvm::IRBuilder<> myBuilder; //定义全局IRbuilder
+extern llvm::LLVMContext Context; //定义全局context
+extern llvm::IRBuilder<> IRBuilder; //定义全局IRbuilder
+
+//symbol 的定义
+class Symbol{
+public:
+    Symbol(void) : Content(NULL), Type(UNDEFINED) {}
+    Symbol(llvm::Function* Func) : Content(Func), Type(FUNCTION) {}
+    Symbol(llvm::Value* Value) : Content(Value), Type(VARIABLE) {}
+    llvm::Value* GetVariable(void) { return this->Type == VARIABLE ? (llvm::Value*)Content : NULL; }
+    llvm::Function* GetFunction(void) { return this->Type == FUNCTION ? (llvm::Function*)Content : NULL; }
+public:
+    llvm::Value* Content;
+    enum{
+        FUNCTION,
+        VARIABLE,
+        UNDEFINED
+    } Type;   
+    // llvm::Type* Type;   
+};
+
+class CodeGenerator{
+    public:
+        using SymbolTable = std::map<std::string, Symbol>;
+
+        llvm::Module* Module;
+        std::vector<SymbolTable*> SymbolTableStack;
+        llvm::Function* CurrFunction;	
+        llvm::BasicBlock* returnBB;
+        llvm::Value* returnVal;
+    public:
+        CodeGenerator(void);
+        //sizeof() 空位，待实现
+
+        void PushSymbolTable(void);
+
+        void PopSymbolTable(void);
+
+        llvm::Function* FindFunction(std::string Name);
+
+        bool AddFunction(std::string Name, llvm::Function* Function);
+
+        llvm::Value* FindVariable(std::string Name);
+
+        bool AddVariable(std::string Name, llvm::Value* Variable);
+
+        llvm::Function* GetCurrentFunction(void);
+
+        void GenIR(Block* programBlock,const string& filename);
+
+};
+
 
 #endif
