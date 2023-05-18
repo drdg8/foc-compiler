@@ -27,49 +27,6 @@ llvm::Type* VarType::getLLVMType(){
         default: break;
     }
     return LLVMType;
-
-    /*
-    if(type == "int")
-        return llvm::Type::getInt32Ty(Context);
-    else if(type == "float")
-        return llvm::Type::getFloatTy(Context);
-    else if(type == "char")
-        return llvm::Type::getInt8Ty(Context);
-    else if(type == "bool")
-        return llvm::Type::getInt1Ty(Context);
-    else
-        return llvm::Type::getVoidTy(Context);
-    */
-}
-
-// need change
-// return the ptr type of llvm
-llvm::Type* getPtrLLVMType(string type){
-    if(type == "int")
-        return llvm::Type::getInt32PtrTy(Context);
-    else if(type == "float")
-        return llvm::Type::getFloatPtrTy(Context);
-    else if(type == "char")
-        return llvm::Type::getInt8PtrTy(Context);
-    else if(type == "bool")
-        return llvm::Type::getInt1PtrTy(Context);
-    else
-        return llvm::Type::getVoidTy(Context);
-}
-
-// need change
-// return the array type of llvm
-llvm::Type* getArrayLLVMType(string type,int size){
-    if(type == "int")
-        return llvm::ArrayType::get(llvm::Type::getInt32Ty(Context), size);
-    else if(type == "float")
-        return llvm::ArrayType::get(llvm::Type::getFloatTy(Context), size);
-    else if(type == "char")
-        return llvm::ArrayType::get(llvm::Type::getInt8Ty(Context), size);
-    else if(type == "bool")
-        return llvm::ArrayType::get(llvm::Type::getInt1Ty(Context), size);
-    else
-        return nullptr;
 }
 
 /*
@@ -334,20 +291,6 @@ llvm::Value* Assign::codeGen(CodeGenerator &context){
     return new llvm::StoreInst(right, result, false, CurrentBlock);
 }
 
-llvm::Value* Block::codeGen(CodeGenerator &context){
-    llvm::Value* tmp = NULL;
-    for(auto i : statementList){
-        cout << "Generating code for " << typeid(*i).name() << endl;
-        tmp = (*i).codeGen(context);
-
-        // 若当前语句为 return , 则后面的语句需要截断
-        // if(i == true)
-        //     break;
-    }
-    cout << endl;
-	return tmp;
-}
-
 // e.g a[2];
 llvm::Value* ArrayElement::codeGen(CodeGenerator &context){
     cout << "ArrayElement: " << identifier.name << "[]" << endl;
@@ -479,20 +422,31 @@ llvm::Value* GetArrayAddr::codeGen(CodeGenerator &context){
         indexList.push_back(indexValue);    
     }
 
+    // get element pointer
     llvm::Value* elePtr = IRBuilder.CreateInBoundsGEP(arrayValue->getType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "elePtr");
     return elePtr;
     //return nullptr;
 }
 
-llvm::Value* ExpressionStatement::codeGen(CodeGenerator &context){
-    cout << "Generate Expression Statement" << endl;
-    return expression.codeGen(context);
-}
+llvm::Value* Block::codeGen(CodeGenerator &context){
+    context.PushSymbolTable();
+    llvm::Value* tmp = NULL;
+    for(auto stmt : statementList){
+        cout << "Generating code for " << typeid(*stmt).name() << endl;
+        tmp = (*stmt).codeGen(context);
 
-llvm::Value* Return::codeGen(CodeGenerator &context){
-    cout << "Generate Return Statement" << endl;
-    // need to complete
-    return NULL;
+        //If the current block already has a terminator,
+        //i.e. a "break" statement is generated, stop;
+        //Otherwise, continue generating.
+        if (IRBuilder.GetInsertBlock()->getTerminator())
+            break;
+        else if (stmt){
+            stmt->codeGen(context);
+        }
+    }
+    cout << endl;
+    context.PopSymbolTable();
+	return NULL;
 }
 
 
@@ -500,7 +454,7 @@ llvm::Value* Return::codeGen(CodeGenerator &context){
 llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
     // not an array
     // why not codeGen? 
-    llvm::Type* VarType = type->getLLVMType();
+    llvm::Type* VarType = type.getLLVMType();
     if(context.CurrFunction == NULL){
         // global variable
         cout << "declaration global variable " << id.name << endl;
@@ -536,6 +490,8 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
         cout << "declaration local variable " << id.name << endl;
         llvm::Function *Func = context.CurrFunction;
         // declaration in function
+        // create an alloca instruction in the entry block of the current function,
+        // wherever the variable declaration is.
         llvm::IRBuilder<> TmpB(&Func->getEntryBlock(), Func->getEntryBlock().begin());
         llvm::AllocaInst* Alloc = TmpB.CreateAlloca(VarType, 0, id.name);
         if(context.AddVariable(id.name, Alloc) == false) {
@@ -558,7 +514,7 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
         /*
         //Assign the initial value by "store" instruction.
         if (NewVar->_InitialExpr) {
-            llvm::Value* Initializer = TypeCasting(NewVar->_InitialExpr->CodeGen(__Generator), VarType);
+            llvm::Value* Initializer = TypeCasting(NewVar->_InitialExpr->codeGen(context), VarType);
             if (Initializer == NULL) {
                 throw std::logic_error("Initializing variable " + NewVar->_Name + " with value of different type.");
                 return NULL;
@@ -569,6 +525,432 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
     }
 }
 
+/*
+// need to implement 
 llvm::Value* ArrayDeclaration::codeGen(CodeGenerator &context){
+    return NULL;
+}
 
+// to be implement
+llvm::Value* ExternDeclaration::codeGen(CodeGenerator& context){
+    return NULL;
+}
+
+*/
+
+llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
+    // get the ArgTypes
+    std::vector<llvm::Type*> ArgTypes;
+    for(auto i: this->arguments){
+        llvm::Type* tp = i->type.getLLVMType();
+        if (!tp) {
+            throw std::logic_error("Defining a function " + i->id.name + " using unknown type(s).");
+            return NULL;
+        }
+
+        // check if it is a "void" type
+        if (tp->isVoidTy()){
+            if(arguments.size() > 1){
+                throw std::logic_error("function has more than one arguemnt with void type.");
+                return NULL;
+            }
+            else{
+                // no arguments
+                break;
+            }
+        }
+
+        // when the function argument type is an array type, we don't pass the entire array.
+        // we just pass a pointer pointing to its elements
+        if (i->size == 0)
+            tp = tp->getPointerTo();
+
+        ArgTypes.push_back(tp);
+    }
+
+    // get return type
+    // array or pointer need to change in parser.y
+    llvm::Type* RetType = this->type.getLLVMType();
+
+    // get function type
+    // 3rd argument is whether arg has ...
+    llvm::FunctionType* FuncType = llvm::FunctionType::get(RetType, ArgTypes, false);
+
+    // create function
+    llvm::Function* Func = llvm::Function::Create(FuncType, llvm::GlobalValue::ExternalLinkage, this->id.name, context.Module);
+    context.AddFunction(this->id.name, Func);
+
+    /*
+    for now, func def without implement is not allow
+    here if allow func definition, we need to change parser.y
+
+    // if the function name conflictes, there was already something with the same name.
+    // if it already has a body, don't allow redefinition.
+    if (Func->getName() != this->_Name) {
+        //Delete the one we just made and get the existing one.
+        Func->eraseFromParent();
+        Func = context.Module->getFunction(this->_Name);
+        //If this function already has a body,
+        //or the current declaration doesn't have a body,
+        //reject this declaration.
+        if (!Func->empty() || !this->_FuncBody) {
+            throw std::logic_error("Redefining function " + this->_Name);
+            return NULL;
+        }
+        if (Func->getFunctionType() != FuncType) {
+            throw std::logic_error("Redefining function " + this->_Name + " with different arg types.");
+            return NULL;
+        }
+    }
+    */
+
+    // implement function block
+
+    // create a new basic block to start insertion into. global Context
+    llvm::BasicBlock* FuncBlock = llvm::BasicBlock::Create(Context, "entry", Func);
+    IRBuilder.SetInsertPoint(FuncBlock);
+
+    // create allocated space for arguments.
+	// this variable table is only used to store the arguments of the function
+    context.PushSymbolTable();
+    size_t Index = 0;
+    for (auto ArgIter = Func->arg_begin(); ArgIter < Func->arg_end(); ArgIter++, Index++) {
+        // Create alloc
+        llvm::IRBuilder<> TmpB(&Func->getEntryBlock(), Func->getEntryBlock().begin());
+        llvm::AllocaInst* Alloc = TmpB.CreateAlloca(ArgTypes[Index], 0, this->arguments[Index]->id.name);
+
+        // Assign the value by "store" instruction
+        IRBuilder.CreateStore(ArgIter, Alloc);
+        // Add to the symbol table
+        context.AddVariable(this->arguments[Index]->id.name, Alloc);
+    }
+    //Generate code of the function body
+    context.EnterFunction(Func);
+    context.PushSymbolTable();
+    this->block.codeGen(context);
+    context.PopSymbolTable();
+    context.LeaveFunction();
+    context.PopSymbolTable();	// why we need to pop out an extra variable table?
+
+    return NULL;
+}
+
+llvm::Value* ExpressionStatement::codeGen(CodeGenerator &context){
+    cout << "Generate Expression Statement" << endl;
+    return expression.codeGen(context);
+}
+
+llvm::Value* ReturnStatement::codeGen(CodeGenerator &context){
+    cout << "Generate Return Statement" << endl;
+    llvm::Function* Func = context.GetCurrentFunction();
+    if(Func == nullptr){
+        throw std::logic_error("Return statement with no function body");
+        return NULL;
+    }
+    if(expression == nullptr){
+        // here in minic use a bool var hasReturn 
+        if (Func->getReturnType()->isVoidTy()){
+            return IRBuilder.CreateRetVoid();
+        }
+        else{
+            throw std::logic_error("should return void");
+            return NULL;
+        }
+    }else{
+        llvm::Value *ret = this->expression->codeGen(context);
+        llvm::Value *RetVal = typeCast(ret, Func->getReturnType());
+        if (RetVal == NULL) {
+            throw std::logic_error("The type of return value doesn't match");
+            return NULL;
+        }
+        else{
+            return IRBuilder.CreateRet(RetVal);
+        }
+    }
+}
+
+// Create an unconditional branch if the current block doesn't have a terminator.
+// This function is safer than IRBuilder.CreateBr(llvm::BasicBlock* BB),
+// because if the current block already has a terminator, it does nothing.
+// For example, when generating if-statement, we create three blocks: ThenBB, ElseBB, MergeBB.
+// At the end of ThenBB and ElseBB, an unconditional branch to MergeBB needs to be created respectively,
+// UNLESS ThenBB or ElseBB is already terminated.
+// e.g.
+//	if (i) break;
+//	else continue;
+llvm::BranchInst* TerminateBlockByBr(llvm::BasicBlock* BB) {
+	//If not terminated, jump to the target block
+	if (!IRBuilder.GetInsertBlock()->getTerminator())
+		return IRBuilder.CreateBr(BB);
+	else
+		return NULL;
+}
+
+/*
+llvm::Value* LoopStatement::codeGen(CodeGenerator &context){ }
+*/
+
+llvm::Value* IfStatement::codeGen(CodeGenerator &context){
+    cout << "create if statement " << endl;
+    // evaluate condition
+    llvm::Value* Condition = this->condition.codeGen(context);
+
+    // check condition
+    if (( Condition = typeCast(Condition, IRBuilder.getInt1Ty()) ) == NULL) {
+        throw std::logic_error("condition type can not cast to bool");
+        return NULL;
+    }
+
+    //Create "Then", "Else" and "Merge" block
+    llvm::Function* CurrentFunc = context.GetCurrentFunction();
+    llvm::BasicBlock* ThenBB = llvm::BasicBlock::Create(Context, "Then");
+    llvm::BasicBlock* ElseBB = llvm::BasicBlock::Create(Context, "Else");
+    llvm::BasicBlock* MergeBB = llvm::BasicBlock::Create(Context, "Merge");
+
+    //Create a branch instruction corresponding to this if statement
+    IRBuilder.CreateCondBr(Condition, ThenBB, ElseBB);
+
+    //Generate code in the "Then" block
+    CurrentFunc->getBasicBlockList().push_back(ThenBB);
+    IRBuilder.SetInsertPoint(ThenBB);
+    context.PushSymbolTable();
+    this->next.codeGen(context);
+    context.PopSymbolTable();
+    TerminateBlockByBr(MergeBB);
+
+    //Generate code in the "Else" block
+    CurrentFunc->getBasicBlockList().push_back(ElseBB);
+    IRBuilder.SetInsertPoint(ElseBB);
+    if(else_next){
+        context.PushSymbolTable();
+        this->else_next->codeGen(context);
+        context.PopSymbolTable();
+    }
+    TerminateBlockByBr(MergeBB);
+
+    //Finish "Merge" block
+    /* The hasNPredecessorsOrMore() method is used to determine if the Merge block has at least one predecessor (i.e., if it was actually used).  */
+    if (MergeBB->hasNPredecessorsOrMore(1)) {
+        CurrentFunc->getBasicBlockList().push_back(MergeBB);
+        IRBuilder.SetInsertPoint(MergeBB);
+    }
+    return NULL;
+}
+
+llvm::Value* WhileStatement::codeGen(CodeGenerator &context){
+    llvm::Function* CurrentFunc = context.GetCurrentFunction();
+
+    llvm::BasicBlock* WhileCondBB = llvm::BasicBlock::Create(Context, "WhileCond");
+    llvm::BasicBlock* WhileLoopBB = llvm::BasicBlock::Create(Context, "WhileLoop");
+    llvm::BasicBlock* WhileEndBB = llvm::BasicBlock::Create(Context, "WhileEnd");
+
+    // we need a unconditional branch to get in the loop
+    IRBuilder.CreateBr(WhileCondBB);
+
+    CurrentFunc->getBasicBlockList().push_back(WhileCondBB);
+    IRBuilder.SetInsertPoint(WhileCondBB);
+
+    // evaluate condition
+    llvm::Value* Condition = this->condition.codeGen(context);
+
+    // check condition
+    if (( Condition = typeCast(Condition, IRBuilder.getInt1Ty()) ) == NULL) {
+        throw std::logic_error("condition type can not cast to bool");
+        return NULL;
+    }
+
+    IRBuilder.CreateCondBr(Condition, WhileLoopBB, WhileEndBB);
+    //Generate code in the "WhileLoop" block
+    CurrentFunc->getBasicBlockList().push_back(WhileLoopBB);
+    IRBuilder.SetInsertPoint(WhileLoopBB);
+
+    context.EnterLoop(WhileCondBB, WhileEndBB);
+    context.PushSymbolTable();
+    this->LoopBody.codeGen(context);
+    context.PopSymbolTable();
+    context.LeaveLoop();
+
+    // point: end in while condBB
+    TerminateBlockByBr(WhileCondBB);
+
+    //Finish "WhileEnd" block
+    CurrentFunc->getBasicBlockList().push_back(WhileEndBB);
+    IRBuilder.SetInsertPoint(WhileEndBB);
+    return NULL;
+}
+
+llvm::Value* ForStatement::codeGen(CodeGenerator &context){
+    llvm::Function* CurrentFunc = context.GetCurrentFunction();
+
+    llvm::BasicBlock* ForCondBB = llvm::BasicBlock::Create(Context, "ForCond");
+    llvm::BasicBlock* ForLoopBB = llvm::BasicBlock::Create(Context, "ForLoop");
+    llvm::BasicBlock* ForTailBB = llvm::BasicBlock::Create(Context, "ForTail");
+    llvm::BasicBlock* ForEndBB = llvm::BasicBlock::Create(Context, "ForEnd");
+
+    // if (this->Initial) {
+        context.PushSymbolTable();
+        this->Initial.codeGen(context);
+
+    TerminateBlockByBr(ForCondBB);
+
+    //Generate code in the "ForCond" block
+    CurrentFunc->getBasicBlockList().push_back(ForCondBB);
+    IRBuilder.SetInsertPoint(ForCondBB);
+
+    // evaluate condition
+    llvm::Value* Condition = this->condition.codeGen(context);
+
+    // check condition
+    if (( Condition = typeCast(Condition, IRBuilder.getInt1Ty()) ) == NULL) {
+        throw std::logic_error("condition type can not cast to bool");
+        return NULL;
+    }
+
+    IRBuilder.CreateCondBr(Condition, ForLoopBB, ForEndBB);
+
+    //Otherwise, it is an unconditional loop condition (always returns true)
+    // IRBuilder.CreateBr(ForLoopBB);
+
+    //Generate code in the "ForLoop" block
+    CurrentFunc->getBasicBlockList().push_back(ForLoopBB);
+    IRBuilder.SetInsertPoint(ForLoopBB);
+
+    // here in yjj continue goes to ForTailBB, which maybe wrong
+    // if a "continue" in "for", tha last part of "for" will not be executed
+    context.EnterLoop(ForCondBB, ForEndBB);
+    context.PushSymbolTable();
+    this->LoopBody.codeGen(context);
+    context.PopSymbolTable();
+    context.LeaveLoop();
+
+    //If not terminated, jump to "ForTail"
+    TerminateBlockByBr(ForTailBB);
+
+    //Generate code in the "ForTail" block
+    CurrentFunc->getBasicBlockList().push_back(ForTailBB);
+    IRBuilder.SetInsertPoint(ForTailBB);
+    this->Tail.codeGen(context);
+    IRBuilder.CreateBr(ForCondBB);
+
+    //Finish "ForEnd" block
+    CurrentFunc->getBasicBlockList().push_back(ForEndBB);
+    IRBuilder.SetInsertPoint(ForEndBB);
+    // if (this->Initial) {
+        context.PopSymbolTable();
+    return NULL;
+}
+
+// copy in BianaryOp
+llvm::Value* CreateCmpEQ(llvm::Value* left, llvm::Value* right) {
+    if (left->getType() != right->getType()) {
+        // left or right is float
+        if (left->getType() == llvm::Type::getFloatTy(Context)) {
+            right = typeCast(right, llvm::Type::getFloatTy(Context));
+        } else if (right->getType() == llvm::Type::getFloatTy(Context)) {
+            left = typeCast(left, llvm::Type::getFloatTy(Context));
+        } else {
+            // if left or right is int
+            if (left->getType() == llvm::Type::getInt32Ty(Context)) {
+                right = typeCast(right, llvm::Type::getInt32Ty(Context));
+            } else if(right->getType() == llvm::Type::getInt32Ty(Context)) {
+                left = typeCast(left, llvm::Type::getInt32Ty(Context));
+            } else {
+                throw logic_error("cann't use bool in cmp");
+            }
+        }
+    }
+    if(left->getType() == llvm::Type::getFloatTy(Context))
+        return IRBuilder.CreateFCmpOEQ(left, right, "fcmptmp");
+    else 
+        return IRBuilder.CreateICmpEQ(left, right, "icmptmp");
+}
+
+// just copy yjj
+llvm::Value* SwitchStatement::codeGen(CodeGenerator &context){
+    llvm::Function* CurrentFunc = context.GetCurrentFunction();
+    llvm::Value* Matches = this->matches.codeGen(context);
+
+    //Create one block for each case statement.
+    std::vector<llvm::BasicBlock*> CaseBB;
+    for (int i = 0; i < this->caseList.size(); i++){
+        CaseBB.push_back(llvm::BasicBlock::Create(Context, "Case" + std::to_string(i)));
+    }
+    //Create an extra block for SwitchEnd
+    CaseBB.push_back(llvm::BasicBlock::Create(Context, "SwitchEnd"));
+
+    //Create one block for each comparison.
+    std::vector<llvm::BasicBlock*> ComparisonBB;
+    ComparisonBB.push_back(IRBuilder.GetInsertBlock());
+    for (int i = 1; i < this->caseList.size(); i++){
+        ComparisonBB.push_back(llvm::BasicBlock::Create(Context, "Comparison" + std::to_string(i)));
+    }
+    ComparisonBB.push_back(CaseBB.back());
+
+    //Generate branches
+    for (int i = 0; i < this->caseList.size(); i++) {
+        if (i) {
+            CurrentFunc->getBasicBlockList().push_back(ComparisonBB[i]);
+            IRBuilder.SetInsertPoint(ComparisonBB[i]);
+        }
+        if (this->caseList[i]->condition)	//Have condition
+            IRBuilder.CreateCondBr(
+                CreateCmpEQ(Matches, this->caseList[i]->condition->codeGen(context)),
+                CaseBB[i],
+                ComparisonBB[i + 1]
+            );
+        else									//Default
+            IRBuilder.CreateBr(CaseBB[i]);
+    }
+
+    //Generate code for each case statement
+    context.PushSymbolTable();
+    for (int i = 0; i < this->caseList.size(); i++) {
+        CurrentFunc->getBasicBlockList().push_back(CaseBB[i]);
+        IRBuilder.SetInsertPoint(CaseBB[i]);
+        context.EnterLoop(CaseBB[i + 1], CaseBB.back());
+        this->caseList[i]->codeGen(context);
+        context.LeaveLoop();
+    }
+    context.PopSymbolTable();
+
+    //Finish "SwitchEnd" block
+    if (CaseBB.back()->hasNPredecessorsOrMore(1)) {
+        CurrentFunc->getBasicBlockList().push_back(CaseBB.back());
+        IRBuilder.SetInsertPoint(CaseBB.back());
+    }
+    return NULL;
+}
+
+llvm::Value* CaseStatement::codeGen(CodeGenerator &context){
+    // //Generate the statements, one by one.
+    // for (auto& stmt : this->body.statementList){
+    //     if (IRBuilder.GetInsertBlock()->getTerminator())
+    //         break;
+    //     else if (stmt)
+    //         stmt->codeGen(context);
+    // }
+
+    body.codeGen(context);
+
+    //If not terminated, jump to the next case block
+    TerminateBlockByBr(context.GetConditionBlock());
+    return NULL;
+}
+
+llvm::Value* BreakStatement::codeGen(CodeGenerator &context){
+    llvm::BasicBlock* BreakPoint = context.GetConditionBlock();
+    if (BreakPoint)
+        IRBuilder.CreateBr(BreakPoint);
+    else
+        throw std::logic_error("Break statement should only be used in loops or switch statements.");
+    return NULL;
+}
+
+llvm::Value* ContinueStatement::codeGen(CodeGenerator &context){
+		llvm::BasicBlock* ContinuePoint = context.GetEndBlock();
+		if (ContinuePoint)
+			IRBuilder.CreateBr(ContinuePoint);
+		else
+			throw std::logic_error("Continue statement should only be used in loops or switch statements.");
+		return NULL;
 }

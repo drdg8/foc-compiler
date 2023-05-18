@@ -32,7 +32,7 @@ void CodeGenerator::PopSymbolTable(void) {
 	this->SymbolTableStack.pop_back();
 }
 
-llvm::Function*  CodeGenerator::FindFunction(std::string Name){
+llvm::Function* CodeGenerator::FindFunction(std::string Name){
 	if (this->SymbolTableStack.size() == 0) return NULL;
 	for (auto TableIter = this->SymbolTableStack.end() - 1; TableIter >= this->SymbolTableStack.begin(); TableIter--) {
 		auto PairIter = (**TableIter).find(Name);
@@ -71,7 +71,7 @@ llvm::Value* CodeGenerator::FindVariable(std::string Name){
 		if (PairIter != (**TableIter).end())
 			return PairIter->second.GetVariable();
 	}
-	//再找全局变量,在 LLVM 中，全局变量不仅存在于符号表栈的底层，还会被存储在 LLVM 的模块中。这个方法中的 this->Module->getGlobalVariable(Name, true) 语句就是在模块中查找全局变量。
+	//再找全局变量
 	return this->Module->getGlobalVariable(Name, true);
 }
 
@@ -85,22 +85,57 @@ bool CodeGenerator::AddVariable(std::string Name, llvm::Value* Variable){
 	return true;
 }
 
+//Set current function
+void CodeGenerator::EnterFunction(llvm::Function* Func) {
+	this->CurrFunction = Func;
+}
+
+//Remove current function
+void CodeGenerator::LeaveFunction(void) {
+	this->CurrFunction = NULL;
+}
+
 llvm::Function* CodeGenerator::GetCurrentFunction(void){
 	return this->CurrFunction;
 }
 
+void CodeGenerator::EnterLoop(llvm::BasicBlock* ConditionBB, llvm::BasicBlock* EndBB){
+	this->ConditionBlockStack.push_back(ConditionBB);
+	this->EndBlockStack.push_back(EndBB);
+}
 
+void CodeGenerator::LeaveLoop(void){
+	if (this->ConditionBlockStack.size() != 0)
+		this->ConditionBlockStack.pop_back();
+	if (this->EndBlockStack.size() != 0)
+		this->EndBlockStack.pop_back();
+}
+
+llvm::BasicBlock* CodeGenerator::GetConditionBlock(void){
+	if (this->ConditionBlockStack.size())
+		return this->ConditionBlockStack.back();
+	else
+		return NULL;
+}
+
+llvm::BasicBlock* CodeGenerator::GetEndBlock(void){
+	if (this->EndBlockStack.size())
+		return this->EndBlockStack.back();
+	else
+		return NULL;
+}
+
+/*
 void CodeGenerator:: GenIR(Block* programBlock,const string& filename ){
 	program->codeGen(*this);
-	llvm::verifyModule(*this->myModule, &llvm::outs());
+	llvm::verifyModule(*this->Module, &llvm::outs());
     std::error_code EC;
-	llvm::raw_fd_ostream dest(filename, EC);
+    llvm::raw_fd_ostream dest(filename, EC, llvm::sys::fs::F_None);
 	if (EC) {
         llvm::errs() << "Could not open file: " << EC.message();
         return;
     }
-    this->myModule->print(dest, nullptr);
-
+    this->Module->print(dest, nullptr);
 }
-
+*/
 

@@ -1,109 +1,81 @@
 /bin/sh: 1: llvm-config: not found
-ast.cpp: In member function ‘virtual llvm::Value* ArrayDeclaration::codeGen(CodeGenerator&)’:
-ast.cpp:570:1: warning: no return statement in function returning non-void [-Wreturn-type]
-  570 | }
-      | ^
 /bin/sh: 1: llvm-config: not found
 /bin/sh: 1: llvm-config: not found
-/bin/sh: 1: llvm-config: not found
-/bin/sh: 1: llvm-config: not found
-/usr/bin/ld: parser.o: warning: relocation against `_ZTV14WhileStatement' in read-only section `.text._ZN14WhileStatementC2ER10ExpressionR5Block[_ZN14WhileStatementC5ER10ExpressionR5Block]'
+/usr/bin/ld: ast.o: warning: relocation against `_ZTVN4llvm24IRBuilderDefaultInserterE' in read-only section `.text._ZN4llvm24IRBuilderDefaultInserterC2Ev[_ZN4llvm24IRBuilderDefaultInserterC5Ev]'
 /usr/bin/ld: parser.o:(.data.rel+0x0): undefined reference to `llvm::DisableABIBreakingChecks'
 /usr/bin/ld: parser.o: in function `VarType::VarType(VarType::TypeID)':
-/home/drdg8/lab/2023_foc_complier/src/ast.hpp:47: undefined reference to `vtable for VarType'
-/usr/bin/ld: parser.o: in function `ExternDeclaration::ExternDeclaration(VarType const&, Identifier const&, std::vector<VariableDeclaration*, std::allocator<VariableDeclaration*> > const&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.hpp:244: undefined reference to `vtable for ExternDeclaration'
-/usr/bin/ld: parser.o: in function `FunctionDeclaration::FunctionDeclaration(VarType const&, Identifier const&, std::vector<VariableDeclaration*, std::allocator<VariableDeclaration*> > const&, Block&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.hpp:256: undefined reference to `vtable for FunctionDeclaration'
-/usr/bin/ld: parser.o: in function `LoopStatement::LoopStatement(Expression&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.hpp:267: undefined reference to `vtable for LoopStatement'
-/usr/bin/ld: parser.o: in function `ForStatement::ForStatement(Expression&, Expression&, Expression&, Block&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.hpp:277: undefined reference to `vtable for ForStatement'
-/usr/bin/ld: parser.o: in function `WhileStatement::WhileStatement(Expression&, Block&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.hpp:289: undefined reference to `vtable for WhileStatement'
-/usr/bin/ld: parser.o: in function `IfStatement::IfStatement(Expression&, Block&, Block*)':
-/home/drdg8/lab/2023_foc_complier/src/ast.hpp:300: undefined reference to `vtable for IfStatement'
-/usr/bin/ld: parser.o: in function `IfStatement::IfStatement(Expression&, Block&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.hpp:302: undefined reference to `vtable for IfStatement'
-/usr/bin/ld: parser.o: in function `SwitchStatement::SwitchStatement(Expression&, std::vector<CaseStatement*, std::allocator<CaseStatement*> >&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.hpp:314: undefined reference to `vtable for SwitchStatement'
-/usr/bin/ld: parser.o: in function `CaseStatement::CaseStatement(Expression*, Block&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.hpp:325: undefined reference to `vtable for CaseStatement'
-/usr/bin/ld: parser.o: in function `CaseStatement::CaseStatement(Block&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.hpp:327: undefined reference to `vtable for CaseStatement'
-/usr/bin/ld: parser.o: in function `BreakStatement::BreakStatement()':
-/home/drdg8/lab/2023_foc_complier/src/ast.hpp:337: undefined reference to `vtable for BreakStatement'
-/usr/bin/ld: parser.o: in function `ContinueStatement::ContinueStatement()':
-/home/drdg8/lab/2023_foc_complier/src/ast.hpp:343: undefined reference to `vtable for ContinueStatement'
+/home/drdg8/lab/2023_foc_complier/src/ast.hpp:48: undefined reference to `vtable for VarType'
 /usr/bin/ld: lexer.o:(.data.rel+0x0): undefined reference to `llvm::DisableABIBreakingChecks'
 /usr/bin/ld: ast.o: in function `(anonymous namespace)::ForceMCJITLinking::ForceMCJITLinking()':
 /usr/include/llvm-14/llvm/ExecutionEngine/MCJIT.h:35: undefined reference to `LLVMLinkInMCJIT'
-/usr/bin/ld: ast.o: in function `getPtrLLVMType(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)':
-/home/drdg8/lab/2023_foc_complier/src/ast.cpp:49: undefined reference to `llvm::Type::getInt32PtrTy(llvm::LLVMContext&, unsigned int)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:51: undefined reference to `llvm::Type::getFloatPtrTy(llvm::LLVMContext&, unsigned int)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:53: undefined reference to `llvm::Type::getInt8PtrTy(llvm::LLVMContext&, unsigned int)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:55: undefined reference to `llvm::Type::getInt1PtrTy(llvm::LLVMContext&, unsigned int)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:57: undefined reference to `llvm::Type::getVoidTy(llvm::LLVMContext&)'
-/usr/bin/ld: ast.o: in function `getArrayLLVMType(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, int)':
-/home/drdg8/lab/2023_foc_complier/src/ast.cpp:64: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:64: undefined reference to `llvm::ArrayType::get(llvm::Type*, unsigned long)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:66: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:66: undefined reference to `llvm::ArrayType::get(llvm::Type*, unsigned long)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:68: undefined reference to `llvm::Type::getInt8Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:68: undefined reference to `llvm::ArrayType::get(llvm::Type*, unsigned long)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:70: undefined reference to `llvm::Type::getInt1Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:70: undefined reference to `llvm::ArrayType::get(llvm::Type*, unsigned long)'
 /usr/bin/ld: ast.o: in function `getCastInst(llvm::Type*, llvm::Type*)':
-/home/drdg8/lab/2023_foc_complier/src/ast.cpp:92: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:92: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:95: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:95: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:98: undefined reference to `llvm::Type::getInt8Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:98: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:101: undefined reference to `llvm::Type::getInt8Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:101: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:104: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:104: undefined reference to `llvm::Type::getInt8Ty(llvm::LLVMContext&)'
+/home/drdg8/lab/2023_foc_complier/src/ast.cpp:49: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:49: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:52: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:52: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:55: undefined reference to `llvm::Type::getInt8Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:55: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:58: undefined reference to `llvm::Type::getInt8Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:58: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:61: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:61: undefined reference to `llvm::Type::getInt8Ty(llvm::LLVMContext&)'
 /usr/bin/ld: ast.o: in function `typeCast(llvm::Value*, llvm::Type*)':
-/home/drdg8/lab/2023_foc_complier/src/ast.cpp:116: undefined reference to `llvm::Type::getInt1Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:122: undefined reference to `llvm::ConstantInt::get(llvm::Type*, unsigned long, bool)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:125: undefined reference to `llvm::ConstantFP::get(llvm::Type*, double)'
+/home/drdg8/lab/2023_foc_complier/src/ast.cpp:73: undefined reference to `llvm::Type::getInt1Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:79: undefined reference to `llvm::ConstantInt::get(llvm::Type*, unsigned long, bool)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:82: undefined reference to `llvm::ConstantFP::get(llvm::Type*, double)'
 /usr/bin/ld: ast.o: in function `Double::codeGen(CodeGenerator&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.cpp:146: undefined reference to `llvm::ConstantFP::get(llvm::Type*, double)'
+/home/drdg8/lab/2023_foc_complier/src/ast.cpp:103: undefined reference to `llvm::ConstantFP::get(llvm::Type*, double)'
 /usr/bin/ld: ast.o: in function `Identifier::codeGen(CodeGenerator&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.cpp:170: undefined reference to `llvm::outs()'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:183: undefined reference to `llvm::LoadInst::LoadInst(llvm::Type*, llvm::Value*, llvm::Twine const&, bool, llvm::BasicBlock*)'
+/home/drdg8/lab/2023_foc_complier/src/ast.cpp:127: undefined reference to `llvm::outs()'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:140: undefined reference to `llvm::LoadInst::LoadInst(llvm::Type*, llvm::Value*, llvm::Twine const&, bool, llvm::BasicBlock*)'
 /usr/bin/ld: ast.o: in function `Call::codeGen(CodeGenerator&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.cpp:191: undefined reference to `llvm::Module::getFunction(llvm::StringRef) const'
+/home/drdg8/lab/2023_foc_complier/src/ast.cpp:148: undefined reference to `llvm::Module::getFunction(llvm::StringRef) const'
 /usr/bin/ld: ast.o: in function `BinaryOp::codeGen(CodeGenerator&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.cpp:221: undefined reference to `llvm::Type::getInt1Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:221: undefined reference to `llvm::Type::getInt1Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:227: undefined reference to `llvm::Type::getInt1Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:227: undefined reference to `llvm::Type::getInt1Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:238: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:239: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:240: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/home/drdg8/lab/2023_foc_complier/src/ast.cpp:178: undefined reference to `llvm::Type::getInt1Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:178: undefined reference to `llvm::Type::getInt1Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:184: undefined reference to `llvm::Type::getInt1Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:184: undefined reference to `llvm::Type::getInt1Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:195: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:196: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:197: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:198: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:201: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:202: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:203: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:204: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:220: undefined reference to `llvm::BinaryOperator::Create(llvm::Instruction::BinaryOps, llvm::Value*, llvm::Value*, llvm::Twine const&, llvm::BasicBlock*)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:223: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:229: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:235: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
 /usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:241: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:244: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:245: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:246: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:247: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:263: undefined reference to `llvm::BinaryOperator::Create(llvm::Instruction::BinaryOps, llvm::Value*, llvm::Value*, llvm::Twine const&, llvm::BasicBlock*)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:266: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:272: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:278: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:284: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:290: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
-/usr/bin/ld: ast.o:/home/drdg8/lab/2023_foc_complier/src/ast.cpp:296: more undefined references to `llvm::Type::getFloatTy(llvm::LLVMContext&)' follow
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:247: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: ast.o:/home/drdg8/lab/2023_foc_complier/src/ast.cpp:253: more undefined references to `llvm::Type::getFloatTy(llvm::LLVMContext&)' follow
 /usr/bin/ld: ast.o: in function `Assign::codeGen(CodeGenerator&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.cpp:334: undefined reference to `llvm::StoreInst::StoreInst(llvm::Value*, llvm::Value*, bool, llvm::BasicBlock*)'
+/home/drdg8/lab/2023_foc_complier/src/ast.cpp:291: undefined reference to `llvm::StoreInst::StoreInst(llvm::Value*, llvm::Value*, bool, llvm::BasicBlock*)'
 /usr/bin/ld: ast.o: in function `ArrayAssign::codeGen(CodeGenerator&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.cpp:422: undefined reference to `llvm::outs()'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:438: undefined reference to `llvm::outs()'
+/home/drdg8/lab/2023_foc_complier/src/ast.cpp:365: undefined reference to `llvm::outs()'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:381: undefined reference to `llvm::outs()'
 /usr/bin/ld: ast.o: in function `VariableDeclaration::codeGen(CodeGenerator&)':
-/home/drdg8/lab/2023_foc_complier/src/ast.cpp:513: undefined reference to `llvm::ConstantInt::get(llvm::Type*, unsigned long, bool)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:522: undefined reference to `llvm::GlobalVariable::GlobalVariable(llvm::Module&, llvm::Type*, bool, llvm::GlobalValue::LinkageTypes, llvm::Constant*, llvm::Twine const&, llvm::GlobalVariable*, llvm::GlobalValue::ThreadLocalMode, llvm::Optional<unsigned int>, bool)'
-/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:539: undefined reference to `llvm::Instruction::eraseFromParent()'
+/home/drdg8/lab/2023_foc_complier/src/ast.cpp:467: undefined reference to `llvm::ConstantInt::get(llvm::Type*, unsigned long, bool)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:476: undefined reference to `llvm::GlobalVariable::GlobalVariable(llvm::Module&, llvm::Type*, bool, llvm::GlobalValue::LinkageTypes, llvm::Constant*, llvm::Twine const&, llvm::GlobalVariable*, llvm::GlobalValue::ThreadLocalMode, llvm::Optional<unsigned int>, bool)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:495: undefined reference to `llvm::Instruction::eraseFromParent()'
+/usr/bin/ld: ast.o: in function `FunctionDeclaration::codeGen(CodeGenerator&)':
+/home/drdg8/lab/2023_foc_complier/src/ast.cpp:562: undefined reference to `llvm::Type::getPointerTo(unsigned int) const'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:573: undefined reference to `llvm::FunctionType::get(llvm::Type*, llvm::ArrayRef<llvm::Type*>, bool)'
+/usr/bin/ld: ast.o: in function `IfStatement::codeGen(CodeGenerator&)':
+/home/drdg8/lab/2023_foc_complier/src/ast.cpp:729: undefined reference to `llvm::BasicBlock::hasNPredecessorsOrMore(unsigned int) const'
+/usr/bin/ld: ast.o: in function `CreateCmpEQ(llvm::Value*, llvm::Value*)':
+/home/drdg8/lab/2023_foc_complier/src/ast.cpp:843: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:844: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:845: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:846: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:849: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:850: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:851: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:852: undefined reference to `llvm::Type::getInt32Ty(llvm::LLVMContext&)'
+/usr/bin/ld: /home/drdg8/lab/2023_foc_complier/src/ast.cpp:858: undefined reference to `llvm::Type::getFloatTy(llvm::LLVMContext&)'
+/usr/bin/ld: ast.o: in function `SwitchStatement::codeGen(CodeGenerator&)':
+/home/drdg8/lab/2023_foc_complier/src/ast.cpp:913: undefined reference to `llvm::BasicBlock::hasNPredecessorsOrMore(unsigned int) const'
 /usr/bin/ld: ast.o:(.data.rel+0x0): undefined reference to `llvm::DisableABIBreakingChecks'
 /usr/bin/ld: ast.o: in function `llvm::User::operator delete(void*, unsigned int)':
 /usr/include/llvm-14/llvm/IR/User.h:107: undefined reference to `llvm::User::operator delete(void*)'
@@ -111,12 +83,22 @@ ast.cpp:570:1: warning: no return statement in function returning non-void [-Wre
 /usr/include/llvm-14/llvm/IR/Metadata.h:224: undefined reference to `llvm::MetadataTracking::track(void*, llvm::Metadata&, llvm::PointerUnion<llvm::MetadataAsValue*, llvm::Metadata*>)'
 /usr/bin/ld: ast.o: in function `llvm::MetadataTracking::untrack(llvm::Metadata*&)':
 /usr/include/llvm-14/llvm/IR/Metadata.h:248: undefined reference to `llvm::MetadataTracking::untrack(void*, llvm::Metadata&)'
+/usr/bin/ld: ast.o: in function `llvm::BasicBlock::Create(llvm::LLVMContext&, llvm::Twine const&, llvm::Function*, llvm::BasicBlock*)':
+/usr/include/llvm-14/llvm/IR/BasicBlock.h:103: undefined reference to `llvm::BasicBlock::BasicBlock(llvm::LLVMContext&, llvm::Twine const&, llvm::Function*, llvm::BasicBlock*)'
 /usr/bin/ld: ast.o: in function `llvm::BasicBlock::getModule()':
 /usr/include/llvm-14/llvm/IR/BasicBlock.h:117: undefined reference to `llvm::BasicBlock::getModule() const'
+/usr/bin/ld: ast.o: in function `llvm::BasicBlock::getTerminator()':
+/usr/include/llvm-14/llvm/IR/BasicBlock.h:125: undefined reference to `llvm::BasicBlock::getTerminator() const'
 /usr/bin/ld: ast.o: in function `llvm::raw_ostream::operator<<(llvm::StringRef)':
 /usr/include/llvm-14/llvm/Support/raw_ostream.h:219: undefined reference to `llvm::raw_ostream::write(char const*, unsigned long)'
 /usr/bin/ld: ast.o: in function `llvm::operator<<(llvm::raw_ostream&, llvm::Type const&)':
 /usr/include/llvm-14/llvm/IR/Type.h:482: undefined reference to `llvm::Type::print(llvm::raw_ostream&, bool, bool) const'
+/usr/bin/ld: ast.o: in function `llvm::Function::CheckLazyArguments() const':
+/usr/include/llvm-14/llvm/IR/Function.h:115: undefined reference to `llvm::Function::BuildLazyArguments() const'
+/usr/bin/ld: ast.o: in function `llvm::Function::Create(llvm::FunctionType*, llvm::GlobalValue::LinkageTypes, llvm::Twine const&, llvm::Module*)':
+/usr/include/llvm-14/llvm/IR/Function.h:148: undefined reference to `llvm::User::operator new(unsigned long)'
+/usr/bin/ld: /usr/include/llvm-14/llvm/IR/Function.h:148: undefined reference to `llvm::Function::Function(llvm::FunctionType*, llvm::GlobalValue::LinkageTypes, unsigned int, llvm::Twine const&, llvm::Module*)'
+/usr/bin/ld: /usr/include/llvm-14/llvm/IR/Function.h:148: undefined reference to `llvm::User::operator delete(void*)'
 /usr/bin/ld: ast.o: in function `llvm::GlobalVariable::operator new(unsigned long)':
 /usr/include/llvm-14/llvm/IR/GlobalVariable.h:73: undefined reference to `llvm::User::operator new(unsigned long, unsigned int)'
 /usr/bin/ld: ast.o: in function `llvm::GlobalVariable::operator delete(void*)':
@@ -172,6 +154,15 @@ ast.cpp:570:1: warning: no return statement in function returning non-void [-Wre
 /usr/include/llvm-14/llvm/IR/InstrTypes.h:1197: undefined reference to `llvm::Instruction::Instruction(llvm::Type*, unsigned int, llvm::Use*, unsigned int, llvm::BasicBlock*)'
 /usr/bin/ld: ast.o: in function `llvm::CallInst::CallInst(llvm::FunctionType*, llvm::Value*, llvm::ArrayRef<llvm::Value*>, llvm::ArrayRef<llvm::OperandBundleDefT<llvm::Value*> >, llvm::Twine const&, llvm::BasicBlock*)':
 /usr/include/llvm-14/llvm/IR/Instructions.h:1718: undefined reference to `llvm::CallInst::init(llvm::FunctionType*, llvm::Value*, llvm::ArrayRef<llvm::Value*>, llvm::ArrayRef<llvm::OperandBundleDefT<llvm::Value*> >, llvm::Twine const&)'
+/usr/bin/ld: ast.o: in function `llvm::ReturnInst::Create(llvm::LLVMContext&, llvm::Value*, llvm::Instruction*)':
+/usr/include/llvm-14/llvm/IR/Instructions.h:3036: undefined reference to `llvm::User::operator new(unsigned long, unsigned int)'
+/usr/bin/ld: /usr/include/llvm-14/llvm/IR/Instructions.h:3036: undefined reference to `llvm::ReturnInst::ReturnInst(llvm::LLVMContext&, llvm::Value*, llvm::Instruction*)'
+/usr/bin/ld: ast.o: in function `llvm::BranchInst::Create(llvm::BasicBlock*, llvm::Instruction*)':
+/usr/include/llvm-14/llvm/IR/Instructions.h:3147: undefined reference to `llvm::User::operator new(unsigned long, unsigned int)'
+/usr/bin/ld: /usr/include/llvm-14/llvm/IR/Instructions.h:3147: undefined reference to `llvm::BranchInst::BranchInst(llvm::BasicBlock*, llvm::Instruction*)'
+/usr/bin/ld: ast.o: in function `llvm::BranchInst::Create(llvm::BasicBlock*, llvm::BasicBlock*, llvm::Value*, llvm::Instruction*)':
+/usr/include/llvm-14/llvm/IR/Instructions.h:3152: undefined reference to `llvm::User::operator new(unsigned long, unsigned int)'
+/usr/bin/ld: /usr/include/llvm-14/llvm/IR/Instructions.h:3152: undefined reference to `llvm::BranchInst::BranchInst(llvm::BasicBlock*, llvm::BasicBlock*, llvm::Value*, llvm::Instruction*)'
 /usr/bin/ld: ast.o: in function `llvm::IRBuilderDefaultInserter::IRBuilderDefaultInserter()':
 /usr/include/llvm-14/llvm/IR/IRBuilder.h:62: undefined reference to `vtable for llvm::IRBuilderDefaultInserter'
 /usr/bin/ld: ast.o: in function `llvm::IRBuilderBase::AddMetadataToInst(llvm::Instruction*) const':
@@ -216,6 +207,9 @@ ast.cpp:570:1: warning: no return statement in function returning non-void [-Wre
 /usr/include/llvm-14/llvm/IR/IRBuilder.h:2210: undefined reference to `llvm::IRBuilderBase::CreateFCmpHelper(llvm::CmpInst::Predicate, llvm::Value*, llvm::Value*, llvm::Twine const&, llvm::MDNode*, bool)'
 /usr/bin/ld: ast.o: in function `llvm::IRBuilder<llvm::ConstantFolder, llvm::IRBuilderDefaultInserter>::~IRBuilder()':
 /usr/include/llvm-14/llvm/IR/IRBuilder.h:2514: undefined reference to `llvm::IRBuilderDefaultInserter::~IRBuilderDefaultInserter()'
+/usr/bin/ld: ast.o: in function `llvm::BranchInst* llvm::IRBuilderBase::addBranchMetadata<llvm::BranchInst>(llvm::BranchInst*, llvm::MDNode*, llvm::MDNode*)':
+/usr/include/llvm-14/llvm/IR/IRBuilder.h:956: undefined reference to `llvm::Instruction::setMetadata(unsigned int, llvm::MDNode*)'
+/usr/bin/ld: /usr/include/llvm-14/llvm/IR/IRBuilder.h:958: undefined reference to `llvm::Instruction::setMetadata(unsigned int, llvm::MDNode*)'
 /usr/bin/ld: ast.o: in function `llvm::IRBuilderFolder::IRBuilderFolder()':
 /usr/include/llvm-14/llvm/IR/IRBuilderFolder.h:24: undefined reference to `vtable for llvm::IRBuilderFolder'
 /usr/bin/ld: ast.o: in function `llvm::ConstantFolder::ConstantFolder()':
@@ -223,6 +217,8 @@ ast.cpp:570:1: warning: no return statement in function returning non-void [-Wre
 /usr/bin/ld: ast.o: in function `llvm::IRBuilder<llvm::ConstantFolder, llvm::IRBuilderDefaultInserter>::IRBuilder(llvm::BasicBlock*, llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::Instruction, false, false, void>, false, false>, llvm::MDNode*, llvm::ArrayRef<llvm::OperandBundleDefT<llvm::Value*> >)':
 /usr/include/llvm-14/llvm/IR/IRBuilder.h:2564: undefined reference to `llvm::BasicBlock::getContext() const'
 /usr/bin/ld: /usr/include/llvm-14/llvm/IR/IRBuilder.h:2566: undefined reference to `llvm::IRBuilderDefaultInserter::~IRBuilderDefaultInserter()'
+/usr/bin/ld: ast.o: in function `llvm::iplist_impl<llvm::simple_ilist<llvm::BasicBlock>, llvm::SymbolTableListTraits<llvm::BasicBlock> >::insert(llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::BasicBlock, false, false, void>, false, false>, llvm::BasicBlock*)':
+/usr/include/llvm-14/llvm/ADT/ilist.h:230: undefined reference to `llvm::SymbolTableListTraits<llvm::BasicBlock>::addNodeToList(llvm::BasicBlock*)'
 /usr/bin/ld: ast.o: in function `llvm::SmallVectorTemplateCommon<std::pair<unsigned int, llvm::MDNode*>, void>::grow_pod(unsigned long, unsigned long)':
 /usr/include/llvm-14/llvm/ADT/SmallVector.h:120: undefined reference to `llvm::SmallVectorBase<unsigned int>::grow_pod(void*, unsigned long, unsigned long)'
 /usr/bin/ld: ast.o: in function `llvm::ConstantFolder::~ConstantFolder()':

@@ -76,7 +76,7 @@
 %type <ident> ident
 %type <expr> const_value expression 
 %type <block> program stmts block
-%type <stmt> stmt var_decl func_decl extern_decl
+%type <stmt> stmt var_decl func_decl // extern_decl
 %type<ifStatement>							IfStmt
 %type<forStatement>							ForStmt
 %type<whileStatement>						WhileStmt
@@ -116,15 +116,15 @@ program:
 
 
   stmt ://声明
-  var_decl| func_decl | extern_decl
+  var_decl| func_decl // | extern_decl
 	 | expression { $$ = new ExpressionStatement(*$1); }
-	 | RETURN expression { $$ = new Return($2); }
-   | RETURN { $$ = new Return(); }
+	 | RETURN expression { $$ = new ReturnStatement($2); }
+   | RETURN { $$ = new ReturnStatement(); }
 	 | BreakStmt  { $$ = $1; }
    | ContinueStmt  { $$ = $1; }
    | SwitchStmt	{  $$ = $1;} 
-   |IfStmt { $$ = $1; }
-   |LoopStmt { $$ = $1; }
+   | IfStmt { $$ = $1; }
+   | LoopStmt { $$ = $1; }
     ;
 
 
@@ -177,15 +177,10 @@ program:
     };
 
   //变量定义、函数定义，函数参数定义，extern定义
-  var_decl :varType ident{ $$ = new VariableDeclaration($1, *$2); }
-      | varType ident EQUAL expression { $$ = new VariableDeclaration($1, *$2, $4); }
+  var_decl :varType ident{ $$ = new VariableDeclaration(*$1, *$2); }
+      | varType ident EQUAL expression { $$ = new VariableDeclaration(*$1, *$2, $4); }
       | varType ident LBRACK INTEGER RBRACK { // 定义数组
-              $$ = new ArrayDeclaration($1, *$2, $4);
-    }
-      | ident ident { $$ = new VariableDeclaration($1, *$2); }
-      | ident ident EQUAL expression { $$ = new VariableDeclaration($1, *$2, $4); }
-      | ident ident LBRACK INTEGER RBRACK { // 定义数组
-        $$ = new ArrayDeclaration($1, *$2, $4);
+              $$ = new VariableDeclaration(*$1, *$2, $4);
     }
       ;
 
@@ -196,9 +191,11 @@ program:
 			| VOID			                    {  $$ = new VarType(VarType::_Void); }
       ;
 
+/*
   extern_decl : EXTERN varType ident LPAREN func_decl_args RPAREN
                   { $$ = new ExternDeclaration(*$2, *$3, *$5); delete $5; }
               ;
+*/
 
   func_decl : varType ident LPAREN func_decl_args RPAREN block 
   { $$ = new FunctionDeclaration(*$1, *$2, *$4, *$6); delete $4; }

@@ -57,8 +57,14 @@ class CodeGenerator{
         llvm::Module* Module;
         std::vector<SymbolTable*> SymbolTableStack;
         llvm::Function* CurrFunction;	
-        llvm::BasicBlock* returnBB;
-        llvm::Value* returnVal;
+        // condition block, when "continue;" jump here
+        std::vector<llvm::BasicBlock*> ConditionBlockStack;
+        // end block, when "break;" jump here
+        std::vector<llvm::BasicBlock*> EndBlockStack;
+
+        // llvm::BasicBlock* returnBB;
+        // llvm::Value* returnVal;
+
     public:
         CodeGenerator(void);
         //sizeof() 空位，待实现
@@ -76,6 +82,21 @@ class CodeGenerator{
         bool AddVariable(std::string Name, llvm::Value* Variable);
 
         llvm::Function* GetCurrentFunction(void);
+
+        void EnterFunction(llvm::Function* Func);
+
+        void LeaveFunction(void);
+
+        void EnterLoop(llvm::BasicBlock* ConditionBB, llvm::BasicBlock* EndBB);
+
+        // called when leave a loop
+        void LeaveLoop(void);
+
+        // get the destination block for "continue" statements
+        llvm::BasicBlock* GetConditionBlock(void);
+
+        // get the destination block for "break" statements
+        llvm::BasicBlock* GetEndBlock(void);
 
         void GenIR(Block* programBlock,const string& filename);
 

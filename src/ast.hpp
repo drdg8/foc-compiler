@@ -36,6 +36,7 @@ public:
 	virtual llvm::Value* codeGen(CodeGenerator& context) = 0;
 };
 
+// no need to codeGen?
 class VarType : public Node {
 public:
 	enum TypeID {
@@ -126,13 +127,6 @@ public:
 	Expression& expr;
 };
 
-class Block : public Expression {//Function body
-public:
-	Block() { }
-	virtual llvm::Value* codeGen(CodeGenerator& context);
-public:
-	StatementList statementList;
-};
 
 class ArrayElement : public Expression {   //identifier[expression] 表示数组中某个元素
 public:
@@ -171,6 +165,16 @@ public:
 	Identifier& rhs;
 };
 
+// Function body
+class Block : public Expression {
+public:
+	Block() { }
+	virtual llvm::Value* codeGen(CodeGenerator& context);
+public:
+	StatementList statementList;
+};
+
+
 
 class Declaration : public Statement {
 public:
@@ -179,48 +183,25 @@ public:
 	virtual llvm::Value* codeGen(CodeGenerator& context) = 0;
 };
 
-class ExpressionStatement : public Statement {
-public:
-	ExpressionStatement(Expression& expression) : 
-		expression(expression) { }
-	virtual llvm::Value* codeGen(CodeGenerator& context);
-public:
-	Expression& expression;
-};
-
-class Return : public Statement {
-public:
-	Return(Expression* expression) : 
-		expression(expression) { }
-	Return() : 
-		expression(nullptr) { }
-	virtual llvm::Value* codeGen(CodeGenerator& context);
-public:
-	Expression* expression;
-};
 class VariableDeclaration : public Declaration {
 public:
-	VariableDeclaration( Identifier* type, Identifier& id) :
-		Customtype(type), id(id) { assignmentExpr = nullptr; type=nullptr; }
-	VariableDeclaration( Identifier* type, Identifier& id,int size) :
-		Customtype(type), id(id) { assignmentExpr = nullptr; type=nullptr;}
-	VariableDeclaration( Identifier* type, Identifier& id, Expression *assignmentExpr) :
-		Customtype(type), id(id), assignmentExpr(assignmentExpr) { BuildInType=nullptr;}
-			VariableDeclaration( VarType* type, Identifier& id) :
-		type(type), id(id) { assignmentExpr = nullptr; Customtype=nullptr;}
-	VariableDeclaration( VarType* type, Identifier& id,int size) :
-		type(type), id(id) { assignmentExpr = nullptr; Customtype=nullptr;}
-	VariableDeclaration( VarType* type, Identifier& id, Expression *assignmentExpr) :
+	VariableDeclaration( VarType& type, Identifier& id) :
+		type(type), id(id), size(0) { assignmentExpr = nullptr; Customtype=nullptr;}
+	VariableDeclaration( VarType& type, Identifier& id,int size) :
+		type(type), id(id), size(size) { assignmentExpr = nullptr; Customtype=nullptr;}
+	VariableDeclaration( VarType& type, Identifier& id, Expression *assignmentExpr) :
 		type(type), id(id), assignmentExpr(assignmentExpr) { Customtype=nullptr;}
+
 	virtual llvm::Value* codeGen(CodeGenerator& context);
 public:
 	int size;
-	VarType* type;//内置类型，为null时表示这个变量为自定义类型
-	Identifier* Customtype;//自定义类型，为null时表示这个变量为内置类型
+	VarType& type;//内置类型，为null时表示这个变量为自定义类型
+	Identifier* Customtype;//自定义类型，为null时表示这个变量为内置类型 未实现
 	Identifier& id;
 	Expression *assignmentExpr;
 };
 
+/*
 class ArrayDeclaration : public VariableDeclaration {
 public:
 	ArrayDeclaration(Identifier* type, Identifier& id,int size) :
@@ -244,25 +225,48 @@ public:
     const Identifier& id;
     VariableList arguments;
 };
+*/
 
 class FunctionDeclaration : public Declaration {
 public:
-	FunctionDeclaration(const VarType& type, const Identifier& id, 
+	FunctionDeclaration(VarType& type, Identifier& id, 
 		const VariableList& arguments, Block& block) :
 		type(type), id(id), arguments(arguments), block(block) { }
 	virtual llvm::Value* codeGen(CodeGenerator& context);
 public:
-	const VarType& type;
-	const Identifier& id;
+	VarType& type;
+	Identifier& id;
 	VariableList arguments;
 	Block& block;
+};
+
+
+
+class ExpressionStatement : public Statement {
+public:
+	ExpressionStatement(Expression& expression) : 
+		expression(expression) { }
+	virtual llvm::Value* codeGen(CodeGenerator& context);
+public:
+	Expression& expression;
+};
+
+class ReturnStatement : public Statement {
+public:
+	ReturnStatement(Expression* expression) : 
+		expression(expression) { }
+	ReturnStatement() : 
+		expression(nullptr) { }
+	virtual llvm::Value* codeGen(CodeGenerator& context);
+public:
+	Expression* expression;
 };
 
 class LoopStatement : public Statement {
 public:
 	LoopStatement(Expression& condition) :condition(condition) {}
 	~LoopStatement() {}
-	llvm::Value* codeGen(CodeGenerator& context);
+	virtual llvm::Value* codeGen(CodeGenerator& context) = 0;
 public:
 	Expression& condition;
 };
@@ -329,15 +333,17 @@ public:
 };
 
 class BreakStatement : public Statement {
-	public:
-		BreakStatement() {}
-		~BreakStatement() {}
-		llvm::Value* codeGen(CodeGenerator& context);
-	};
+public:
+	BreakStatement() {}
+	~BreakStatement() {}
+	llvm::Value* codeGen(CodeGenerator& context);
+};
+
 class ContinueStatement : public Statement {
-	public:
-		ContinueStatement() {}
-		~ContinueStatement() {}
-		llvm::Value* codeGen(CodeGenerator& context);
-	};
+public:
+	ContinueStatement() {}
+	~ContinueStatement() {}
+	llvm::Value* codeGen(CodeGenerator& context);
+};
+
 #endif
