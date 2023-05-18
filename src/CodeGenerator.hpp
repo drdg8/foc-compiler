@@ -37,7 +37,7 @@ class Symbol{
 public:
     Symbol(void) : _Value(NULL),_Function(NULL), Type(UNDEFINED) {}
     Symbol(llvm::Function* Func) : _Value(NULL),_Function(Func), Type(FUNCTION) {}
-    Symbol(llvm::Value* Value) : _Function(Value), Type(VARIABLE) {}
+    Symbol(llvm::Value* Value) : _Value(Value),_Function(NULL), Type(VARIABLE) {}
     llvm::Value* GetVariable(void) { return this->Type == VARIABLE ? _Value : NULL; }
     llvm::Function* GetFunction(void) { return this->Type == FUNCTION ? _Function : NULL; }
 public:

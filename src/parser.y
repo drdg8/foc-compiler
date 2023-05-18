@@ -185,10 +185,10 @@ program:
       ;
 
     varType:
-      INT													    {  $$ = new VarType(VarType::_Int); }
-			| CHAR													{  $$ = new VarType(VarType::_Char);  }
-			| DOUBLE												{  $$ = new VarType(VarType::_Double);  }
-			| VOID			                    {  $$ = new VarType(VarType::_Void); }
+      INT													    {  $$ = new VarType(VarType::TypeID::_Int); }
+			| CHAR													{  $$ = new VarType(VarType::TypeID::_Char);  }
+			| DOUBLE												{  $$ = new VarType(VarType::TypeID::_Double);  }
+			| VOID			                    {  $$ = new VarType(VarType::TypeID::_Void); }
       ;
 
 /*

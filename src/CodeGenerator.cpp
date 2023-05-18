@@ -17,7 +17,7 @@ llvm::IRBuilder<> IRBuilder(Context); //定义全局IRbuilder
 CodeGenerator::CodeGenerator(void) :
 	Module(new llvm::Module("main", Context)),
 	CurrFunction(NULL),
-	SymbolTableStack()
+	SymbolTableStack(),
 	ConditionBlockStack(),
 	EndBlockStack()
 {}
@@ -131,10 +131,10 @@ llvm::BasicBlock* CodeGenerator::GetEndBlock(void){
 
 
 void CodeGenerator:: GenIR(Block* programBlock,const string& filename ){
-	program->codeGen(*this);
+	programBlock->codeGen(*this);
 	llvm::verifyModule(*this->Module, &llvm::outs());
-    std::error_code EC;
-    llvm::raw_fd_ostream dest(filename, EC, llvm::sys::fs::F_None);
+	std::error_code EC;
+	llvm::raw_fd_ostream dest(filename, EC);
 	if (EC) {
         llvm::errs() << "Could not open file: " << EC.message();
         return;

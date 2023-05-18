@@ -19,7 +19,8 @@ typedef std::vector<CaseStatement*> CaseList;
 
 class Node {
 public:
-	virtual ~Node() {}
+	Node(void) {}
+	virtual ~Node() {} 
 	virtual llvm::Value* codeGen(CodeGenerator& context) { return NULL; }
 };
 
@@ -47,7 +48,7 @@ public:
 	};
 	VarType(TypeID __Type) : type(__Type) {}
 	~VarType(void) {}
-	virtual llvm::Value* codeGen(CodeGenerator& context);
+	// llvm::Value* codeGen(CodeGenerator& context);
 	virtual llvm::Type* getLLVMType(void);
 public:
 	TypeID type;
