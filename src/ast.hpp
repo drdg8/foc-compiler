@@ -266,7 +266,7 @@ class LoopStatement : public Statement {
 public:
 	LoopStatement(Expression& condition) :condition(condition) {}
 	~LoopStatement() {}
-	llvm::Value* codeGen(CodeGenerator& context);
+	virtual llvm::Value* codeGen(CodeGenerator& context) = 0;
 public:
 	Expression& condition;
 };

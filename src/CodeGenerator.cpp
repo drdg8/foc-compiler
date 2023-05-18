@@ -32,7 +32,7 @@ void CodeGenerator::PopSymbolTable(void) {
 	this->SymbolTableStack.pop_back();
 }
 
-llvm::Function*  CodeGenerator::FindFunction(std::string Name){
+llvm::Function* CodeGenerator::FindFunction(std::string Name){
 	if (this->SymbolTableStack.size() == 0) return NULL;
 	for (auto TableIter = this->SymbolTableStack.end() - 1; TableIter >= this->SymbolTableStack.begin(); TableIter--) {
 		auto PairIter = (**TableIter).find(Name);
@@ -85,8 +85,44 @@ bool CodeGenerator::AddVariable(std::string Name, llvm::Value* Variable){
 	return true;
 }
 
+//Set current function
+void CodeGenerator::EnterFunction(llvm::Function* Func) {
+	this->CurrFunction = Func;
+}
+
+//Remove current function
+void CodeGenerator::LeaveFunction(void) {
+	this->CurrFunction = NULL;
+}
+
 llvm::Function* CodeGenerator::GetCurrentFunction(void){
 	return this->CurrFunction;
+}
+
+void CodeGenerator::EnterLoop(llvm::BasicBlock* ConditionBB, llvm::BasicBlock* EndBB){
+	this->ConditionBlockStack.push_back(ConditionBB);
+	this->EndBlockStack.push_back(EndBB);
+}
+
+void CodeGenerator::LeaveLoop(void){
+	if (this->ConditionBlockStack.size() != 0)
+		this->ConditionBlockStack.pop_back();
+	if (this->EndBlockStack.size() != 0)
+		this->EndBlockStack.pop_back();
+}
+
+llvm::BasicBlock* CodeGenerator::GetConditionBlock(void){
+	if (this->ConditionBlockStack.size())
+		return this->ConditionBlockStack.back();
+	else
+		return NULL;
+}
+
+llvm::BasicBlock* CodeGenerator::GetEndBlock(void){
+	if (this->EndBlockStack.size())
+		return this->EndBlockStack.back();
+	else
+		return NULL;
 }
 
 /*
