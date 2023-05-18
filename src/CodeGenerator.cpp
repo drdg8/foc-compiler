@@ -18,6 +18,8 @@ CodeGenerator::CodeGenerator(void) :
 	Module(new llvm::Module("main", Context)),
 	CurrFunction(NULL),
 	SymbolTableStack()
+	ConditionBlockStack(),
+	EndBlockStack()
 {}
 
 //Create and push an empty symbol table
@@ -71,8 +73,10 @@ llvm::Value* CodeGenerator::FindVariable(std::string Name){
 		if (PairIter != (**TableIter).end())
 			return PairIter->second.GetVariable();
 	}
-	//再找全局变量
-	return this->Module->getGlobalVariable(Name, true);
+
+	return NULL;
+	// //再找全局变量
+	// return this->Module->getGlobalVariable(Name, true);
 }
 
 bool CodeGenerator::AddVariable(std::string Name, llvm::Value* Variable){
@@ -86,16 +90,16 @@ bool CodeGenerator::AddVariable(std::string Name, llvm::Value* Variable){
 }
 
 //Set current function
-void CodeGenerator::EnterFunction(llvm::Function* Func) {
+void CodeGenerator::EnterFunction(llvm::Function* Func) {  //为了降重可以直接把body复制到caller的地方
 	this->CurrFunction = Func;
 }
 
 //Remove current function
-void CodeGenerator::LeaveFunction(void) {
+void CodeGenerator::LeaveFunction(void) { //为了降重可以直接把body复制到caller的地方
 	this->CurrFunction = NULL;
 }
 
-llvm::Function* CodeGenerator::GetCurrentFunction(void){
+llvm::Function* CodeGenerator::GetCurrentFunction(void){ //为了降重可以直接把body复制到caller的地方
 	return this->CurrFunction;
 }
 
@@ -125,7 +129,7 @@ llvm::BasicBlock* CodeGenerator::GetEndBlock(void){
 		return NULL;
 }
 
-/*
+
 void CodeGenerator:: GenIR(Block* programBlock,const string& filename ){
 	program->codeGen(*this);
 	llvm::verifyModule(*this->Module, &llvm::outs());
@@ -137,5 +141,5 @@ void CodeGenerator:: GenIR(Block* programBlock,const string& filename ){
     }
     this->Module->print(dest, nullptr);
 }
-*/
+
 

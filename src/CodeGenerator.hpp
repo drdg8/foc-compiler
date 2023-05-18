@@ -35,13 +35,14 @@ extern llvm::IRBuilder<> IRBuilder; //定义全局IRbuilder
 //symbol table的定义
 class Symbol{
 public:
-    Symbol(void) : Content(NULL), Type(UNDEFINED) {}
-    Symbol(llvm::Function* Func) : Content(Func), Type(FUNCTION) {}
-    Symbol(llvm::Value* Value) : Content(Value), Type(VARIABLE) {}
-    llvm::Value* GetVariable(void) { return this->Type == VARIABLE ? (llvm::Value*)Content : NULL; }
-    llvm::Function* GetFunction(void) { return this->Type == FUNCTION ? (llvm::Function*)Content : NULL; }
+    Symbol(void) : _Value(NULL),_Function(NULL), Type(UNDEFINED) {}
+    Symbol(llvm::Function* Func) : _Value(NULL),_Function(Func), Type(FUNCTION) {}
+    Symbol(llvm::Value* Value) : _Function(Value), Type(VARIABLE) {}
+    llvm::Value* GetVariable(void) { return this->Type == VARIABLE ? _Value : NULL; }
+    llvm::Function* GetFunction(void) { return this->Type == FUNCTION ? _Function : NULL; }
 public:
-    llvm::Value* Content;
+    llvm::Value* _Value;
+    llvm::Function* _Function;
     enum{
         FUNCTION,
         VARIABLE,
