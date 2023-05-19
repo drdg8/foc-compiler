@@ -24,4 +24,3 @@ c_compiler: $(OBJS)
 
 clean:
 	$(RM) -rf parser.cpp parser.hpp c_compiler lexer.cpp $(OBJS) 
-
