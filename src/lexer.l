@@ -15,8 +15,6 @@
 
 %%
 
-[ \t\n]					        ;//匹配回车
-"/*"[^*]*[*]+([^*/][^*]*[*]+)*"/"						 ; //匹配注释
 
 "extern"                return TOKEN(EXTERN);//c语言关键字
 "return"				        return TOKEN(RETURN);
@@ -37,7 +35,7 @@
 "double"												{return TOKEN(DOUBLE); }
 "void"													{return TOKEN(VOID); }
 
-[a-zA-Z_][a-zA-Z0-9_]*  {SAVE_IDENTIFIER; return IDENTIFIER;}//标识符
+[a-zA-Z_][a-zA-Z0-9_]*  {SAVE_IDENTIFIER;  return IDENTIFIER;}//标识符
 [0-9]+\.[0-9]* 			    {SAVE_DOUBLE; return DOUBLE;}//浮点
 [0-9]+					        {SAVE_INTEGER; return INTEGER;}//整型
 \'"[^\\']"\'          {SAVE_CHAR; return CHARACTER;}//字符
@@ -48,7 +46,7 @@
 "~"                     return TOKEN(NOT);
 
 
-"="						          return TOKEN(EQUAL);//赋值和比较
+"="						       { return TOKEN(EQUAL);}//赋值和比较
 "=="				          	return TOKEN(CEQ);
 "!="			          		return TOKEN(CNE);
 "<"				          		return TOKEN(CLT);
@@ -75,9 +73,12 @@
 "."         						return TOKEN(DOT);//其他
 ","				          		return TOKEN(COMMA);
 "&"				          		return TOKEN(GAD);//取地址
-";"				          		return TOKEN(SEMI);
+";"				          	  	return TOKEN(SEMI);
 ":"                     return TOKEN(COLON);
 "->"					          return TOKEN(ARW);//箭头（暂未实现）
+
+[ \t\n]				         //匹配回车
+"/*"[^*]*[*]+([^*/][^*]*[*]+)*"/"						 ; //匹配注释
 
 
 .                       printf("Unknown token!\n"); yyterminate();

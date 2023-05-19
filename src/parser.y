@@ -116,12 +116,13 @@ program:
 
 
   stmt ://声明
-  var_decl| func_decl // | extern_decl
-	 | expression { $$ = new ExpressionStatement(*$1); }
-	 | RETURN expression { $$ = new ReturnStatement($2); }
-   | RETURN { $$ = new ReturnStatement(); }
-	 | BreakStmt  { $$ = $1; }
-   | ContinueStmt  { $$ = $1; }
+   var_decl SEMI  {}
+   | func_decl // 
+	 | expression SEMI { $$ = new ExpressionStatement(*$1); }
+	 | RETURN expression SEMI { $$ = new ReturnStatement($2); }
+   | RETURN SEMI { $$ = new ReturnStatement(); }
+   | BreakStmt  SEMI { $$ = $1; }
+   | ContinueStmt  SEMI { $$ = $1; }
    | SwitchStmt	{  $$ = $1;} 
    | IfStmt { $$ = $1; }
    | LoopStmt { $$ = $1; }
@@ -177,15 +178,15 @@ program:
     };
 
   //变量定义、函数定义，函数参数定义，extern定义
-  var_decl :varType ident{ $$ = new VariableDeclaration(*$1, *$2); }
-      | varType ident EQUAL expression { $$ = new VariableDeclaration(*$1, *$2, $4); }
+  var_decl :varType ident{$$ = new VariableDeclaration(*$1, *$2); }
+      | varType ident EQUAL expression { $$ = new VariableDeclaration(*$1, *$2, $4);  }
       | varType ident LBRACK INTEGER RBRACK { // 定义数组
               $$ = new VariableDeclaration(*$1, *$2, $4);
     }
       ;
 
     varType:
-      INT													    {  $$ = new VarType(VarType::TypeID::_Int); }
+      INT													    {$$ = new VarType(VarType::TypeID::_Int); }
 			| CHAR													{  $$ = new VarType(VarType::TypeID::_Char);  }
 			| DOUBLE												{  $$ = new VarType(VarType::TypeID::_Double);  }
 			| VOID			                    {  $$ = new VarType(VarType::TypeID::_Void); }

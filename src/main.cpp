@@ -62,7 +62,13 @@ int main(int argc, const char* argv[]){
             OutputObjectFile = OutputObjectFile + ".ll";
         }
     }
+
+    std::cout << "I'm in yyparse" << std::endl;
+
     yyparse();
+
+    std::cout << "I'm out yyparse" << std::endl;
+
     CodeGenerator* generator = new CodeGenerator();
 
     llvm::InitializeNativeTarget();

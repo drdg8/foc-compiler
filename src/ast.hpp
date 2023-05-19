@@ -191,7 +191,7 @@ public:
 	VariableDeclaration( VarType& type, Identifier& id,int size) :
 		type(type), id(id), size(size) { assignmentExpr = nullptr; Customtype=nullptr;}
 	VariableDeclaration( VarType& type, Identifier& id, Expression *assignmentExpr) :
-		type(type), id(id), assignmentExpr(assignmentExpr) { Customtype=nullptr;}
+		type(type), id(id), assignmentExpr(assignmentExpr) {  Customtype=nullptr;}
 
 	virtual llvm::Value* codeGen(CodeGenerator& context);
 public:
