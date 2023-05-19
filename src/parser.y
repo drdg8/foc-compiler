@@ -102,12 +102,13 @@
 %start program
 
 %%
-program: 
-    stmts { 
-        programBlock = $1; 
-    };
+  program: 
+      stmts { 
+          programBlock = $1; 
+      };
 	stmts: //多个声明
     stmt {
+        printf("stmts\n");
         $$ = new Block(); $$->statementList.push_back($<stmt>1);
     }
     | stmts stmt {
@@ -199,7 +200,7 @@ program:
 */
 
   func_decl : varType ident LPAREN func_decl_args RPAREN block 
-  { $$ = new FunctionDeclaration(*$1, *$2, *$4, *$6); delete $4; }
+  { printf("func_decl\n"); $$ = new FunctionDeclaration(*$1, *$2, *$4, *$6); delete $4; }
   ;
 
   func_decl_args : /*blank*/  { $$ = new VariableList(); }

@@ -430,6 +430,7 @@ llvm::Value* GetArrayAddr::codeGen(CodeGenerator &context){
 
 llvm::Value* Block::codeGen(CodeGenerator &context){
     context.PushSymbolTable();
+    cout << "statementList:" << statementList.size()  << endl;
     llvm::Value* tmp = NULL;
     for(auto stmt : statementList){
         cout << "Generating code for " << typeid(*stmt).name() << endl;
@@ -438,11 +439,11 @@ llvm::Value* Block::codeGen(CodeGenerator &context){
         //If the current block already has a terminator,
         //i.e. a "break" statement is generated, stop;
         //Otherwise, continue generating.
-        if (IRBuilder.GetInsertBlock()->getTerminator())
-            break;
-        else if (stmt){
-            stmt->codeGen(context);
-        }
+        // if (IRBuilder.GetInsertBlock()->getTerminator())
+        //     break;
+        // else if (stmt){
+        //     stmt->codeGen(context);
+        // }
     }
     cout << endl;
     context.PopSymbolTable();
@@ -541,6 +542,7 @@ llvm::Value* ExternDeclaration::codeGen(CodeGenerator& context){
 llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
     // get the ArgTypes
     std::vector<llvm::Type*> ArgTypes;
+    std::cout << "ArgTypes_size:" << ArgTypes.size()  << std::endl;
     for(auto i: this->arguments){
         llvm::Type* tp = i->type.getLLVMType();
         if (!tp) {
