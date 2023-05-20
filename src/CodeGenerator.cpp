@@ -74,9 +74,9 @@ llvm::Value* CodeGenerator::FindVariable(std::string Name){
 			return PairIter->second.GetVariable();
 	}
 
-	// return NULL;
+	return NULL;
 	//再找全局变量
-	return this->Module->getGlobalVariable(Name, true);
+	// return this->Module->getGlobalVariable(Name, true);
 }
 
 bool CodeGenerator::AddVariable(std::string Name, llvm::Value* Variable){
