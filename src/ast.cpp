@@ -587,9 +587,9 @@ llvm::Value* ExternDeclaration::codeGen(CodeGenerator& context){
 llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
     // get the ArgTypes
     std::vector<llvm::Type*> ArgTypes;
-    std::cout << "ArgTypes_size:" << ArgTypes.size()  << std::endl;
-    for(auto i: this->arguments){
+    for(auto i: (this->arguments)){
         llvm::Type* tp = i->type.getLLVMType();
+        // std::cout << "arg_type:"<< i->type.type <<std::endl;
         if (!tp) {
             throw std::logic_error("Defining a function " + i->id.name + " using unknown type(s).");
             return NULL;
@@ -609,11 +609,14 @@ llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
 
         // when the function argument type is an array type, we don't pass the entire array.
         // we just pass a pointer pointing to its elements
-        if (i->size == 0)
+        if (i->size != 0)
+        {  
             tp = tp->getPointerTo();
+        }
 
         ArgTypes.push_back(tp);
     }
+    // std::cout << "ArgTypes_size:" << ArgTypes.size()  << std::endl;
 
     // get return type
     // array or pointer need to change in parser.y
@@ -664,12 +667,20 @@ llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
     for (auto ArgIter = Func->arg_begin(); ArgIter < Func->arg_end(); ArgIter++, Index++) {
         // Create alloc
         llvm::IRBuilder<> TmpB(&Func->getEntryBlock(), Func->getEntryBlock().begin());
-        llvm::AllocaInst* Alloc = TmpB.CreateAlloca(ArgTypes[Index], 0, this->arguments[Index]->id.name);
+        auto Alloc = TmpB.CreateAlloca(ArgTypes[Index], 0, this->arguments[Index]->id.name);
+
+        //Create alloca
+        // auto Alloc = CreateEntryBlockAlloca(Func, this->arguments[Index]->id.name, ArgTypes[Index]);
+        // //Assign the value by "store" instruction
+        // IRBuilder.CreateStore(ArgIter, Alloc);
 
         // Assign the value by "store" instruction
+        //  cout << "1111" <<endl;
+
         IRBuilder.CreateStore(ArgIter, Alloc);
         // Add to the symbol table
         context.AddVariable(this->arguments[Index]->id.name, Alloc);
+        //   cout << this->arguments[Index]->id.name <<endl;
     }
     //Generate code of the function body
     context.EnterFunction(Func);

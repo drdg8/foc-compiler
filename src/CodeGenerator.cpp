@@ -158,10 +158,12 @@ void CodeGenerator::GenerateCode(Block *Root){
 
 	//Delete symbol table
 	this->PopSymbolTable();
+
 }
 
 void CodeGenerator:: GenIR(const string& filename ){
 	llvm::verifyModule(*this->Module, &llvm::outs());
+	
 	std::error_code EC;
 	llvm::raw_fd_ostream dest(filename, EC);
 	if (EC) {
