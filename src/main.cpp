@@ -16,6 +16,7 @@ void parseArgments(){
     for (int i = 0; i < args.size(); i++){
         if (args[i][0] == '-'){
             std::string name(&args[i][1]);
+
             if (i + 1 < args.size() && args[i + 1][0] != '-') {
                 argMap[name] = args[i + 1];
                 i++;
@@ -23,6 +24,7 @@ void parseArgments(){
             else {
                 argMap[name] = "";
             }
+
         }
     }
 }
@@ -49,19 +51,22 @@ int main(int argc, const char* argv[]){
     InputFile = it_0->second;
     freopen(InputFile.c_str(), "r", stdin);
 
+    
     //处理输出文件
     auto it_1 = argMap.find("o");
-    if(it_1 == argMap.end() || OutputObjectFile == "")
-    {
+    if(it_1 == argMap.end() )
         OutputObjectFile = "a.ll";
-    }
     else{
         OutputObjectFile = it_1->second;
         if(OutputObjectFile.length() <= 3 || OutputObjectFile.substr(OutputObjectFile.length() - 3) != ".ll")
         {
             OutputObjectFile = OutputObjectFile + ".ll";
         }
-    }
+        
+    }    
+    std::cout <<OutputObjectFile << std::endl;
+    std::cout << "I'm in yyparse" << std::endl;
+
 
     std::cout << "I'm in yyparse" << std::endl;
 

@@ -117,7 +117,7 @@
 
 
   stmt ://声明
-   var_decl SEMI  {printf("var_decl\n");}
+   var_decl SEMI  {}
    | func_decl // 
 	 | expression SEMI { $$ = new ExpressionStatement(*$1); }
 	 | RETURN expression SEMI { $$ = new ReturnStatement($2); }
@@ -180,7 +180,7 @@
 
   //变量定义、函数定义，函数参数定义，extern定义
   var_decl :varType ident{$$ = new VariableDeclaration(*$1, *$2); }
-      | varType ident EQUAL expression { printf("dingyi \n"); $$ = new VariableDeclaration(*$1, *$2, $4);  }
+      | varType ident EQUAL expression {  $$ = new VariableDeclaration(*$1, *$2, $4);  }
       | varType ident LBRACK INTEGER RBRACK { // 定义数组
               $$ = new VariableDeclaration(*$1, *$2, $4);
     }
@@ -189,7 +189,7 @@
     varType:
       INT													    {$$ = new VarType(VarType::TypeID::_Int); }
 			| CHAR													{  $$ = new VarType(VarType::TypeID::_Char);  }
-			| DOUBLE												{ printf("double_par\n"); $$ = new VarType(VarType::TypeID::_Double);  }
+			| DOUBLE												{  $$ = new VarType(VarType::TypeID::_Double);  }
 			| VOID			                    {  $$ = new VarType(VarType::TypeID::_Void); }
       ;
 
@@ -200,7 +200,7 @@
 */
 
   func_decl : varType ident LPAREN func_decl_args RPAREN block 
-  { printf("func_decl\n"); $$ = new FunctionDeclaration(*$1, *$2, *$4, *$6); delete $4; }
+  {  $$ = new FunctionDeclaration(*$1, *$2, *$4, *$6); delete $4; }
   ;
 
   func_decl_args : /*blank*/  { $$ = new VariableList(); }
@@ -210,7 +210,7 @@
 
   //标识符
   ident : 
-  IDENTIFIER { printf("id\n"); $$ = new Identifier(*$1); delete $1; }
+  IDENTIFIER {  $$ = new Identifier(*$1); delete $1; }
       ;
 
   //表达式

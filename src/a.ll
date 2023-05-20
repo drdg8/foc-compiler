@@ -10,5 +10,8 @@ entry:
   store i32 1, i32* %a, align 4
   store i32 3, i32* %a, align 4
   store i32 1, i32* %b, align 4
+  %LoadInst = load i32, i32* %b, align 4
+  %0 = add i32 %LoadInst, 2
+  store i32 %0, i32* %a, align 4
   ret i32 0
 }
