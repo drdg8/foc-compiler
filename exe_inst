@@ -1,4 +1,4 @@
 llvm-as -o=main.bc main.ll
 llc -filetype=obj -o=main.o main.bc
-gcc -no-pie -o main main.o
+gcc -no-pie -o main main.o 或 clang -no-pie -o main main.o
 ./main

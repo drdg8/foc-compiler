@@ -15,6 +15,8 @@ int main(){
     }else{
         b = b-1;
     }
-    printf("%d\n",b);
+    int e = 0;
+    scanf("%d",&e);
+    printf("%d\n",e);
     return 0;
 }

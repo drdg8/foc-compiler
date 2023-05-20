@@ -1,7 +1,8 @@
 ; ModuleID = 'main'
 source_filename = "main"
 
-@_Const_String_ = private constant [4 x i8] c"%d\0A\00"
+@_Const_String_ = private constant [3 x i8] c"%d\00"
+@_Const_String_.1 = private constant [4 x i8] c"%d\0A\00"
 
 declare i32 @printf(i8*, ...)
 
@@ -24,6 +25,7 @@ entry:
 
 define i32 @main() {
 entry:
+  %e = alloca i32, align 4
   %b = alloca i32, align 4
   %a = alloca i32, align 4
   %d = alloca double, align 8
@@ -49,7 +51,9 @@ Else:                                             ; preds = %entry
   br label %Merge
 
 Merge:                                            ; preds = %Else, %Then
-  %LoadInst3 = load i32, i32* %b, align 4
-  %printf = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @_Const_String_, i32 0, i32 0), i32 %LoadInst3)
+  store i32 0, i32* %e, align 4
+  %scanf = call i32 (...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @_Const_String_, i32 0, i32 0), i32* %e)
+  %LoadInst3 = load i32, i32* %e, align 4
+  %printf = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @_Const_String_.1, i32 0, i32 0), i32 %LoadInst3)
   ret i32 0
 }
