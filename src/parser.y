@@ -108,17 +108,18 @@
       };
 	stmts: //多个声明
     stmt {
-        printf("stmts\n");
+        std::cout << "stmt1"  <<std::endl;
         $$ = new Block(); $$->statementList.push_back($<stmt>1);
     }
     | stmts stmt {
+      std::cout << "stmt2"  <<std::endl;
        $1->statementList.push_back($<stmt>2);
     };
 
 
   stmt ://声明
    var_decl SEMI  {}
-   | func_decl // 
+   | func_decl {printf("func_1\n");} // 
 	 | expression SEMI { $$ = new ExpressionStatement(*$1); }
 	 | RETURN expression SEMI { $$ = new ReturnStatement($2); }
    | RETURN SEMI { $$ = new ReturnStatement(); }
@@ -189,7 +190,7 @@
     varType:
       INT													    {$$ = new VarType(VarType::TypeID::_Int); }
 			| CHAR													{  $$ = new VarType(VarType::TypeID::_Char);  }
-			| DOUBLE												{  $$ = new VarType(VarType::TypeID::_Double);  }
+			| DOUBLE												{std::cout << "double_y"  <<std::endl;   $$ = new VarType(VarType::TypeID::_Double);  }
 			| VOID			                    {  $$ = new VarType(VarType::TypeID::_Void); }
       ;
 
@@ -200,7 +201,7 @@
 */
 
   func_decl : varType ident LPAREN func_decl_args RPAREN block 
-  {  $$ = new FunctionDeclaration(*$1, *$2, *$4, *$6); delete $4; }
+  {  std::cout<<$2->name<<std::endl; $$ = new FunctionDeclaration(*$1, *$2, *$4, *$6); delete $4; }
   ;
 
   func_decl_args : /*blank*/  { $$ = new VariableList(); }

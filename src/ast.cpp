@@ -473,8 +473,10 @@ llvm::Value* Block::codeGen(CodeGenerator &context){
         // i.e. a "break" statement is generated, stop;
         // Otherwise, continue generating.
         
-        if (IRBuilder.GetInsertBlock() != NULL && IRBuilder.GetInsertBlock()->getTerminator())
-            break;
+        if (context.GetCurrentFunction() != NULL && IRBuilder.GetInsertBlock()->getTerminator())
+         {  
+             break;
+         }
         else if (stmt){
             stmt->codeGen(context);
         }

@@ -8,7 +8,7 @@ int add(int a,int b){
 int main(){
     double d = 1.1;
     int a = 1;
-    a = 2;
+    a = add(3,4);
     int b = 1;
     if(a==3){
         b = b+1;
