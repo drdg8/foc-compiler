@@ -62,7 +62,8 @@ class CodeGenerator{
         std::vector<llvm::BasicBlock*> ConditionBlockStack;
         // end block, when "break;" jump here
         std::vector<llvm::BasicBlock*> EndBlockStack;
-
+        
+        bool is_declare = 0;
         // llvm::BasicBlock* returnBB;
         // llvm::Value* returnVal;
 

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+
 #include <llvm/IR/Value.h>
 
 class CodeGenerator;
@@ -182,6 +183,8 @@ public:
 	Declaration() {}
 	~Declaration() {}
 	virtual llvm::Value* codeGen(CodeGenerator& context) = 0;
+
+
 };
 
 class VariableDeclaration : public Declaration {

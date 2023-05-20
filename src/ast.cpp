@@ -12,6 +12,8 @@
 #include <llvm/IR/Value.h>
 #include <string>
 #include <vector>
+#include <typeinfo>
+
 using namespace std;
 
 // we distguish global context and global context use C/context
@@ -276,7 +278,7 @@ llvm::Value* Assign::codeGen(CodeGenerator &context){
     llvm::Value* right = expr.codeGen(context);
 
     auto CurrentBlock = IRBuilder.GetInsertBlock();
-
+    // cout << (IRBuilder.GetInsertBlock() == NULL) << endl;
     // use chatgpt
     // if Value *src, what's the difference between src->getType() and src->getType()->getPointerElementType()? give a e.g
     // in all, if src is pointer to int, getType() return llvm::Type *, which is a pointer to int, ->getPointerElementType() is same
@@ -434,21 +436,31 @@ llvm::Value* Block::codeGen(CodeGenerator &context){
     llvm::Value* tmp = NULL;
     for(auto stmt : statementList){
         cout << "Generating code for " << typeid(*stmt).name() << endl;
-        tmp = (*stmt).codeGen(context);
+        // if(typeid(*stmt) == typeid(VariableDeclaration)) {
+        //     cout << "VariableDeclaration" << endl;
+        // } 
+        // else  if(typeid(*stmt) == typeid(FunctionDeclaration)) {
+        //     cout << "FunctionDeclaration" << endl;
+        // }   
+        
+        // tmp = (*stmt).codeGen(context);
 
         //If the current block already has a terminator,
-        //i.e. a "break" statement is generated, stop;
-        //Otherwise, continue generating.
-        // if (IRBuilder.GetInsertBlock()->getTerminator())
-        //     break;
-        // else if (stmt){
-        //     stmt->codeGen(context);
-        // }
+        // i.e. a "break" statement is generated, stop;
+        // Otherwise, continue generating.
+        
+        if (context.GetCurrentFunction() != NULL  &&IRBuilder.GetInsertBlock()->getTerminator())
+            break;
+        else if (stmt){
+            stmt->codeGen(context);
+        }
     }
     cout << endl;
     context.PopSymbolTable();
 	return NULL;
 }
+
+
 
 
 //已检查
@@ -457,6 +469,8 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
     // why not codeGen? 
     llvm::Type* VarType = type.getLLVMType();
     if(context.CurrFunction == NULL){
+
+
         // global variable
         cout << "declaration global variable " << id.name << endl;
         // if redefine
@@ -484,6 +498,7 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
             Assign ass(id, *assignmentExpr);
             ass.codeGen(context);
         }
+        // cout << "111" << endl;
         return Alloc;
     }
     else{
