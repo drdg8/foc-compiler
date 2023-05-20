@@ -1,7 +1,11 @@
 ; ModuleID = 'main'
 source_filename = "main"
 
-@c = global i32 5
+@_Const_String_ = private constant [4 x i8] c"%d\0A\00"
+
+declare i32 @printf(i8*, ...)
+
+declare i32 @scanf(...)
 
 define i32 @add(i32 %0, i32 %1) {
 entry:
@@ -45,5 +49,7 @@ Else:                                             ; preds = %entry
   br label %Merge
 
 Merge:                                            ; preds = %Else, %Then
+  %LoadInst3 = load i32, i32* %b, align 4
+  %printf = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @_Const_String_, i32 0, i32 0), i32 %LoadInst3)
   ret i32 0
 }

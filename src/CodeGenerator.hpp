@@ -65,7 +65,7 @@ class CodeGenerator{
         llvm::BasicBlock* TmpBB;
         llvm::BasicBlock* GlobalBB;
         llvm::Function* GlobalFunc;
-        
+        llvm::Function *printf,*scanf;
         // llvm::Value* returnVal;
 
     public:
@@ -108,7 +108,10 @@ class CodeGenerator{
         void GenerateCode(Block *Root);
 
         void GenIR(const string& filename);
-
+        
+        llvm::Function* GenPrintf(); //得到llvm形式的printf函数
+        
+        llvm::Function* GenScanf();  //得到llvm形式的scanf函数
 };
 
 

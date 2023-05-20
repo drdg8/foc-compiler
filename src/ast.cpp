@@ -118,7 +118,31 @@ llvm::Value* Char::codeGen(CodeGenerator& context) {
 
 llvm::Value* String::codeGen(CodeGenerator& context) {
     cout << "STRING: " << value << endl;
-    return IRBuilder.CreateGlobalStringPtr(value.c_str());
+    string str = value.substr(1, value.length() - 2);
+    string after = string(1, '\n');
+    int pos = str.find("\\n");
+    while(pos != string::npos) {
+        str = str.replace(pos, 2, after);
+        pos = str.find("\\n");
+    }
+    llvm::Constant *strConst = llvm::ConstantDataArray::getString(Context, str);
+    
+    llvm::Value *globalVar = new llvm::GlobalVariable(*(context.Module), strConst->getType(), true, llvm::GlobalValue::PrivateLinkage, strConst, "_Const_String_");
+    vector<llvm::Value*> indexList;
+    indexList.push_back(IRBuilder.getInt32(0));
+    indexList.push_back(IRBuilder.getInt32(0));
+    // var value
+    // llvm::Value * varPtr = IRBuilder.CreateInBoundsGEP(globalVar, llvm::ArrayRef<llvm::Value*>(indexList), "tmpstring");
+    llvm::PointerType* PtrTy = static_cast<llvm::PointerType*>(globalVar->getType());
+    llvm::Type* ElemTy = PtrTy->getPointerElementType();
+
+    llvm::Value * varPtr = IRBuilder.CreateInBoundsGEP(ElemTy, globalVar, llvm::ArrayRef<llvm::Value*>(indexList), "tmpstring");
+
+    
+    return varPtr;
+
+
+    // return IRBuilder.CreateGlobalStringPtr(value.c_str());
 }
 
 
@@ -151,7 +175,49 @@ llvm::Value* Identifier::codeGen(CodeGenerator& context) {
     return res;
 }
 
+
+vector<llvm::Value *> *getScanfArgs(CodeGenerator& context,vector<Expression*> args){
+    vector<llvm::Value *> *scanf_args = new vector<llvm::Value *>;
+    for(auto it: args){
+        llvm::Value* tmp = it->codeGen(context);
+        scanf_args->push_back(tmp);
+    }
+    return scanf_args;
+}
+
+vector<llvm::Value *> *getPrintfArgs(CodeGenerator& context,vector<Expression*> args){
+    vector<llvm::Value *> *printf_args = new vector<llvm::Value *>;
+    for(auto it: args){
+        llvm::Value* tmp = it->codeGen(context);
+        if (tmp->getType() == llvm::Type::getFloatTy(Context))
+            tmp = IRBuilder.CreateFPExt(tmp, llvm::Type::getDoubleTy(Context), "tmpdouble");
+        printf_args->push_back(tmp);
+    }
+    return printf_args;
+}
+llvm:: Value* call_printf(CodeGenerator& context,vector<Expression*> args){
+    vector<llvm::Value *> *printf_args = getPrintfArgs(context, args);    
+    return IRBuilder.CreateCall(context.printf, *printf_args, "printf");
+}
+
+llvm:: Value* call_scanf(CodeGenerator& context,vector<Expression*> args){
+    //vector<llvm::Value *> *scanf_args = getScanfArgsAddr(emitContext, args);    
+    vector<llvm::Value *> *scanf_args = getScanfArgs(context, args);    
+    return IRBuilder.CreateCall(context.scanf, *scanf_args, "scanf");
+}
+
+
+
+
 llvm::Value* Call::codeGen(CodeGenerator& context){
+
+    if(id.name == "printf"){ //若调用 printf 函数
+        return call_printf(context, arguments);
+    } else if(id.name == "scanf"){ //若调用 scanf 函数
+        return call_scanf(context, arguments);
+    }
+    
+
     // find the same name function in module
     llvm::Function *func = context.Module->getFunction(id.name.c_str());
     if (func == NULL) {
@@ -485,6 +551,15 @@ llvm::Value* Block::codeGen(CodeGenerator &context){
     context.PopSymbolTable();
 	return NULL;
 }
+
+
+
+
+
+
+
+
+
 
 //已检查
 llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){

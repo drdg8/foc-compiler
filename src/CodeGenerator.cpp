@@ -22,7 +22,11 @@ CodeGenerator::CodeGenerator(void) :
 	EndBlockStack(),
 	GlobalBB(),
 	GlobalFunc()
-{}
+{
+	this->printf = GenPrintf();
+    this->scanf = GenScanf();
+
+}
 
 //Create and push an empty symbol table
 void CodeGenerator::PushSymbolTable(void) {
@@ -173,4 +177,26 @@ void CodeGenerator:: GenIR(const string& filename ){
     this->Module->print(dest, nullptr);
 }
 
+llvm::Function* CodeGenerator::GenPrintf(){
+    vector<llvm::Type*> printf_arg_types; //printf内参数的类型
+    printf_arg_types.push_back(IRBuilder.getInt8PtrTy()); //8位代表void*
+
+    llvm::FunctionType* printf_type = 
+    llvm::FunctionType::get(IRBuilder.getInt32Ty(),printf_arg_types,true);
+    llvm::Function* printf_func = 
+    llvm::Function::Create(printf_type,llvm::Function::ExternalLinkage,llvm::Twine("printf"),this->Module);
+
+    printf_func->setCallingConv(llvm::CallingConv::C);
+    return printf_func;
+}
+
+llvm::Function* CodeGenerator::GenScanf(){
+    llvm::FunctionType* scanf_type = 
+    llvm::FunctionType::get(IRBuilder.getInt32Ty(),true);
+    llvm::Function* scanf_func = 
+    llvm::Function::Create(scanf_type,llvm::Function::ExternalLinkage,llvm::Twine("scanf"),this->Module);
+
+    scanf_func->setCallingConv(llvm::CallingConv::C);
+    return scanf_func;
+}
 

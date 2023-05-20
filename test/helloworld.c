@@ -1,4 +1,3 @@
-int c = 5;
 int add(int a,int b){
     int res = a+b;
     return res;
@@ -6,6 +5,7 @@ int add(int a,int b){
 
 
 int main(){
+    
     double d = 1.1;
     int a = 1;
     a = add(3,4);
@@ -15,5 +15,6 @@ int main(){
     }else{
         b = b-1;
     }
+    printf("%d\n",b);
     return 0;
 }
