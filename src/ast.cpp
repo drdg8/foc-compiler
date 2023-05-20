@@ -281,6 +281,7 @@ llvm::Value* Assign::codeGen(CodeGenerator &context){
 		return nullptr;
     }
 
+    // Assign: Type of left %res = alloca i32, align 4 is: i32* ,eleType is: i32
     llvm::Type* type = result->getType();
     llvm::Type* eletype = result->getType()->getPointerElementType();
     llvm::outs() << "Assign: Type of left " << *result << " is: ";
@@ -312,7 +313,12 @@ llvm::Value* Assign::codeGen(CodeGenerator &context){
 		return NULL;
 	}
     IRBuilder.CreateStore(right, result);
+    /*
+    Note that AllocaInst is a subclass of Instruction, which is a subclass of Value, so the cast from AllocaInst* to Value* is safe. This allows you to use the resulting Value* pointer in other parts of your LLVM code that expect a Value*, such as passing it as an argument to a function.
+    */
     // maybe wrong here !!!
+
+    // return result;
     return right;
 }
 
@@ -519,7 +525,7 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
         // so we use GlobalBB to do Assign
         if (assignmentExpr) {
             Assign ass(id, *assignmentExpr);
-            Initializer = (llvm::Constant *)typeCast(ass.codeGen(context), VarType);
+            Initializer = (llvm::Constant *)typeCast((llvm::Value *)ass.codeGen(context), VarType);
         }
 
         Alloc->setInitializer(Initializer);
@@ -585,6 +591,7 @@ llvm::Value* ExternDeclaration::codeGen(CodeGenerator& context){
 */
 
 llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
+    cout << "11" << endl;
     // get the ArgTypes
     std::vector<llvm::Type*> ArgTypes;
     for(auto i: (this->arguments)){
@@ -609,8 +616,7 @@ llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
 
         // when the function argument type is an array type, we don't pass the entire array.
         // we just pass a pointer pointing to its elements
-        if (i->size != 0)
-        {  
+        if (i->size != 0){  
             tp = tp->getPointerTo();
         }
 
