@@ -36,7 +36,7 @@
 "void"													{return TOKEN(VOID); }
 
 [a-zA-Z_][a-zA-Z0-9_]*  {SAVE_IDENTIFIER;  return IDENTIFIER;}//标识符
-[0-9]+\.[0-9]* 			    {SAVE_DOUBLE; return DOUBLE;}//浮点
+[0-9]+\.[0-9]* 			    {printf("double_lex \n"); SAVE_DOUBLE; return REAL;}//浮点
 [0-9]+					        {SAVE_INTEGER; return INTEGER;}//整型
 \'"[^\\']"\'          {SAVE_CHAR; return CHARACTER;}//字符
 \"(\\.|[^"\\])*\"       {SAVE_STRING; return STRING; }//字符串
@@ -73,7 +73,7 @@
 "."         						return TOKEN(DOT);//其他
 ","				          		return TOKEN(COMMA);
 "&"				          		return TOKEN(GAD);//取地址
-";"				          	  	return TOKEN(SEMI);
+";"				          	  	printf("SEMI_lex\n"); return TOKEN(SEMI);
 ":"                     return TOKEN(COLON);
 "->"					          return TOKEN(ARW);//箭头（暂未实现）
 
