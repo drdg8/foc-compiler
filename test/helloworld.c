@@ -1,3 +1,4 @@
+// int c = 2;
 int main(){
     double d = 1.1;
     int a = 1;
