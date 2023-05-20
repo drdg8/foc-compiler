@@ -62,9 +62,10 @@ class CodeGenerator{
         std::vector<llvm::BasicBlock*> ConditionBlockStack;
         // end block, when "break;" jump here
         std::vector<llvm::BasicBlock*> EndBlockStack;
+        llvm::BasicBlock* TmpBB;
+        llvm::BasicBlock* GlobalBB;
+        llvm::Function* GlobalFunc;
         
-        bool is_declare = 0;
-        // llvm::BasicBlock* returnBB;
         // llvm::Value* returnVal;
 
     public:
@@ -100,7 +101,13 @@ class CodeGenerator{
         // get the destination block for "break" statements
         llvm::BasicBlock* GetEndBlock(void);
 
-        void GenIR(Block* programBlock,const string& filename);
+        void ChangeToGlobalBB();
+
+        void ChangeToTmpBB();
+
+        void GenerateCode(Block *Root);
+
+        void GenIR(const string& filename);
 
 };
 
