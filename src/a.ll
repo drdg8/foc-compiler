@@ -1,7 +1,7 @@
 ; ModuleID = 'main'
 source_filename = "main"
 
-@c = global i32 0
+@c = global i32 3
 
 define i32 @main() {
 entry:

@@ -26,6 +26,7 @@ void parseArgments(){
         }
     }
 }
+
 int main(int argc, const char* argv[]){
     if(argc == 1){
         std::cout << "Usage :" <<std::endl;
@@ -77,7 +78,8 @@ int main(int argc, const char* argv[]){
 
     std::cout<<"program begin"<<std::endl;
 
+    generator->GenerateCode(programBlock);
+
     //将目标代码写入output file中
-    generator->GenIR(programBlock,OutputObjectFile);
-    // programBlock->CodeGen
+    generator->GenIR(OutputObjectFile);
 }

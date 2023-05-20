@@ -69,6 +69,12 @@ llvm::Instruction::CastOps getCastInst(llvm::Type* src, llvm::Type* dst) {
 }
 
 llvm::Value* typeCast(llvm::Value* src, llvm::Type* dst) {
+    llvm::Type* type = src->getType();
+    llvm::outs() << "TypeCast: Type of value " << *src << " is: ";
+    type->print(llvm::outs());
+    llvm::outs() << ", casting to " << *dst;
+    llvm::outs() << "\n";
+
     if(src->getType() == dst){
         return src;
     }
@@ -267,22 +273,37 @@ llvm::Value* BinaryOp::codeGen(CodeGenerator& context){
 // idk but in yacc ASSIGN is EQUAL
 // identifier = expression
 llvm::Value* Assign::codeGen(CodeGenerator &context){
-    cout << "ASSIGN: lhs " << ident.name << endl;
-    
+    cout << "Assign: " << ident.name << endl;
+
     llvm::Value* result = context.FindVariable(ident.name);
     if(result == nullptr){
         cerr << "undeclared variable " << ident.name << endl;
 		return nullptr;
     }
 
+    llvm::Type* type = result->getType();
+    llvm::Type* eletype = result->getType()->getPointerElementType();
+    llvm::outs() << "Assign: Type of left " << *result << " is: ";
+    type->print(llvm::outs());
+    llvm::outs() << " ,eleType is: ";
+    eletype->print(llvm::outs());
+    llvm::outs() << "\n";
+
     llvm::Value* right = expr.codeGen(context);
+
+    type = right->getType();
+    llvm::outs() << "Assign: Type of value " << *right << " is: ";
+    type->print(llvm::outs());
+    llvm::outs() << "\n";
 
     auto CurrentBlock = IRBuilder.GetInsertBlock();
     // cout << (IRBuilder.GetInsertBlock() == NULL) << endl;
+
     // use chatgpt
     // if Value *src, what's the difference between src->getType() and src->getType()->getPointerElementType()? give a e.g
     // in all, if src is pointer to int, getType() return llvm::Type *, which is a pointer to int, ->getPointerElementType() is same
     // if src is pointer to array int, getType() return pointer to llvm::Type array, ->getPointerElementType() return pointer to llvm::Type int 
+
     if (right->getType() != result->getType()->getPointerElementType())
         right = typeCast(right, result->getType()->getPointerElementType());
 
@@ -290,7 +311,9 @@ llvm::Value* Assign::codeGen(CodeGenerator &context){
 		throw std::domain_error("Assignment with values that cannot be cast to the target type.");
 		return NULL;
 	}
-    return new llvm::StoreInst(right, result, false, CurrentBlock);
+    IRBuilder.CreateStore(right, result);
+    // maybe wrong here !!!
+    return right;
 }
 
 // e.g a[2];
@@ -436,6 +459,7 @@ llvm::Value* Block::codeGen(CodeGenerator &context){
     llvm::Value* tmp = NULL;
     for(auto stmt : statementList){
         cout << "Generating code for " << typeid(*stmt).name() << endl;
+
         // if(typeid(*stmt) == typeid(VariableDeclaration)) {
         //     cout << "VariableDeclaration" << endl;
         // } 
@@ -449,7 +473,7 @@ llvm::Value* Block::codeGen(CodeGenerator &context){
         // i.e. a "break" statement is generated, stop;
         // Otherwise, continue generating.
         
-        if (context.GetCurrentFunction() != NULL  &&IRBuilder.GetInsertBlock()->getTerminator())
+        if (IRBuilder.GetInsertBlock() != NULL && IRBuilder.GetInsertBlock()->getTerminator())
             break;
         else if (stmt){
             stmt->codeGen(context);
@@ -460,28 +484,27 @@ llvm::Value* Block::codeGen(CodeGenerator &context){
 	return NULL;
 }
 
-
-
-
 //已检查
 llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
     // not an array
     // why not codeGen? 
     llvm::Type* VarType = type.getLLVMType();
     if(context.CurrFunction == NULL){
-
-
         // global variable
         cout << "declaration global variable " << id.name << endl;
+
+        context.ChangeToGlobalBB();
+
         // if redefine
         llvm::Value *tmp = context.Module->getGlobalVariable(id.name, true);
         if(tmp != nullptr){
             throw logic_error("Redefined Global Variable: " + id.name);
             return NULL;
         }
-        //Create the constant initializer
-        llvm::Constant* Initializer = NULL;
-        Initializer = llvm::ConstantInt::get(VarType, 0);
+
+        // create the constant initializer
+        llvm::Constant* Initializer = llvm::ConstantInt::get(VarType, 0);
+
         // 3rd argument is const or not, which we don't implement
         auto Alloc = new llvm::GlobalVariable(
             *(context.Module),
@@ -491,20 +514,25 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
             Initializer,
             id.name
         );
-        // if global we check no currfunction
 
-        //常量的赋值与变量不一样
+        // if global we check no currfunction
+        // so we use GlobalBB to do Assign
         if (assignmentExpr) {
             Assign ass(id, *assignmentExpr);
-            ass.codeGen(context);
+            Initializer = (llvm::Constant *)typeCast(ass.codeGen(context), VarType);
         }
-        // cout << "111" << endl;
+
+        Alloc->setInitializer(Initializer);
+
+        context.ChangeToTmpBB();
+
         return Alloc;
     }
     else{
         // local variable
         cout << "declaration local variable " << id.name << endl;
         llvm::Function *Func = context.CurrFunction;
+
         // declaration in function
         // create an alloca instruction in the entry block of the current function,
         // wherever the variable declaration is.
@@ -516,11 +544,13 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
             throw logic_error("Redefined Local Variable: " + id.name);
             return NULL;
         }
+
         /*
         // 将新定义的变量类型和地址存入符号表中
         emitContext.getTopType()[identifier.name] = llvmType;
         emitContext.getTop()[identifier.name] = alloc;
         */
+
         if (assignmentExpr) {
             Assign ass(id, *assignmentExpr);
             ass.codeGen(context);

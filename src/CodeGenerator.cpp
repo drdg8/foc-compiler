@@ -19,7 +19,9 @@ CodeGenerator::CodeGenerator(void) :
 	CurrFunction(NULL),
 	SymbolTableStack(),
 	ConditionBlockStack(),
-	EndBlockStack()
+	EndBlockStack(),
+	GlobalBB(),
+	GlobalFunc()
 {}
 
 //Create and push an empty symbol table
@@ -129,9 +131,36 @@ llvm::BasicBlock* CodeGenerator::GetEndBlock(void){
 		return NULL;
 }
 
+void CodeGenerator::ChangeToGlobalBB(){
+	auto Tmp = IRBuilder.GetInsertBlock();
+	this->TmpBB = Tmp;
+	IRBuilder.SetInsertPoint(this->GlobalBB);
+}
 
-void CodeGenerator:: GenIR(Block* programBlock,const string& filename ){
-	programBlock->codeGen(*this);
+void CodeGenerator::ChangeToTmpBB(){
+	IRBuilder.SetInsertPoint(this->TmpBB);
+	this->TmpBB = NULL;
+}
+
+void CodeGenerator::GenerateCode(Block *Root){
+	// initialize symbol table
+	this->PushSymbolTable();
+
+	this->GlobalFunc = llvm::Function::Create(llvm::FunctionType::get(IRBuilder.getVoidTy(), false), llvm::GlobalValue::InternalLinkage, "0Global", this->Module);
+	this->GlobalBB = llvm::BasicBlock::Create(Context, "Temp", this->GlobalFunc);
+    Root->codeGen(*this);
+
+	std::cout << "Gen Successfully" << std::endl;
+
+	//Delete GlobalBB and GlobalFunc
+	this->GlobalBB->eraseFromParent();
+	this->GlobalFunc->eraseFromParent();
+
+	//Delete symbol table
+	this->PopSymbolTable();
+}
+
+void CodeGenerator:: GenIR(const string& filename ){
 	llvm::verifyModule(*this->Module, &llvm::outs());
 	std::error_code EC;
 	llvm::raw_fd_ostream dest(filename, EC);
