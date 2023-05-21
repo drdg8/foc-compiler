@@ -18,17 +18,16 @@ int main(){
     // }
     int e = 5;
     while( e < 6 ){
-        e = e + 1;
-        if(e == 6){
-            continue;
+        if(e == 5){
+            break;
         }
-        b = b + 1;
-      
+        e = e + 1;
+        // b = b + 1;
     }
     int i;
-    for(i=0;i<2;i=i+1){
-        e = e + i;
-    }
+    // for(i=0;i<2;i=i+1){
+    //     e = e + i;
+    // }
     printf("%d\n",b);
     printf("%d\n",e);
     return 0;

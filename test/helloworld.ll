@@ -48,11 +48,8 @@ WhileCond:                                        ; preds = %Merge, %entry
 
 WhileLoop:                                        ; preds = %WhileCond
   %LoadInst2 = load i32, i32* %e, align 4
-  %1 = add i32 %LoadInst2, 1
-  store i32 %1, i32* %e, align 4
-  %LoadInst3 = load i32, i32* %e, align 4
-  %icmptmp4 = icmp eq i32 %LoadInst3, 6
-  br i1 %icmptmp4, label %Then, label %Else
+  %icmptmp3 = icmp eq i32 %LoadInst2, 5
+  br i1 %icmptmp3, label %Then, label %Else
 
 Then:                                             ; preds = %WhileLoop
   br label %WhileEnd
@@ -61,37 +58,15 @@ Else:                                             ; preds = %WhileLoop
   br label %Merge
 
 Merge:                                            ; preds = %Else
-  %LoadInst5 = load i32, i32* %b, align 4
-  %2 = add i32 %LoadInst5, 1
-  store i32 %2, i32* %b, align 4
+  %LoadInst4 = load i32, i32* %e, align 4
+  %1 = add i32 %LoadInst4, 1
+  store i32 %1, i32* %e, align 4
   br label %WhileCond
 
 WhileEnd:                                         ; preds = %Then, %WhileCond
-  store i32 0, i32* %i, align 4
-  br label %ForCond
-
-ForCond:                                          ; preds = %ForTail, %WhileEnd
-  %LoadInst6 = load i32, i32* %i, align 4
-  %icmptmp7 = icmp slt i32 %LoadInst6, 2
-  br i1 %icmptmp7, label %ForLoop, label %ForEnd
-
-ForLoop:                                          ; preds = %ForCond
-  %LoadInst8 = load i32, i32* %e, align 4
-  %LoadInst9 = load i32, i32* %i, align 4
-  %3 = add i32 %LoadInst8, %LoadInst9
-  store i32 %3, i32* %e, align 4
-  br label %ForTail
-
-ForTail:                                          ; preds = %ForLoop
-  %LoadInst10 = load i32, i32* %i, align 4
-  %4 = add i32 %LoadInst10, 1
-  store i32 %4, i32* %i, align 4
-  br label %ForCond
-
-ForEnd:                                           ; preds = %ForCond
-  %LoadInst11 = load i32, i32* %b, align 4
-  %printf12 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @_Const_String_.1, i32 0, i32 0), i32 %LoadInst11)
-  %LoadInst13 = load i32, i32* %e, align 4
-  %printf14 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @_Const_String_.2, i32 0, i32 0), i32 %LoadInst13)
+  %LoadInst5 = load i32, i32* %b, align 4
+  %printf6 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @_Const_String_.1, i32 0, i32 0), i32 %LoadInst5)
+  %LoadInst7 = load i32, i32* %e, align 4
+  %printf8 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @_Const_String_.2, i32 0, i32 0), i32 %LoadInst7)
   ret i32 0
 }

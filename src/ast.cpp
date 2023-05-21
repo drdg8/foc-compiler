@@ -1077,7 +1077,8 @@ llvm::Value* CaseStatement::codeGen(CodeGenerator &context){
 }
 
 llvm::Value* BreakStatement::codeGen(CodeGenerator &context){
-    llvm::BasicBlock* BreakPoint = context.GetConditionBlock();
+    cout << "break,codegen" << endl;
+    llvm::BasicBlock* BreakPoint = context.GetEndBlock();
     if (BreakPoint)
         IRBuilder.CreateBr(BreakPoint);
     else
