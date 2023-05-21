@@ -915,6 +915,8 @@ llvm::Value* WhileStatement::codeGen(CodeGenerator &context){
 }
 
 llvm::Value* ForStatement::codeGen(CodeGenerator &context){
+    cout << "ForStatement"<< endl;
+
     llvm::Function* CurrentFunc = context.GetCurrentFunction();
 
     llvm::BasicBlock* ForCondBB = llvm::BasicBlock::Create(Context, "ForCond");
@@ -923,14 +925,16 @@ llvm::Value* ForStatement::codeGen(CodeGenerator &context){
     llvm::BasicBlock* ForEndBB = llvm::BasicBlock::Create(Context, "ForEnd");
 
     // if (this->Initial) {
-        context.PushSymbolTable();
-        this->Initial.codeGen(context);
-
+    context.PushSymbolTable();
+    cout << "For init" << endl;
+    this->Initial.codeGen(context);
+    cout << "For end" << endl;
     TerminateBlockByBr(ForCondBB);
 
     //Generate code in the "ForCond" block
     CurrentFunc->getBasicBlockList().push_back(ForCondBB);
     IRBuilder.SetInsertPoint(ForCondBB);
+
 
     // evaluate condition
     llvm::Value* Condition = this->condition.codeGen(context);

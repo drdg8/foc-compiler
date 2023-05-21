@@ -9,14 +9,27 @@ int main(){
     double d = 1.1;
     int a = 1;
     a = add(3,4);
+    printf("%d\n",a);
     int b = 1;
-    if(a==3){
-        b = b+1;
-    }else{
-        b = b-1;
+    // if(a==3){
+    //     b = b+1;
+    // }else{
+    //     b = b-1;
+    // }
+    int e = 5;
+    while( e < 6 ){
+        e = e + 1;
+        if(e == 6){
+            continue;
+        }
+        b = b + 1;
+      
     }
-    int e = 0;
-    scanf("%d",&e);
+    int i;
+    for(i=0;i<2;i=i+1){
+        e = e + i;
+    }
+    printf("%d\n",b);
     printf("%d\n",e);
     return 0;
 }

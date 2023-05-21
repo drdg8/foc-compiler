@@ -151,7 +151,7 @@
   
   ForStmt:FOR LPAREN expression SEMI expression SEMI expression RPAREN block
    {
-        $$ = new ForStatement(*$5, *$3,*$7,*$9);
+        $$ = new ForStatement(*$3, *$5,*$7,*$9);
     };
   SwitchStmt:	SWITCH LPAREN expression RPAREN LBRACE CaseList RBRACE		
       {  $$ = new SwitchStatement(*$3,*$6);   }
