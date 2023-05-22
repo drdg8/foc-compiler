@@ -28,7 +28,7 @@
 "array"               return TOKEN(ARRAY);
 "continue"              return TOKEN(CONTINUE);
 "until"                 return TOKEN(UNTIL);
-"break"                 return TOKEN(BREAK);
+"break"                  printf("break_lex\n"); return TOKEN(BREAK);
 
 "int"													{return TOKEN(INT); }
 "char"													{return TOKEN(CHAR); }
