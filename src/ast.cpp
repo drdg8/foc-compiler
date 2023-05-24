@@ -180,7 +180,7 @@ llvm::Value* Identifier::codeGen(CodeGenerator& context) {
         indexList.push_back(IRBuilder.getInt32(0));
         indexList.push_back(IRBuilder.getInt32(0));
         // the first argument is a pointer to the base address of the array, and the remaining arguments are the indices of the element to access.
-        res = IRBuilder.CreateInBoundsGEP(var->getType(), var, llvm::ArrayRef<llvm::Value*>(indexList), "arrayPtr");
+        res = IRBuilder.CreateInBoundsGEP(var->getType()->getPointerElementType(), var, llvm::ArrayRef<llvm::Value*>(indexList), "arrayPtr");
     }
     else {
         res = new llvm::LoadInst(tp, var, "LoadInst", false, IRBuilder.GetInsertBlock());
@@ -235,6 +235,7 @@ llvm::Value* Call::codeGen(CodeGenerator& context){
     if (func == NULL) {
 		std::cerr << "no such function " << id.name << endl;
 	}
+    cout << "Call: function name: " << id.name << endl;
 
     // !! no type upgrade or type check
 
@@ -416,22 +417,23 @@ llvm::Value* ArrayElement::codeGen(CodeGenerator &context){
     // type of variable @f = global [100 x i32] zeroinitializer is: [100 x i32]* ,eleType is: [100 x i32]
     typePrint(arrayValue);
 
-    /*
-    // if a[2] = &b pointer
+    // if arrayValue->getType() is i32**
     if(arrayValue->getType()->getPointerElementType()->isPointerTy()) {
         arrayValue = IRBuilder.CreateLoad(arrayValue->getType()->getPointerElementType(), arrayValue);
         indexList.push_back(indexValue);    
     }
     // if array 
-    else {
-    */
+    else if(arrayValue->getType()->getPointerElementType()->isArrayTy()) {
         indexList.push_back(IRBuilder.getInt32(0));
         indexList.push_back(indexValue);    
-    // }
+    }
+    else{
+        cerr << "[] can just be used to pointer or array" << endl;
+        return nullptr;
+    }
 
     llvm::Value* elePtr = IRBuilder.CreateInBoundsGEP(arrayValue->getType()->getPointerElementType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmparray");
 
-    cout << "++++++++++++++\n";
     return IRBuilder.CreateLoad(elePtr->getType()->getPointerElementType(), elePtr, "tmpvar");
 
     //return IRBuilder.CreateAlignedLoad(elePtr, 4);
@@ -708,9 +710,9 @@ llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
 
         // when the function argument type is an array type, we don't pass the entire array.
         // we just pass a pointer pointing to its elements
-        // if (i->size != 0){  
-        //     tp = tp->getPointerTo();
-        // }
+        if (tp->isArrayTy()){  
+            tp = tp->getArrayElementType()->getPointerTo();
+        }
 
         ArgTypes.push_back(tp);
     }
