@@ -107,6 +107,8 @@ public:
 	Call(const Identifier& id, ExpressionList& arguments) :
 		id(id), arguments(arguments) { }
 	Call(const Identifier& id) : id(id) { }
+	llvm::Value* generatePrintfCall(CodeGenerator& context, std::vector<Expression*>& args);
+	llvm::Value* generateScanfCall(CodeGenerator& context, std::vector<Expression*>& args);
 	virtual llvm::Value* codeGen(CodeGenerator& context);
 public:
 	const Identifier& id;

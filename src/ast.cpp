@@ -16,10 +16,15 @@
 
 using namespace std;
 
-// we distguish global context and global context use C/context
+// we distguish global context and code use C/context
+//我们用C/context来区分上下文和codegenerator
 
+// 这个函数是用来获取VarType类型对应的LLVM类型。LLVM类型包括Int32，Int8，Double，Void等基本类型，
+// 并且也处理了数组类型。数组类型是通过llvm::ArrayType来实现的。
 llvm::Type* VarType::getLLVMType(){
+    // 创建一个llvm::Type指针LLVMType
     llvm::Type *LLVMType;
+    // 判断变量的类型
     switch (type) {
         case _Int: LLVMType = IRBuilder.getInt32Ty(); break;
         case _Char: LLVMType = IRBuilder.getInt8Ty(); break;
@@ -27,13 +32,22 @@ llvm::Type* VarType::getLLVMType(){
         case _Void: LLVMType = IRBuilder.getVoidTy(); break;
         default: break;
     }
+    // 如果变量有大小（可能是数组）
     if(this->size > 0){
-        // array 
+        // 使用llvm::ArrayType::get生成数组类型，并赋值给LLVMType
         LLVMType = llvm::ArrayType::get(LLVMType, this->size); 
     }
+    // 返回LLVMType
     return LLVMType;
 }
 
+
+
+
+
+// 这个函数用于打印LLVM Value的类型。
+// 如果这个Value是一个指针类型，它还会打印这个指针所指向的元素的类型。输出的结果将直接打印到标准输出设备（例如控制台）。
+// 打印信息用于调试
 void typePrint(llvm::Value *var){
     // Assign: Type of left %res = alloca i32, align 4 is: i32* ,eleType is: i32
     llvm::Type* type = var->getType();
@@ -47,22 +61,8 @@ void typePrint(llvm::Value *var){
     llvm::outs() << "\n";
 }
 
-/*
-    Trunc: Truncate a value to a smaller type.
-    ZExt: Zero-extend a value to a larger type.
-    SExt: Sign-extend a value to a larger type.
-    FPToUI: Convert a floating-point value to an unsigned integer type.
-    FPToSI: Convert a floating-point value to a signed integer type.
-    UIToFP: Convert an unsigned integer value to a floating-point type.
-    SIToFP: Convert a signed integer value to a floating-point type.
-    FPTrunc: Truncate a floating-point value to a smaller type.
-    FPExt: Extend a floating-point value to a larger type.
-    PtrToInt: Convert a pointer value to an integer type.
-    IntToPtr: Convert an integer value to a pointer type.
-    BitCast: Bitcast a value to a different type.
-    AddrSpaceCast: Cast a pointer value to a different address space.
-*/
 
+//根据源数据类型和目标数据类型确定适当的转换操作类型。它处理不同的类型之间的转换，例如，从 float 到 int32，从 int32 到 float 等等。
 llvm::Instruction::CastOps getCastInst(llvm::Type* src, llvm::Type* dst) {
     if (src == llvm::Type::getFloatTy(Context) && dst == llvm::Type::getInt32Ty(Context)) {
         return llvm::Instruction::FPToSI;  
@@ -84,6 +84,7 @@ llvm::Instruction::CastOps getCastInst(llvm::Type* src, llvm::Type* dst) {
     }
 }
 
+//执行类型转换。它首先打印出源数据类型和目标数据类型，然后根据源数据类型和目标数据类型调用适当的转换函数。
 llvm::Value* typeCast(llvm::Value* src, llvm::Type* dst) {
     llvm::Type* type = src->getType();
     llvm::outs() << "TypeCast: Type of value " << *src << " is: ";
@@ -94,12 +95,12 @@ llvm::Value* typeCast(llvm::Value* src, llvm::Type* dst) {
     if(src->getType() == dst){
         return src;
     }
+    //如果目标类型（dst）是 1-bit 整型（对应于布尔类型），执行相应的类型转换。
     if (dst == llvm::Type::getInt1Ty(Context)){
         if (src->getType() == IRBuilder.getInt1Ty()){
             return src;
         }
         else if (src->getType()->isIntegerTy()){
-            // return IRBuilder.CreateICmpNE(Value, llvm::ConstantInt::get((llvm::IntegerType*)Value->getType(), 0, true));
             return IRBuilder.CreateICmpNE(src, llvm::ConstantInt::get(src->getType(), 0, true));
         }
         else if (src->getType()->isFloatingPointTy()){
@@ -117,48 +118,60 @@ llvm::Value* typeCast(llvm::Value* src, llvm::Type* dst) {
     return IRBuilder.CreateCast(op, src, dst, "tmptypecast");
 }
 
+// Integer 类型的代码生成函数。在控制台输出 "INT: 值"，并返回一个 int32 常量值。
 llvm::Value* Integer::codeGen(CodeGenerator& context) {
     cout << "INT: " << value << endl;
     return IRBuilder.getInt32(value);
 }
 
+// Double 类型的代码生成函数。在控制台输出 "DOUBLE: 值"，并返回一个 double 常量值。
 llvm::Value* Double::codeGen(CodeGenerator& context) {
     cout << "DOUBLE: " << value << endl;
     return llvm::ConstantFP::get(IRBuilder.getDoubleTy(), value);
 }
 
+// Char 类型的代码生成函数。在控制台输出 "CHAR: 值"，并返回一个 int8（字符型）常量值。
 llvm::Value* Char::codeGen(CodeGenerator& context) {
     cout << "CHAR: " << value << endl;
     return IRBuilder.getInt8(value);
 }
 
+// String 类型的代码生成函数。首先在控制台输出 "STRING: 值"，然后处理字符串中的 "\n"（换行符）。
+// 创建一个 LLVM 常量数据数组来存储处理后的字符串，并将其设置为全局变量。
+// 最后，创建一个全局变量指针，并返回该指针。
 llvm::Value* String::codeGen(CodeGenerator& context) {
-    cout << "STRING: " << value << endl;
-    string str = value.substr(1, value.length() - 2);
-    string after = string(1, '\n');
-    int pos = str.find("\\n");
-    while(pos != string::npos) {
-        str = str.replace(pos, 2, after);
-        pos = str.find("\\n");
-    }
-    llvm::Constant *strConst = llvm::ConstantDataArray::getString(Context, str);
+    std::cout << "STRING: " << value << std::endl;
     
-    llvm::Value *globalVar = new llvm::GlobalVariable(*(context.Module), strConst->getType(), true, llvm::GlobalValue::PrivateLinkage, strConst, "_Const_String_");
-    vector<llvm::Value*> indexList;
-    indexList.push_back(IRBuilder.getInt32(0));
-    indexList.push_back(IRBuilder.getInt32(0));
-    // var value
-    // llvm::Value * varPtr = IRBuilder.CreateInBoundsGEP(globalVar, llvm::ArrayRef<llvm::Value*>(indexList), "tmpstring");
-    llvm::PointerType* PtrTy = static_cast<llvm::PointerType*>(globalVar->getType());
-    llvm::Type* ElemTy = PtrTy->getPointerElementType();
+    std::string processedStr = value.substr(1, value.length() - 2);
+    const std::string newLine = "\n";
+    size_t newlinePos = processedStr.find("\\n");
 
-    llvm::Value * varPtr = IRBuilder.CreateInBoundsGEP(ElemTy, globalVar, llvm::ArrayRef<llvm::Value*>(indexList), "tmpstring");
+    while(newlinePos != std::string::npos) {
+        processedStr.replace(newlinePos, 2, newLine);
+        newlinePos = processedStr.find("\\n");
+    }
+
+    llvm::Constant *constStr = llvm::ConstantDataArray::getString(Context, processedStr);
+
+    llvm::GlobalVariable *globalStrVar = new llvm::GlobalVariable(*(context.Module), 
+                                                                   constStr->getType(), 
+                                                                   true, 
+                                                                   llvm::GlobalValue::PrivateLinkage, 
+                                                                   constStr, 
+                                                                   "_Const_String_");
     
-    return varPtr;
-    // return IRBuilder.CreateGlobalStringPtr(value.c_str());
+    std::vector<llvm::Value*> indices = {IRBuilder.getInt32(0), IRBuilder.getInt32(0)};
+    llvm::PointerType* ptrType = llvm::cast<llvm::PointerType>(globalStrVar->getType());
+    llvm::Type* elementType = ptrType->getPointerElementType();
+
+    llvm::Value *strPointer = IRBuilder.CreateInBoundsGEP(elementType, globalStrVar, indices, "tmpstring");
+
+    return strPointer;
 }
 
-
+// 此函数通过名字查找变量并返回其 LLVM IR 代码。
+// 如果变量是数组类型，会获取数组元素的指针。
+// 如果变量不是数组，会从内存中加载其值。
 llvm::Value* Identifier::codeGen(CodeGenerator& context) {
     cout << "IDENTIFIER: " << name << endl;
 
@@ -172,9 +185,7 @@ llvm::Value* Identifier::codeGen(CodeGenerator& context) {
     llvm::outs() << "identifier type:" << *tp << "\n";
 
     llvm::Value* res = nullptr;
-    // if array
     if(tp->isArrayTy()) {
-        // 2-dimension
         vector<llvm::Value*> indexList;
         indexList.push_back(IRBuilder.getInt32(0));
         indexList.push_back(IRBuilder.getInt32(0));
@@ -188,7 +199,7 @@ llvm::Value* Identifier::codeGen(CodeGenerator& context) {
     return res;
 }
 
-
+// 为scanf函数生成参数
 vector<llvm::Value *> *getScanfArgs(CodeGenerator& context,vector<Expression*> args){
     vector<llvm::Value *> *scanf_args = new vector<llvm::Value *>;
     for(auto it: args){
@@ -198,6 +209,7 @@ vector<llvm::Value *> *getScanfArgs(CodeGenerator& context,vector<Expression*> a
     return scanf_args;
 }
 
+// 为printf函数生成参数
 vector<llvm::Value *> *getPrintfArgs(CodeGenerator& context,vector<Expression*> args){
     vector<llvm::Value *> *printf_args = new vector<llvm::Value *>;
     for(auto it: args){
@@ -209,144 +221,255 @@ vector<llvm::Value *> *getPrintfArgs(CodeGenerator& context,vector<Expression*> 
     return printf_args;
 }
 
+
+// 调用printf函数，生成printf调用的代码
 llvm::Value* call_printf(CodeGenerator& context,vector<Expression*> args){
     vector<llvm::Value *> *printf_args = getPrintfArgs(context, args);    
     return IRBuilder.CreateCall(context.printf, *printf_args, "printf");
 }
 
+// 调用scanf函数，生成scanf调用的代码
 llvm::Value* call_scanf(CodeGenerator& context,vector<Expression*> args){
     //vector<llvm::Value *> *scanf_args = getScanfArgsAddr(emitContext, args);    
     vector<llvm::Value *> *scanf_args = getScanfArgs(context, args);    
     return IRBuilder.CreateCall(context.scanf, *scanf_args, "scanf");
 }
+llvm::Value* Call::generatePrintfCall(CodeGenerator& context, std::vector<Expression*>& args){
+    std::cout << "Generating call to printf" << std::endl;
+    return call_printf(context, args);
+}
 
+llvm::Value* Call::generateScanfCall(CodeGenerator& context, std::vector<Expression*>& args){
+    std::cout << "Generating call to scanf" << std::endl;
+    return call_scanf(context, args);
+}
+
+// 这是 Call 类的 codeGen 函数，它负责生成调用函数的 LLVM IR 代码
 llvm::Value* Call::codeGen(CodeGenerator& context){
-
-    if(id.name == "printf"){ //若调用 printf 函数
-        return call_printf(context, arguments);
-    } else if(id.name == "scanf"){ //若调用 scanf 函数
-        return call_scanf(context, arguments);
+    llvm::Value* result = nullptr;
+    
+    // 特别处理 printf 和 scanf 函数
+    if(id.name == "printf"){
+        result = generatePrintfCall(context, arguments);
+    } else if(id.name == "scanf"){
+        result = generateScanfCall(context, arguments);
     }
     
+    // 如果不是 printf 或 scanf，就在模块中查找函数
+    if (result == nullptr) {
+        llvm::Function* function = context.Module->getFunction(id.name.c_str());
+        if (function == nullptr) {
+            std::cerr << "Function not found: " << id.name << std::endl;
+            return nullptr;
+        }
 
-    // find the same name function in module
-    llvm::Function *func = context.Module->getFunction(id.name.c_str());
-    if (func == NULL) {
-		std::cerr << "no such function " << id.name << endl;
-	}
-    cout << "Call: function name: " << id.name << endl;
+        std::cout << "Generating call to function: " << id.name << std::endl;
 
-    // !! no type upgrade or type check
+        std::vector<llvm::Value*> argValues;
+        for(auto& arg : arguments){
+            argValues.push_back(arg->codeGen(context));
+        }
 
-    vector<llvm::Value*> tmp;
-    // vector<Expression*>::iterator i;
-
-    // generate all the arg val
-    for(auto i: arguments){
-        tmp.push_back((*i).codeGen(context));
+        result = llvm::CallInst::Create(function, llvm::makeArrayRef(argValues), "", IRBuilder.GetInsertBlock());
+        std::cout << "Created call to function: " << id.name << std::endl;
     }
+    
+    return result;
+}
 
-    // llvm::CallInst *call = IRBuilder.CreateCall(Func, ArgList);
-    llvm::CallInst *call = llvm::CallInst::Create(func, llvm::makeArrayRef(tmp),"",IRBuilder.GetInsertBlock());
-    cout << "Creating method call: " << id.name << endl;
-	return call;
+// 确保两个操作数的类型相同，如果不同则进行转换
+void unifyOperandTypes(llvm::Value*& left, llvm::Value*& right){
+    if (left->getType() == llvm::Type::getFloatTy(Context)) {
+        right = typeCast(right, llvm::Type::getFloatTy(Context));
+    } else if (right->getType() == llvm::Type::getFloatTy(Context)) {
+        left = typeCast(left, llvm::Type::getFloatTy(Context));
+    } else {
+        if (left->getType() == llvm::Type::getInt32Ty(Context)) {
+            right = typeCast(right, llvm::Type::getInt32Ty(Context));
+        } else if(right->getType() == llvm::Type::getInt32Ty(Context)) {
+            left = typeCast(left, llvm::Type::getInt32Ty(Context));
+        } else {
+            throw std::logic_error("Both operands should be int or float for arithmetic operations.");
+        }
+    }
+}
+
+// 根据操作符和操作数类型，确定应使用的 LLVM IR 指令
+llvm::Instruction::BinaryOps determineBinOpInstruction(int op, llvm::Type* type){
+    switch (op)
+    {
+        case PLUS:
+            return type->isFloatTy() ? llvm::Instruction::FAdd : llvm::Instruction::Add;
+        case MINUS:
+            return type->isFloatTy() ? llvm::Instruction::FSub : llvm::Instruction::Sub;
+        case MUL:
+            return type->isFloatTy() ? llvm::Instruction::FMul : llvm::Instruction::Mul;
+        case DIV:
+            return type->isFloatTy() ? llvm::Instruction::FDiv : llvm::Instruction::SDiv;
+        default:
+            throw std::invalid_argument("Invalid operator for binary operation instruction.");
+    }
+}
+// 生成比较操作的指令
+llvm::Value* generateComparisonInstruction(int op, llvm::Value* left, llvm::Value* right){
+    bool isFloat = left->getType() == llvm::Type::getFloatTy(Context);
+    switch (op)
+    {
+        case CEQ:
+            return isFloat ? IRBuilder.CreateFCmpOEQ(left, right, "fcmptmp")
+                           : IRBuilder.CreateICmpEQ(left, right, "icmptmp");
+        case CGE:
+            return isFloat ? IRBuilder.CreateFCmpOGE(left, right, "fcmptmp")
+                           : IRBuilder.CreateICmpSGE(left, right, "icmptmp");
+        case CLE:
+            return isFloat ? IRBuilder.CreateFCmpOLE(left, right, "fcmptmp")
+                           : IRBuilder.CreateICmpSLE(left, right, "icmptmp");
+        case CGT:
+            return isFloat ? IRBuilder.CreateFCmpOGT(left, right, "fcmptmp")
+                           : IRBuilder.CreateICmpSGT(left, right, "icmptmp");
+        case CLT:
+            return isFloat ? IRBuilder.CreateFCmpOLT(left, right, "fcmptmp")
+                           : IRBuilder.CreateICmpSLT(left, right, "icmptmp");
+        case CNE:
+            return isFloat ? IRBuilder.CreateFCmpONE(left, right, "fcmptmp")
+                           : IRBuilder.CreateICmpNE(left, right, "icmptmp");
+        default:
+            throw std::invalid_argument("Invalid operator for comparison instruction.");
+    }
 }
 
 
+
+// BinaryOp 的 codeGen 函数用于生成二元运算的 LLVM IR 代码
 llvm::Value* BinaryOp::codeGen(CodeGenerator& context){
-    cout << "BinaryOp: " << op << endl;
-    llvm::Value* left = lhs.codeGen(context);
-    llvm::Value* right = rhs.codeGen(context);
-    llvm::Instruction::BinaryOps bi_op;
+    std::cout << "Processing Binary Operation: " << op << std::endl;
+    llvm::Value* leftOperand = lhs.codeGen(context);
+    llvm::Value* rightOperand = rhs.codeGen(context);
+    llvm::Instruction::BinaryOps binOpInstr;
 
-    // bit calculate
-    if(op == AND){
-        if (left->getType() != llvm::Type::getInt1Ty(Context) || right->getType() != llvm::Type::getInt1Ty(Context)) {
-            throw logic_error("can not use types other than bool in and exp");
+    // 如果是逻辑与或逻辑或运算
+    if(op == AND || op == OR){
+        // 检查类型是否为布尔型
+        if (leftOperand->getType() != llvm::Type::getInt1Ty(Context) || rightOperand->getType() != llvm::Type::getInt1Ty(Context)) {
+            throw std::logic_error("Both operands should be of type bool for 'AND'/'OR' operations.");
         }
-        return IRBuilder.CreateAnd(left, right, "tmpAnd");
+        return (op == AND) ? IRBuilder.CreateAnd(leftOperand, rightOperand, "tmpAnd")
+                           : IRBuilder.CreateOr(leftOperand, rightOperand, "tmpOR");
     }
-    else if (op == OR) {
-        if (left->getType() != llvm::Type::getInt1Ty(Context) || right->getType() != llvm::Type::getInt1Ty(Context)) {
-            throw logic_error("cannot use types other than bool in and exp");
-        }
-        return IRBuilder.CreateOr(left, right, "tmpOR");
-    }
+    // 否则，处理其他类型的运算
     else{
-    // ADD SUB MUL DIV
-    // LT、GT、EQ、NEQ、LE、GE
-        // same type 
-        if (left->getType() != right->getType()) {
-            // left or right is float
-            if (left->getType() == llvm::Type::getFloatTy(Context)) {
-                right = typeCast(right, llvm::Type::getFloatTy(Context));
-            } else if (right->getType() == llvm::Type::getFloatTy(Context)) {
-                left = typeCast(left, llvm::Type::getFloatTy(Context));
-            } else {
-                // if left or right is int
-                if (left->getType() == llvm::Type::getInt32Ty(Context)) {
-                    right = typeCast(right, llvm::Type::getInt32Ty(Context));
-                } else if(right->getType() == llvm::Type::getInt32Ty(Context)) {
-                    left = typeCast(left, llvm::Type::getInt32Ty(Context));
-                } else {
-                    throw logic_error("cann't use bool in + - * / == != >= <= < >");
-                }
-            }
+        // 保证左右操作数类型一致
+        if (leftOperand->getType() != rightOperand->getType()) {
+            unifyOperandTypes(leftOperand, rightOperand);
         }
-        if(op == PLUS || op == MINUS || op == MUL || op ==  DIV){
-            if(op == PLUS){
-                bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FAdd : llvm::Instruction::Add;
-            } else if(op == MINUS){
-                bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FSub : llvm::Instruction::Sub;
-            } else if(op == MUL){
-                bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FMul : llvm::Instruction::Mul;
-            } else if(op == DIV){ 
-                bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FDiv : llvm::Instruction::SDiv;
-            } 
-            return llvm::BinaryOperator::Create(bi_op, left, right, "", IRBuilder.GetInsertBlock());
+        // 处理算术运算
+        if(op == PLUS || op == MINUS || op == MUL || op == DIV){
+            binOpInstr = determineBinOpInstruction(op, leftOperand->getType());
+            return llvm::BinaryOperator::Create(binOpInstr, leftOperand, rightOperand, "", IRBuilder.GetInsertBlock());
         }
-        if (op == CEQ) {
-            if(left->getType() == llvm::Type::getFloatTy(Context))
-                return IRBuilder.CreateFCmpOEQ(left, right, "fcmptmp");
-            else 
-                return IRBuilder.CreateICmpEQ(left, right, "icmptmp");
-        }
-        else if (op == CGE) {
-            if(left->getType() == llvm::Type::getFloatTy(Context))
-                return IRBuilder.CreateFCmpOGE(left, right, "fcmptmp");
-            else 
-                return IRBuilder.CreateICmpSGE(left, right, "icmptmp");
-        }
-        else if (op == CLE) {
-            if(left->getType() == llvm::Type::getFloatTy(Context))
-                return IRBuilder.CreateFCmpOLE(left, right, "fcmptmp");
-            else 
-                return IRBuilder.CreateICmpSLE(left, right, "icmptmp");
-        }
-        else if (op == CGT) {
-            if(left->getType() == llvm::Type::getFloatTy(Context))
-                return IRBuilder.CreateFCmpOGT(left, right, "fcmptmp");
-            else 
-                return IRBuilder.CreateICmpSGT(left, right, "icmptmp");
-        }
-        else if (op == CLT) {
-            if(left->getType() == llvm::Type::getFloatTy(Context))
-                return IRBuilder.CreateFCmpOLT(left, right, "fcmptmp");
-            else 
-                return IRBuilder.CreateICmpSLT(left, right, "icmptmp");
-        }
-        else if (op == CNE) {
-            if(left->getType() == llvm::Type::getFloatTy(Context))
-                return IRBuilder.CreateFCmpONE(left, right, "fcmptmp");
-            else 
-                return IRBuilder.CreateICmpNE(left, right, "icmptmp");
-        }
-        else{
-            cerr << "unknown operator " << op << endl;
-            return NULL;
+        // 处理比较运算
+        else {
+            return generateComparisonInstruction(op, leftOperand, rightOperand);
         }
     }
 }
+
+
+
+// llvm::Value* BinaryOp::codeGen(CodeGenerator& context){
+//     cout << "BinaryOp: " << op << endl;
+//     llvm::Value* left = lhs.codeGen(context);
+//     llvm::Value* right = rhs.codeGen(context);
+//     llvm::Instruction::BinaryOps bi_op;
+
+//     // bit calculate
+//     if(op == AND){
+//         if (left->getType() != llvm::Type::getInt1Ty(Context) || right->getType() != llvm::Type::getInt1Ty(Context)) {
+//             throw logic_error("can not use types other than bool in and exp");
+//         }
+//         return IRBuilder.CreateAnd(left, right, "tmpAnd");
+//     }
+//     else if (op == OR) {
+//         if (left->getType() != llvm::Type::getInt1Ty(Context) || right->getType() != llvm::Type::getInt1Ty(Context)) {
+//             throw logic_error("cannot use types other than bool in and exp");
+//         }
+//         return IRBuilder.CreateOr(left, right, "tmpOR");
+//     }
+//     else{
+//     // ADD SUB MUL DIV
+//     // LT、GT、EQ、NEQ、LE、GE
+//         // same type 
+//         if (left->getType() != right->getType()) {
+//             // left or right is float
+//             if (left->getType() == llvm::Type::getFloatTy(Context)) {
+//                 right = typeCast(right, llvm::Type::getFloatTy(Context));
+//             } else if (right->getType() == llvm::Type::getFloatTy(Context)) {
+//                 left = typeCast(left, llvm::Type::getFloatTy(Context));
+//             } else {
+//                 // if left or right is int
+//                 if (left->getType() == llvm::Type::getInt32Ty(Context)) {
+//                     right = typeCast(right, llvm::Type::getInt32Ty(Context));
+//                 } else if(right->getType() == llvm::Type::getInt32Ty(Context)) {
+//                     left = typeCast(left, llvm::Type::getInt32Ty(Context));
+//                 } else {
+//                     throw logic_error("cann't use bool in + - * / == != >= <= < >");
+//                 }
+//             }
+//         }
+//         if(op == PLUS || op == MINUS || op == MUL || op ==  DIV){
+//             if(op == PLUS){
+//                 bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FAdd : llvm::Instruction::Add;
+//             } else if(op == MINUS){
+//                 bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FSub : llvm::Instruction::Sub;
+//             } else if(op == MUL){
+//                 bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FMul : llvm::Instruction::Mul;
+//             } else if(op == DIV){ 
+//                 bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FDiv : llvm::Instruction::SDiv;
+//             } 
+//             return llvm::BinaryOperator::Create(bi_op, left, right, "", IRBuilder.GetInsertBlock());
+//         }
+//         if (op == CEQ) {
+//             if(left->getType() == llvm::Type::getFloatTy(Context))
+//                 return IRBuilder.CreateFCmpOEQ(left, right, "fcmptmp");
+//             else 
+//                 return IRBuilder.CreateICmpEQ(left, right, "icmptmp");
+//         }
+//         else if (op == CGE) {
+//             if(left->getType() == llvm::Type::getFloatTy(Context))
+//                 return IRBuilder.CreateFCmpOGE(left, right, "fcmptmp");
+//             else 
+//                 return IRBuilder.CreateICmpSGE(left, right, "icmptmp");
+//         }
+//         else if (op == CLE) {
+//             if(left->getType() == llvm::Type::getFloatTy(Context))
+//                 return IRBuilder.CreateFCmpOLE(left, right, "fcmptmp");
+//             else 
+//                 return IRBuilder.CreateICmpSLE(left, right, "icmptmp");
+//         }
+//         else if (op == CGT) {
+//             if(left->getType() == llvm::Type::getFloatTy(Context))
+//                 return IRBuilder.CreateFCmpOGT(left, right, "fcmptmp");
+//             else 
+//                 return IRBuilder.CreateICmpSGT(left, right, "icmptmp");
+//         }
+//         else if (op == CLT) {
+//             if(left->getType() == llvm::Type::getFloatTy(Context))
+//                 return IRBuilder.CreateFCmpOLT(left, right, "fcmptmp");
+//             else 
+//                 return IRBuilder.CreateICmpSLT(left, right, "icmptmp");
+//         }
+//         else if (op == CNE) {
+//             if(left->getType() == llvm::Type::getFloatTy(Context))
+//                 return IRBuilder.CreateFCmpONE(left, right, "fcmptmp");
+//             else 
+//                 return IRBuilder.CreateICmpNE(left, right, "icmptmp");
+//         }
+//         else{
+//             cerr << "unknown operator " << op << endl;
+//             return NULL;
+//         }
+//     }
+// }
 
 // idk but in yacc ASSIGN is EQUAL
 // identifier = expression
@@ -551,20 +674,6 @@ llvm::Value* Block::codeGen(CodeGenerator &context){
     llvm::Value* tmp = NULL;
     for(auto stmt : statementList){
         cout << "Generating code for " << typeid(*stmt).name() << endl;
-
-        // if(typeid(*stmt) == typeid(VariableDeclaration)) {
-        //     cout << "VariableDeclaration" << endl;
-        // } 
-        // else  if(typeid(*stmt) == typeid(FunctionDeclaration)) {
-        //     cout << "FunctionDeclaration" << endl;
-        // }   
-        
-        // tmp = (*stmt).codeGen(context);
-
-        //If the current block already has a terminator,
-        // i.e. a "break" statement is generated, stop;
-        // Otherwise, continue generating.
-        
         if (context.GetCurrentFunction() != NULL && IRBuilder.GetInsertBlock()->getTerminator())
          {  
              break;

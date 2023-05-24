@@ -1,43 +1,53 @@
-int add(int a,int b){
-    int res = a+b;
-    return res;
+void quicksort(int A[10], int left, int right) {
+    int i;
+    int j;
+    int x;
+    int y;
+    i = left;
+    j = right;
+    x = A[(left + right) / 2];
+    while(i <= j) {
+        while (A[i] < x) { 
+            i = i + 1;
+        }
+        while (x < A[j]) {
+            j = j - 1;
+        }
+        if (i <= j) {
+            y = A[i];
+            A[i] = A[j];
+            A[j] = y;
+            i = i + 1;
+            j = j - 1;
+        }
+    }
+    if (left < j) {
+        quicksort(A, left, j);
+    }
+    if (i < right) {
+        quicksort(A, i, right);
+    } 
+    return;
 }
 
+int main()
+{
+int B[1000000];
+int N;
+scanf("%d", &N);
+int i = 0;
+while(i < N) {
+scanf("%d", &B[i]);
+i = i + 1;
+}
+int left = 0;
+int right = N - 1;
+quicksort(B, left, right);
+i = 0;
+while(i < N) {
+printf("%d\n", B[i]);
+i = i + 1;
+}
 
-int f[100];
-int h;
-// h = f[3];
-// f[1] = 2;
-
-int main(){
-    
-    double d = 1.1;
-    int a = 1;
-    a = add(3,4);
-    printf("%d\n",a);
-    int b = 1;
-    // if(a==3){
-    //     b = b+1;
-    // }else{
-    //     b = b-1;
-    // }
-    int e = 5;
-    while( e < 6 ){
-        if(e == 5){
-            break;
-        }
-        e = e + 1;
-        // b = b + 1;
-    }
-    int i;
-    // for(i=0;i<2;i=i+1){
-    //     e = e + i;
-    // }
-    printf("%d\n",b);
-    printf("%d\n",e);
-    int g[100];
-
-    h = f[4];
-    f[2] = e;
-    return 0;
+return 0;
 }

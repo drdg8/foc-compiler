@@ -65,12 +65,11 @@
 "/"				          		return TOKEN(DIV);
 
 
-"."         						return TOKEN(DOT);//其他
+"."         						return TOKEN(DOT);
 ","				          		return TOKEN(COMMA);
 "&"				          		return TOKEN(GAD);//取地址
 ";"				          	  	 return TOKEN(SEMI);
 ":"                     return TOKEN(COLON);
-"->"					          return TOKEN(ARW);//箭头（暂未实现）
 
 [ \t\n]				         //匹配回车
 "//"[^\n]*                                //匹配单行注释
