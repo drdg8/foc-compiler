@@ -1,6 +1,8 @@
 ; ModuleID = 'main'
 source_filename = "main"
 
+@f = global [100 x i32] zeroinitializer
+@h = global i32 0
 @_Const_String_ = private constant [4 x i8] c"%d\0A\00"
 @_Const_String_.1 = private constant [4 x i8] c"%d\0A\00"
 @_Const_String_.2 = private constant [4 x i8] c"%d\0A\00"
@@ -26,6 +28,7 @@ entry:
 
 define i32 @main() {
 entry:
+  %g = alloca [100 x i32], align 4
   %i = alloca i32, align 4
   %e = alloca i32, align 4
   %b = alloca i32, align 4
@@ -68,5 +71,9 @@ WhileEnd:                                         ; preds = %Then, %WhileCond
   %printf6 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @_Const_String_.1, i32 0, i32 0), i32 %LoadInst5)
   %LoadInst7 = load i32, i32* %e, align 4
   %printf8 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @_Const_String_.2, i32 0, i32 0), i32 %LoadInst7)
+  %tmpvar = load i32, i32* getelementptr inbounds ([100 x i32], [100 x i32]* @f, i32 0, i32 4), align 4
+  store i32 %tmpvar, i32* @h, align 4
+  %LoadInst9 = load i32, i32* %e, align 4
+  store i32 %LoadInst9, i32* getelementptr inbounds ([100 x i32], [100 x i32]* @f, i32 0, i32 2), align 4
   ret i32 0
 }

@@ -47,12 +47,18 @@ public:
 		_Double,
 		_Void
 	};
-	VarType(TypeID __Type) : type(__Type) {}
+	VarType(TypeID __Type) : type(__Type) { size = 0; }
+	VarType(TypeID __Type, int size) : type(__Type), size(size) {}
 	~VarType(void) {}
 	// llvm::Value* codeGen(CodeGenerator& context);
 	virtual llvm::Type* getLLVMType(void);
+	VarType *changeSize(int size){
+		this->size = size;
+		return this;
+	}
 public:
 	TypeID type;
+	int size;
 };
 
 class Integer : public ConstVal {
@@ -183,22 +189,17 @@ public:
 	Declaration() {}
 	~Declaration() {}
 	virtual llvm::Value* codeGen(CodeGenerator& context) = 0;
-
-
 };
 
 class VariableDeclaration : public Declaration {
 public:
 	VariableDeclaration( VarType& type, Identifier& id) :
-		type(type), id(id), size(0) { assignmentExpr = nullptr; Customtype=nullptr;}
-	VariableDeclaration( VarType& type, Identifier& id,int size) :
-		type(type), id(id), size(size) { assignmentExpr = nullptr; Customtype=nullptr;}
+		type(type), id(id) { assignmentExpr = nullptr; Customtype=nullptr;}
 	VariableDeclaration( VarType& type, Identifier& id, Expression *assignmentExpr) :
 		type(type), id(id), assignmentExpr(assignmentExpr) {  Customtype=nullptr;}
 
 	virtual llvm::Value* codeGen(CodeGenerator& context);
 public:
-	int size;
 	VarType& type;//内置类型，为null时表示这个变量为自定义类型
 	Identifier* Customtype;//自定义类型，为null时表示这个变量为内置类型 未实现
 	Identifier& id;

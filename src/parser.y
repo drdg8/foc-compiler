@@ -183,7 +183,8 @@
   var_decl :varType ident{$$ = new VariableDeclaration(*$1, *$2); }
       | varType ident EQUAL expression {  $$ = new VariableDeclaration(*$1, *$2, $4);  }
       | varType ident LBRACK INTEGER RBRACK { // 定义数组
-              $$ = new VariableDeclaration(*$1, *$2, $4);
+              VarType *varType = $1->changeSize($4);
+              $$ = new VariableDeclaration(*varType, *$2);
     }
       ;
 

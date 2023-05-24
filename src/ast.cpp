@@ -28,7 +28,24 @@ llvm::Type* VarType::getLLVMType(){
         case _Void: LLVMType = IRBuilder.getVoidTy(); break;
         default: break;
     }
+    if(this->size > 0){
+        // array 
+        LLVMType = llvm::ArrayType::get(LLVMType, this->size); 
+    }
     return LLVMType;
+}
+
+void typePrint(llvm::Value *var){
+    // Assign: Type of left %res = alloca i32, align 4 is: i32* ,eleType is: i32
+    llvm::Type* type = var->getType();
+    llvm::outs() << "Type of variable " << *var << " is: ";
+    type->print(llvm::outs());
+    if(type->isPointerTy()){
+        llvm::Type* eletype = var->getType()->getPointerElementType();
+        llvm::outs() << " ,eleType is: ";
+        eletype->print(llvm::outs());
+    }
+    llvm::outs() << "\n";
 }
 
 /*
@@ -137,11 +154,8 @@ llvm::Value* String::codeGen(CodeGenerator& context) {
     llvm::Type* ElemTy = PtrTy->getPointerElementType();
 
     llvm::Value * varPtr = IRBuilder.CreateInBoundsGEP(ElemTy, globalVar, llvm::ArrayRef<llvm::Value*>(indexList), "tmpstring");
-
     
     return varPtr;
-
-
     // return IRBuilder.CreateGlobalStringPtr(value.c_str());
 }
 
@@ -195,19 +209,17 @@ vector<llvm::Value *> *getPrintfArgs(CodeGenerator& context,vector<Expression*> 
     }
     return printf_args;
 }
-llvm:: Value* call_printf(CodeGenerator& context,vector<Expression*> args){
+
+llvm::Value* call_printf(CodeGenerator& context,vector<Expression*> args){
     vector<llvm::Value *> *printf_args = getPrintfArgs(context, args);    
     return IRBuilder.CreateCall(context.printf, *printf_args, "printf");
 }
 
-llvm:: Value* call_scanf(CodeGenerator& context,vector<Expression*> args){
+llvm::Value* call_scanf(CodeGenerator& context,vector<Expression*> args){
     //vector<llvm::Value *> *scanf_args = getScanfArgsAddr(emitContext, args);    
     vector<llvm::Value *> *scanf_args = getScanfArgs(context, args);    
     return IRBuilder.CreateCall(context.scanf, *scanf_args, "scanf");
 }
-
-
-
 
 llvm::Value* Call::codeGen(CodeGenerator& context){
 
@@ -349,19 +361,11 @@ llvm::Value* Assign::codeGen(CodeGenerator &context){
 
     // Assign: Type of left %res = alloca i32, align 4 is: i32* ,eleType is: i32
     llvm::Type* type = result->getType();
-    llvm::Type* eletype = result->getType()->getPointerElementType();
-    llvm::outs() << "Assign: Type of left " << *result << " is: ";
-    type->print(llvm::outs());
-    llvm::outs() << " ,eleType is: ";
-    eletype->print(llvm::outs());
-    llvm::outs() << "\n";
+    typePrint(result);
 
     llvm::Value* right = expr.codeGen(context);
-
-    type = right->getType();
-    llvm::outs() << "Assign: Type of value " << *right << " is: ";
-    type->print(llvm::outs());
-    llvm::outs() << "\n";
+    cout << "right: ";
+    typePrint(right);
 
     auto CurrentBlock = IRBuilder.GetInsertBlock();
     // cout << (IRBuilder.GetInsertBlock() == NULL) << endl;
@@ -398,9 +402,21 @@ llvm::Value* ArrayElement::codeGen(CodeGenerator &context){
 		return nullptr;
     }
 
+    cout << "ArrayElement: index: " << endl;
     llvm::Value* indexValue = index.codeGen(context);
+
+    // Check that the index value is an integer type
+    if (!indexValue->getType()->isIntegerTy()) {
+        cerr << "index value is not an integer type" << endl;
+        return nullptr;
+    }
+
     vector<llvm::Value*> indexList;
 
+    // type of variable @f = global [100 x i32] zeroinitializer is: [100 x i32]* ,eleType is: [100 x i32]
+    typePrint(arrayValue);
+
+    /*
     // if a[2] = &b pointer
     if(arrayValue->getType()->getPointerElementType()->isPointerTy()) {
         arrayValue = IRBuilder.CreateLoad(arrayValue->getType()->getPointerElementType(), arrayValue);
@@ -408,12 +424,16 @@ llvm::Value* ArrayElement::codeGen(CodeGenerator &context){
     }
     // if array 
     else {
+    */
         indexList.push_back(IRBuilder.getInt32(0));
         indexList.push_back(indexValue);    
-    }
+    // }
 
-    llvm::Value* elePtr =  IRBuilder.CreateInBoundsGEP(arrayValue->getType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmparray");
+    llvm::Value* elePtr = IRBuilder.CreateInBoundsGEP(arrayValue->getType()->getPointerElementType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmparray");
+
+    cout << "++++++++++++++\n";
     return IRBuilder.CreateLoad(elePtr->getType()->getPointerElementType(), elePtr, "tmpvar");
+
     //return IRBuilder.CreateAlignedLoad(elePtr, 4);
 }
 
@@ -441,7 +461,7 @@ llvm::Value* ArrayElement::getAddr(CodeGenerator &context){
         indexList.push_back(indexValue);    
     }
 
-    llvm::Value* elePtr =  IRBuilder.CreateInBoundsGEP(arrayValue->getType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmparray");
+    llvm::Value* elePtr =  IRBuilder.CreateInBoundsGEP(arrayValue->getType()->getPointerElementType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmparray");
     return elePtr;
     //return IRBuilder.CreateAlignedLoad(elePtr, 4);
 }
@@ -454,10 +474,9 @@ llvm::Value* ArrayAssign::codeGen(CodeGenerator &context){
         cerr << "undeclared array " << identifier.name << endl;
 		return nullptr;
     }
-    // llvm::Value* arrayValue = context.getTop()[identifier.name];
+
     llvm::Value* indexValue = index.codeGen(context);
     vector<llvm::Value*> indexList;
-
 
     llvm::outs()<<"arrayIdentifier type:"<<*(arrayValue->getType());
     cout<<endl;
@@ -472,7 +491,7 @@ llvm::Value* ArrayAssign::codeGen(CodeGenerator &context){
         indexList.push_back(IRBuilder.getInt32(0));
         indexList.push_back(indexValue);    
     }
-    llvm::Value* left =  IRBuilder.CreateInBoundsGEP(arrayValue->getType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmpvar");
+    llvm::Value* left =  IRBuilder.CreateInBoundsGEP(arrayValue->getType()->getPointerElementType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmpvar");
     llvm::Value *right = rhs.codeGen(context);
 
     llvm::outs()<<*(left->getType()->getPointerElementType());
@@ -520,7 +539,7 @@ llvm::Value* GetArrayAddr::codeGen(CodeGenerator &context){
     }
 
     // get element pointer
-    llvm::Value* elePtr = IRBuilder.CreateInBoundsGEP(arrayValue->getType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "elePtr");
+    llvm::Value* elePtr = IRBuilder.CreateInBoundsGEP(arrayValue->getType()->getPointerElementType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "elePtr");
     return elePtr;
     //return nullptr;
 }
@@ -558,20 +577,13 @@ llvm::Value* Block::codeGen(CodeGenerator &context){
 	return NULL;
 }
 
-
-
-
-
-
-
-
-
-
 //已检查
 llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
-    // not an array
-    // why not codeGen? 
     llvm::Type* VarType = type.getLLVMType();
+    llvm::outs() << "Var Decl: Type ";
+    VarType->print(llvm::outs());
+    llvm::outs() << "\n";
+
     if(context.CurrFunction == NULL){
         // global variable
         cout << "declaration global variable " << id.name << endl;
@@ -585,24 +597,39 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
             return NULL;
         }
 
-        // create the constant initializer
-        llvm::Constant* Initializer = llvm::ConstantInt::get(VarType, 0);
-
         // 3rd argument is const or not, which we don't implement
         auto Alloc = new llvm::GlobalVariable(
             *(context.Module),
             VarType,
             false,
             llvm::Function::ExternalLinkage,
-            Initializer,
+            0,
             id.name
         );
 
-        // if global we check no currfunction
-        // so we use GlobalBB to do Assign
-        if (assignmentExpr) {
-            Assign ass(id, *assignmentExpr);
-            Initializer = (llvm::Constant *)typeCast((llvm::Value *)ass.codeGen(context), VarType);
+        llvm::Constant* Initializer;
+        // array
+        if(VarType->isArrayTy()){
+            llvm::Type *eleType = VarType->getArrayElementType();
+
+            std::vector<llvm::Constant*> constArrayEle;
+            // create the constant initializer
+            llvm::Constant* constEle = llvm::ConstantInt::get(eleType, 0);
+            int size = VarType->getArrayNumElements();
+            for (int i = 0; i < size; i++) {
+                constArrayEle.push_back(constEle);
+            }
+            Initializer = llvm::ConstantArray::get(llvm::ArrayType::get(eleType, size), constArrayEle);
+        }
+        // not an array
+        else{
+            // if global we check no currfunction
+            // so we use GlobalBB to do Assign
+            Initializer = llvm::ConstantInt::get(VarType, 0);
+            if (assignmentExpr) {
+                Assign ass(id, *assignmentExpr);
+                Initializer = (llvm::Constant *)typeCast((llvm::Value *)ass.codeGen(context), VarType);
+            }
         }
 
         Alloc->setInitializer(Initializer);
@@ -628,12 +655,7 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
             return NULL;
         }
 
-        /*
-        // 将新定义的变量类型和地址存入符号表中
-        emitContext.getTopType()[identifier.name] = llvmType;
-        emitContext.getTop()[identifier.name] = alloc;
-        */
-
+        // not a array
         if (assignmentExpr) {
             Assign ass(id, *assignmentExpr);
             ass.codeGen(context);
@@ -655,20 +677,13 @@ llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
 }
 
 /*
-// need to implement 
-llvm::Value* ArrayDeclaration::codeGen(CodeGenerator &context){
-    return NULL;
-}
-
 // to be implement
 llvm::Value* ExternDeclaration::codeGen(CodeGenerator& context){
     return NULL;
 }
-
 */
 
 llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
-    cout << "11" << endl;
     // get the ArgTypes
     std::vector<llvm::Type*> ArgTypes;
     for(auto i: (this->arguments)){
@@ -693,9 +708,9 @@ llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
 
         // when the function argument type is an array type, we don't pass the entire array.
         // we just pass a pointer pointing to its elements
-        if (i->size != 0){  
-            tp = tp->getPointerTo();
-        }
+        // if (i->size != 0){  
+        //     tp = tp->getPointerTo();
+        // }
 
         ArgTypes.push_back(tp);
     }

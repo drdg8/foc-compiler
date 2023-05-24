@@ -23,30 +23,44 @@ add:                                    # @add
 main:                                   # @main
 	.cfi_startproc
 # %bb.0:                                # %entry
-	subq	$24, %rsp
-	.cfi_def_cfa_offset 32
+	subq	$40, %rsp
+	.cfi_def_cfa_offset 48
 	movabsq	$4607632778762754458, %rax      # imm = 0x3FF199999999999A
-	movq	%rax, 16(%rsp)
-	movl	$1, 12(%rsp)
+	movq	%rax, 24(%rsp)
+	movl	$1, 16(%rsp)
 	movl	$3, %edi
 	movl	$4, %esi
 	callq	add@PLT
-	movl	%eax, 12(%rsp)
-	movl	$1, 8(%rsp)
-	cmpl	$3, %eax
-	jne	.LBB1_2
-# %bb.1:                                # %Then
-	incl	8(%rsp)
-	jmp	.LBB1_3
-.LBB1_2:                                # %Else
-	decl	8(%rsp)
-.LBB1_3:                                # %Merge
-	movl	8(%rsp), %esi
+	movl	%eax, 16(%rsp)
 	movl	$.L_Const_String_, %edi
+	movl	%eax, %esi
+	xorl	%eax, %eax
+	callq	printf@PLT
+	movl	$1, 20(%rsp)
+	movl	$5, 12(%rsp)
+	cmpl	$5, 12(%rsp)
+	jg	.LBB1_4
+	.p2align	4, 0x90
+.LBB1_2:                                # %WhileLoop
+                                        # =>This Inner Loop Header: Depth=1
+	cmpl	$5, 12(%rsp)
+	je	.LBB1_4
+# %bb.3:                                # %Else
+                                        #   in Loop: Header=BB1_2 Depth=1
+	incl	12(%rsp)
+	cmpl	$5, 12(%rsp)
+	jle	.LBB1_2
+.LBB1_4:                                # %WhileEnd
+	movl	20(%rsp), %esi
+	movl	$.L_Const_String_.1, %edi
+	xorl	%eax, %eax
+	callq	printf@PLT
+	movl	12(%rsp), %esi
+	movl	$.L_Const_String_.2, %edi
 	xorl	%eax, %eax
 	callq	printf@PLT
 	xorl	%eax, %eax
-	addq	$24, %rsp
+	addq	$40, %rsp
 	.cfi_def_cfa_offset 8
 	retq
 .Lfunc_end1:
@@ -58,5 +72,15 @@ main:                                   # @main
 .L_Const_String_:
 	.asciz	"%d\n"
 	.size	.L_Const_String_, 4
+
+	.type	.L_Const_String_.1,@object      # @_Const_String_.1
+.L_Const_String_.1:
+	.asciz	"%d\n"
+	.size	.L_Const_String_.1, 4
+
+	.type	.L_Const_String_.2,@object      # @_Const_String_.2
+.L_Const_String_.2:
+	.asciz	"%d\n"
+	.size	.L_Const_String_.2, 4
 
 	.section	".note.GNU-stack","",@progbits

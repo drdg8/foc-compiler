@@ -4,6 +4,11 @@ int add(int a,int b){
 }
 
 
+int f[100];
+int h;
+// h = f[3];
+// f[1] = 2;
+
 int main(){
     
     double d = 1.1;
@@ -30,5 +35,9 @@ int main(){
     // }
     printf("%d\n",b);
     printf("%d\n",e);
+    int g[100];
+
+    h = f[4];
+    f[2] = e;
     return 0;
 }
