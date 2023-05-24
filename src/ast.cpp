@@ -21,7 +21,6 @@ using namespace std;
 llvm::Type* VarType::getLLVMType(){
     llvm::Type *LLVMType;
     switch (type) {
-        // case _Bool: this->_LLVMType = IRBuilder.getInt1Ty(); break;
         case _Int: LLVMType = IRBuilder.getInt32Ty(); break;
         case _Char: LLVMType = IRBuilder.getInt8Ty(); break;
         case _Double: LLVMType = IRBuilder.getDoubleTy(); break;
@@ -728,31 +727,7 @@ llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
 
     // create function
     llvm::Function* Func = llvm::Function::Create(FuncType, llvm::GlobalValue::ExternalLinkage, this->id.name, context.Module);
-    context.AddFunction(this->id.name, Func);
-
-    /*
-    for now, func def without implement is not allow
-    here if allow func definition, we need to change parser.y
-
-    // if the function name conflictes, there was already something with the same name.
-    // if it already has a body, don't allow redefinition.
-    if (Func->getName() != this->_Name) {
-        //Delete the one we just made and get the existing one.
-        Func->eraseFromParent();
-        Func = context.Module->getFunction(this->_Name);
-        //If this function already has a body,
-        //or the current declaration doesn't have a body,
-        //reject this declaration.
-        if (!Func->empty() || !this->_FuncBody) {
-            throw std::logic_error("Redefining function " + this->_Name);
-            return NULL;
-        }
-        if (Func->getFunctionType() != FuncType) {
-            throw std::logic_error("Redefining function " + this->_Name + " with different arg types.");
-            return NULL;
-        }
-    }
-    */
+    // context.AddFunction(this->id.name, Func);
 
     // implement function block
 

@@ -14,9 +14,6 @@
 %option noyywrap
 
 %%
-
-
-"extern"                return TOKEN(EXTERN);//c语言关键字
 "return"				        return TOKEN(RETURN);
 "for"                   return TOKEN(FOR);
 "if"                    return TOKEN(IF);
@@ -25,9 +22,7 @@
 "switch"                return TOKEN(SWITCH);
 "case"                  return TOKEN(CASE);
 "default"               return TOKEN(DEFAULT);
-"array"               return TOKEN(ARRAY);
 "continue"              return TOKEN(CONTINUE);
-"until"                 return TOKEN(UNTIL);
 "break"                  printf("break_lex\n"); return TOKEN(BREAK);
 
 "int"													{return TOKEN(INT); }
