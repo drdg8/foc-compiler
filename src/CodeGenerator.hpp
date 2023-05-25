@@ -32,24 +32,9 @@ using namespace std;
 extern llvm::LLVMContext Context; //定义全局context
 extern llvm::IRBuilder<> IRBuilder; //定义全局IRbuilder
 
-//symbol table的定义
-class Symbol{
-public:
-    Symbol(void) : _Value(NULL), Type(UNDEFINED) {}
-    Symbol(llvm::Value* Value) : _Value(Value),Type(VARIABLE) { }
-    llvm::Value* GetVariable(void) { return this->Type == VARIABLE ? _Value : NULL; }
-public:
-    llvm::Value* _Value;
-    enum{
-        VARIABLE,
-        UNDEFINED
-    } Type;   
-};
-
 class CodeGenerator{
     public:
-        using SymbolTable = std::map<std::string, Symbol>;
-
+        using SymbolTable = std::map<std::string, llvm::Value*>;
         llvm::Module* Module;
         std::vector<SymbolTable*> SymbolTableStack;
         llvm::Function* CurrFunction;	
@@ -61,7 +46,6 @@ class CodeGenerator{
         llvm::BasicBlock* GlobalBB;
         llvm::Function* GlobalFunc;
         llvm::Function *printf,*scanf;
-        // llvm::Value* returnVal;
 
     public:
         CodeGenerator(void);

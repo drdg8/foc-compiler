@@ -2,6 +2,8 @@
 source_filename = "main"
 
 @_Const_String_ = private constant [3 x i8] c"%d\00"
+@_Const_String_.1 = private constant [3 x i8] c"%d\00"
+@_Const_String_.2 = private constant [4 x i8] c"%d\0A\00"
 
 declare i32 @printf(i8*, ...)
 
@@ -152,37 +154,58 @@ Merge57:                                          ; preds = %Else56, %Then52
 
 define i32 @main() {
 entry:
-  %b = alloca i32, align 4
+  %right = alloca i32, align 4
+  %left = alloca i32, align 4
   %i = alloca i32, align 4
+  %N = alloca i32, align 4
+  %B = alloca [1000000 x i32], align 4
+  %scanf = call i32 (...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @_Const_String_, i32 0, i32 0), i32* %N)
   store i32 0, i32* %i, align 4
-  store i32 1, i32* %b, align 4
   br label %WhileCond
 
-WhileCond:                                        ; preds = %Merge, %entry
+WhileCond:                                        ; preds = %WhileLoop, %entry
   %LoadInst = load i32, i32* %i, align 4
-  %icmptmp = icmp slt i32 %LoadInst, 1
+  %LoadInst1 = load i32, i32* %N, align 4
+  %icmptmp = icmp slt i32 %LoadInst, %LoadInst1
   br i1 %icmptmp, label %WhileLoop, label %WhileEnd
 
 WhileLoop:                                        ; preds = %WhileCond
-  %LoadInst1 = load i32, i32* %i, align 4
-  %icmptmp2 = icmp eq i32 %LoadInst1, 0
-  br i1 %icmptmp2, label %Then, label %Else
-
-Then:                                             ; preds = %WhileLoop
-  %LoadInst3 = load i32, i32* %i, align 4
-  %0 = add i32 %LoadInst3, 1
+  %LoadInst2 = load i32, i32* %i, align 4
+  %elePtr = getelementptr inbounds [1000000 x i32], [1000000 x i32]* %B, i32 0, i32 %LoadInst2
+  %scanf3 = call i32 (...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @_Const_String_.1, i32 0, i32 0), i32* %elePtr)
+  %LoadInst4 = load i32, i32* %i, align 4
+  %0 = add i32 %LoadInst4, 1
   store i32 %0, i32* %i, align 4
-  br label %WhileEnd
-
-Else:                                             ; preds = %WhileLoop
-  br label %Merge
-
-Merge:                                            ; preds = %Else
-  store i32 0, i32* %b, align 4
   br label %WhileCond
 
-WhileEnd:                                         ; preds = %Then, %WhileCond
-  %LoadInst4 = load i32, i32* %b, align 4
-  %printf = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @_Const_String_, i32 0, i32 0), i32 %LoadInst4)
+WhileEnd:                                         ; preds = %WhileCond
+  store i32 0, i32* %left, align 4
+  %LoadInst5 = load i32, i32* %N, align 4
+  %1 = sub i32 %LoadInst5, 1
+  store i32 %1, i32* %right, align 4
+  %arrayPtr = getelementptr inbounds [1000000 x i32], [1000000 x i32]* %B, i32 0, i32 0
+  %LoadInst6 = load i32, i32* %left, align 4
+  %LoadInst7 = load i32, i32* %right, align 4
+  call void @quicksort(i32* %arrayPtr, i32 %LoadInst6, i32 %LoadInst7)
+  store i32 0, i32* %i, align 4
+  br label %WhileCond8
+
+WhileCond8:                                       ; preds = %WhileLoop12, %WhileEnd
+  %LoadInst9 = load i32, i32* %i, align 4
+  %LoadInst10 = load i32, i32* %N, align 4
+  %icmptmp11 = icmp slt i32 %LoadInst9, %LoadInst10
+  br i1 %icmptmp11, label %WhileLoop12, label %WhileEnd15
+
+WhileLoop12:                                      ; preds = %WhileCond8
+  %LoadInst13 = load i32, i32* %i, align 4
+  %tmparray = getelementptr inbounds [1000000 x i32], [1000000 x i32]* %B, i32 0, i32 %LoadInst13
+  %tmpvar = load i32, i32* %tmparray, align 4
+  %printf = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @_Const_String_.2, i32 0, i32 0), i32 %tmpvar)
+  %LoadInst14 = load i32, i32* %i, align 4
+  %2 = add i32 %LoadInst14, 1
+  store i32 %2, i32* %i, align 4
+  br label %WhileCond8
+
+WhileEnd15:                                       ; preds = %WhileCond8
   ret i32 0
 }

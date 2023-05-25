@@ -27,39 +27,40 @@ CodeGenerator::CodeGenerator(void) :
     this->scanf = GenScanf();
 }
 
-// 创建并推入一个空的符号表
-void CodeGenerator::PushSymbolTable(void) {
-	this->SymbolTableStack.push_back(new SymbolTable);
-}
-
-// 移除最后一个符号表
-void CodeGenerator::PopSymbolTable(void) {
-	if (this->SymbolTableStack.size() == 0) return;
-	delete this->SymbolTableStack.back();
-	this->SymbolTableStack.pop_back();
-}
-
 // 查找变量
-llvm::Value* CodeGenerator::FindVariable(std::string Name){
-	if (this->SymbolTableStack.size() == 0) return NULL;
-	for (auto TableIter = this->SymbolTableStack.end() - 1; TableIter >= this->SymbolTableStack.begin(); TableIter--) {
-		auto PairIter = (**TableIter).find(Name);
-		if (PairIter != (**TableIter).end())
-			return PairIter->second.GetVariable();
-	}
-	return this->Module->getGlobalVariable(Name, true);
+llvm::Value* CodeGenerator::FindVariable(std::string Name) {
+    if (this->SymbolTableStack.size() == 0) return NULL;
+    for (auto TableIter = this->SymbolTableStack.end() - 1; TableIter >= this->SymbolTableStack.begin(); TableIter--) {
+        auto PairIter = (**TableIter).find(Name);
+        if (PairIter != (**TableIter).end())
+            return PairIter->second;
+    }
+    return this->Module->getGlobalVariable(Name, true);
 }
 
 // 添加变量到当前符号表
 bool CodeGenerator::AddVariable(std::string Name, llvm::Value* Variable){
-	if (this->SymbolTableStack.size() == 0) return false;
-	auto& TopTable = *(this->SymbolTableStack.back());
-	auto PairIter = TopTable.find(Name);
-	if (PairIter != TopTable.end())
-		return false;
-	TopTable[Name] = Symbol(Variable);
-	return true;
+    if (this->SymbolTableStack.size() == 0) return false;
+    auto& TopTable = *(this->SymbolTableStack.back());
+    auto PairIter = TopTable.find(Name);
+    if (PairIter != TopTable.end())
+        return false;
+    TopTable[Name] = Variable;
+    return true;
 }
+
+// 创建并推入一个空的符号表
+void CodeGenerator::PushSymbolTable(void) {
+    this->SymbolTableStack.push_back(new SymbolTable);
+}
+
+// 移除最后一个符号表
+void CodeGenerator::PopSymbolTable(void) {
+    if (this->SymbolTableStack.size() == 0) return;
+    delete this->SymbolTableStack.back();
+    this->SymbolTableStack.pop_back();
+}
+
 
 // 设置当前函数
 void CodeGenerator::EnterFunction(llvm::Function* Func) {
