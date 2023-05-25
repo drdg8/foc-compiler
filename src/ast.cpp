@@ -174,16 +174,13 @@ llvm::Value* String::codeGen(CodeGenerator& context) {
 // 如果变量不是数组，会从内存中加载其值。
 llvm::Value* Identifier::codeGen(CodeGenerator& context) {
     cout << "IDENTIFIER: " << name << endl;
-
     llvm::Value* var = context.FindVariable(name);
     if(var == nullptr){
         std::cerr << "undeclared variable " << name << endl;
         return nullptr;
     }
-
     llvm::Type* tp = var->getType()->getPointerElementType();
     llvm::outs() << "identifier type:" << *tp << "\n";
-
     llvm::Value* res = nullptr;
     if(tp->isArrayTy()) {
         vector<llvm::Value*> indexList;
@@ -195,7 +192,6 @@ llvm::Value* Identifier::codeGen(CodeGenerator& context) {
     else {
         res = new llvm::LoadInst(tp, var, "LoadInst", false, IRBuilder.GetInsertBlock());
     }
-
     return res;
 }
 

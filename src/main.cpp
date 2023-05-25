@@ -1,6 +1,7 @@
 #include "CodeGenerator.hpp"
 #include "ast.hpp"
 #include <llvm/Support/TargetSelect.h>
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
 #include <iostream>
 #include <fstream>
 
@@ -24,10 +25,10 @@ void parseArgments(){
             else {
                 argMap[name] = "";
             }
-
         }
     }
 }
+
 
 int main(int argc, const char* argv[]){
     if(argc == 1){
@@ -65,25 +66,44 @@ int main(int argc, const char* argv[]){
         }
         
     }    
+    //处理-s选项
+    auto it_s = argMap.find("s");
+    if(it_s != argMap.end()){
+        std::string OutputAssemblyFile = it_s->second;
+        if(OutputAssemblyFile.length() <= 2 || OutputAssemblyFile.substr(OutputAssemblyFile.length() - 2) != ".s")
+        {
+            OutputAssemblyFile = OutputAssemblyFile + ".s";
+        }
+        
+        // Convert LLVM IR to RISC-V assembly code
+        std::string command = "llc -march=riscv32 " + OutputObjectFile + " -filetype=asm -o " + OutputAssemblyFile;
+        system(command.c_str());
+    }
+
+
     std::cout <<OutputObjectFile << std::endl;
-    std::cout << "I'm in yyparse" << std::endl;
-
-
-    std::cout << "I'm in yyparse" << std::endl;
-
     yyparse();
-
-    std::cout << "I'm out yyparse" << std::endl;
-
     CodeGenerator* generator = new CodeGenerator();
-
     llvm::InitializeNativeTarget();
     llvm::InitializeNativeTargetAsmParser();
     llvm::InitializeNativeTargetAsmPrinter();
 
     std::cout<<"program begin"<<std::endl;
-
     generator->GenerateCode(programBlock);
+
+    auto it_O = argMap.find("O");
+    if(it_O != argMap.end()){
+        unsigned optLevel = stoi(it_O->second);
+
+        // 创建优化器
+        llvm::legacy::PassManager pm;
+        llvm::PassManagerBuilder pmb;
+        pmb.OptLevel = optLevel;
+        pmb.populateModulePassManager(pm);
+
+        // 运行优化器
+        pm.run(*(generator->Module));
+    }
 
     //将目标代码写入output file中
     generator->GenIR(OutputObjectFile);
