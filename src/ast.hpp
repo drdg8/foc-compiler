@@ -199,6 +199,11 @@ public:
 		type(type), id(id) { assignmentExpr = nullptr; Customtype=nullptr;}
 	VariableDeclaration( VarType& type, Identifier& id, Expression *assignmentExpr) :
 		type(type), id(id), assignmentExpr(assignmentExpr) {  Customtype=nullptr;}
+	// 创建数组的初始化常量
+	llvm::Constant* createArrayInitializer(llvm::Type* VarType);
+
+	// 创建变量的初始化常量
+	llvm::Constant* createVariableInitializer(llvm::Type* VarType, CodeGenerator& context, Expression* assignmentExpr);
 
 	virtual llvm::Value* codeGen(CodeGenerator& context);
 public:
@@ -208,46 +213,22 @@ public:
 	Expression *assignmentExpr;
 };
 
-/*
-class ArrayDeclaration : public VariableDeclaration {
-public:
-	ArrayDeclaration(Identifier* type, Identifier& id,int size) :
-		VariableDeclaration(type,id),size(size) {}
-
-	ArrayDeclaration(VarType* type, Identifier& id,int size) :
-		VariableDeclaration(type,id),size(size) {}
-	virtual llvm::Value* codeGen(CodeGenerator& context);
-public:
-	int size;
-};
-
-class ExternDeclaration : public Declaration {
-public:
-    ExternDeclaration(const VarType& type, const Identifier& id,
-            const VariableList& arguments) :
-        type(type), id(id), arguments(arguments) {}
-    virtual llvm::Value* codeGen(CodeGenerator& context);
-public:
-    const VarType& type;
-    const Identifier& id;
-    VariableList arguments;
-};
-*/
-
 class FunctionDeclaration : public Declaration {
 public:
 	FunctionDeclaration(VarType& type, Identifier& id, 
 		const VariableList& arguments, Block& block) :
 		type(type), id(id), arguments(arguments), block(block) { }
 	virtual llvm::Value* codeGen(CodeGenerator& context);
+	std::vector<llvm::Type*> getArgTypes(CodeGenerator& context) ;
+	void createArgAllocs(CodeGenerator& context, llvm::Function* Func, std::vector<llvm::Type*>& ArgTypes) ;
+	void generateFuncBody(CodeGenerator& context, llvm::Function* Func) ;
+
 public:
 	VarType& type;
 	Identifier& id;
 	VariableList arguments;
 	Block& block;
 };
-
-
 
 class ExpressionStatement : public Statement {
 public:

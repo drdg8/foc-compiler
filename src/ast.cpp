@@ -376,256 +376,169 @@ llvm::Value* BinaryOp::codeGen(CodeGenerator& context){
 
 
 
-// llvm::Value* BinaryOp::codeGen(CodeGenerator& context){
-//     cout << "BinaryOp: " << op << endl;
-//     llvm::Value* left = lhs.codeGen(context);
-//     llvm::Value* right = rhs.codeGen(context);
-//     llvm::Instruction::BinaryOps bi_op;
 
-//     // bit calculate
-//     if(op == AND){
-//         if (left->getType() != llvm::Type::getInt1Ty(Context) || right->getType() != llvm::Type::getInt1Ty(Context)) {
-//             throw logic_error("can not use types other than bool in and exp");
-//         }
-//         return IRBuilder.CreateAnd(left, right, "tmpAnd");
-//     }
-//     else if (op == OR) {
-//         if (left->getType() != llvm::Type::getInt1Ty(Context) || right->getType() != llvm::Type::getInt1Ty(Context)) {
-//             throw logic_error("cannot use types other than bool in and exp");
-//         }
-//         return IRBuilder.CreateOr(left, right, "tmpOR");
-//     }
-//     else{
-//     // ADD SUB MUL DIV
-//     // LT、GT、EQ、NEQ、LE、GE
-//         // same type 
-//         if (left->getType() != right->getType()) {
-//             // left or right is float
-//             if (left->getType() == llvm::Type::getFloatTy(Context)) {
-//                 right = typeCast(right, llvm::Type::getFloatTy(Context));
-//             } else if (right->getType() == llvm::Type::getFloatTy(Context)) {
-//                 left = typeCast(left, llvm::Type::getFloatTy(Context));
-//             } else {
-//                 // if left or right is int
-//                 if (left->getType() == llvm::Type::getInt32Ty(Context)) {
-//                     right = typeCast(right, llvm::Type::getInt32Ty(Context));
-//                 } else if(right->getType() == llvm::Type::getInt32Ty(Context)) {
-//                     left = typeCast(left, llvm::Type::getInt32Ty(Context));
-//                 } else {
-//                     throw logic_error("cann't use bool in + - * / == != >= <= < >");
-//                 }
-//             }
-//         }
-//         if(op == PLUS || op == MINUS || op == MUL || op ==  DIV){
-//             if(op == PLUS){
-//                 bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FAdd : llvm::Instruction::Add;
-//             } else if(op == MINUS){
-//                 bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FSub : llvm::Instruction::Sub;
-//             } else if(op == MUL){
-//                 bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FMul : llvm::Instruction::Mul;
-//             } else if(op == DIV){ 
-//                 bi_op = left->getType()->isFloatTy() ? llvm::Instruction::FDiv : llvm::Instruction::SDiv;
-//             } 
-//             return llvm::BinaryOperator::Create(bi_op, left, right, "", IRBuilder.GetInsertBlock());
-//         }
-//         if (op == CEQ) {
-//             if(left->getType() == llvm::Type::getFloatTy(Context))
-//                 return IRBuilder.CreateFCmpOEQ(left, right, "fcmptmp");
-//             else 
-//                 return IRBuilder.CreateICmpEQ(left, right, "icmptmp");
-//         }
-//         else if (op == CGE) {
-//             if(left->getType() == llvm::Type::getFloatTy(Context))
-//                 return IRBuilder.CreateFCmpOGE(left, right, "fcmptmp");
-//             else 
-//                 return IRBuilder.CreateICmpSGE(left, right, "icmptmp");
-//         }
-//         else if (op == CLE) {
-//             if(left->getType() == llvm::Type::getFloatTy(Context))
-//                 return IRBuilder.CreateFCmpOLE(left, right, "fcmptmp");
-//             else 
-//                 return IRBuilder.CreateICmpSLE(left, right, "icmptmp");
-//         }
-//         else if (op == CGT) {
-//             if(left->getType() == llvm::Type::getFloatTy(Context))
-//                 return IRBuilder.CreateFCmpOGT(left, right, "fcmptmp");
-//             else 
-//                 return IRBuilder.CreateICmpSGT(left, right, "icmptmp");
-//         }
-//         else if (op == CLT) {
-//             if(left->getType() == llvm::Type::getFloatTy(Context))
-//                 return IRBuilder.CreateFCmpOLT(left, right, "fcmptmp");
-//             else 
-//                 return IRBuilder.CreateICmpSLT(left, right, "icmptmp");
-//         }
-//         else if (op == CNE) {
-//             if(left->getType() == llvm::Type::getFloatTy(Context))
-//                 return IRBuilder.CreateFCmpONE(left, right, "fcmptmp");
-//             else 
-//                 return IRBuilder.CreateICmpNE(left, right, "icmptmp");
-//         }
-//         else{
-//             cerr << "unknown operator " << op << endl;
-//             return NULL;
-//         }
-//     }
-// }
-
-// idk but in yacc ASSIGN is EQUAL
-// identifier = expression
+// 利用yacc中的EQUAL来代表赋值操作
+// 形式如：变量 = 表达式
 llvm::Value* Assign::codeGen(CodeGenerator &context){
-    cout << "Assign: " << ident.name << endl;
+    std::cout << "处理赋值操作，变量名为：" << ident.name << std::endl;
 
-    llvm::Value* result = context.FindVariable(ident.name);
-    if(result == nullptr){
-        cerr << "undeclared variable " << ident.name << endl;
+    // 查找变量并获取其值，如果找不到该变量则抛出错误
+    llvm::Value* targetValue = context.FindVariable(ident.name);
+    if(targetValue == nullptr){
+        std::cerr << "尝试赋值给未声明的变量 " << ident.name << std::endl;
 		return nullptr;
     }
 
-    // Assign: Type of left %res = alloca i32, align 4 is: i32* ,eleType is: i32
-    llvm::Type* type = result->getType();
-    typePrint(result);
+    // 打印变量的类型信息
+    llvm::Type* targetType = targetValue->getType();
+    typePrint(targetValue);
 
-    llvm::Value* right = expr.codeGen(context);
-    cout << "right: ";
-    typePrint(right);
+    // 生成表达式的代码并获取其值
+    llvm::Value* exprValue = expr.codeGen(context);
+    std::cout << "表达式的值为：";
+    typePrint(exprValue);
 
+    // 获取当前的代码块
     auto CurrentBlock = IRBuilder.GetInsertBlock();
-    // cout << (IRBuilder.GetInsertBlock() == NULL) << endl;
 
-    // use chatgpt
-    // if Value *src, what's the difference between src->getType() and src->getType()->getPointerElementType()? give a e.g
-    // in all, if src is pointer to int, getType() return llvm::Type *, which is a pointer to int, ->getPointerElementType() is same
-    // if src is pointer to array int, getType() return pointer to llvm::Type array, ->getPointerElementType() return pointer to llvm::Type int 
+    // 如果表达式的值与目标变量的类型不同，则进行类型转换
+    if (exprValue->getType() != targetValue->getType()->getPointerElementType())
+        exprValue = typeCast(exprValue, targetValue->getType()->getPointerElementType());
 
-    if (right->getType() != result->getType()->getPointerElementType())
-        right = typeCast(right, result->getType()->getPointerElementType());
-
-    if (right == NULL) {
-		throw std::domain_error("Assignment with values that cannot be cast to the target type.");
-		return NULL;
+    // 如果无法进行类型转换，则抛出错误
+    if (exprValue == nullptr) {
+		throw std::domain_error("无法将表达式的值转换为目标变量的类型。");
+		return nullptr;
 	}
-    IRBuilder.CreateStore(right, result);
-    /*
-    Note that AllocaInst is a subclass of Instruction, which is a subclass of Value, so the cast from AllocaInst* to Value* is safe. This allows you to use the resulting Value* pointer in other parts of your LLVM code that expect a Value*, such as passing it as an argument to a function.
-    */
-    // maybe wrong here !!!
 
-    // return result;
-    return right;
+    // 在 LLVM IR 中创建一个 store 指令，将表达式的值存储到目标变量中
+    IRBuilder.CreateStore(exprValue, targetValue);
+
+    return exprValue;
 }
 
-// e.g a[2];
+// 对应如 a[2] 的数组元素访问
 llvm::Value* ArrayElement::codeGen(CodeGenerator &context){
-    cout << "ArrayElement: " << identifier.name << "[]" << endl;
+    std::cout << "正在访问数组元素，数组名为：" << identifier.name << "[]" << std::endl;
 
+    // 查找数组并获取其值，如果找不到该数组则报错
     llvm::Value* arrayValue = context.FindVariable(identifier.name);
     if(arrayValue == nullptr){
-        cerr << "undeclared array " << identifier.name << endl;
+        std::cerr << "尝试访问未声明的数组 " << identifier.name << std::endl;
 		return nullptr;
     }
 
-    cout << "ArrayElement: index: " << endl;
+    std::cout << "访问的数组索引为：" << std::endl;
     llvm::Value* indexValue = index.codeGen(context);
 
-    // Check that the index value is an integer type
+    // 检查索引值是否为整数类型
     if (!indexValue->getType()->isIntegerTy()) {
-        cerr << "index value is not an integer type" << endl;
+        std::cerr << "数组索引值不是整数类型" << std::endl;
         return nullptr;
     }
 
     vector<llvm::Value*> indexList;
 
-    // type of variable @f = global [100 x i32] zeroinitializer is: [100 x i32]* ,eleType is: [100 x i32]
+    // 打印数组变量的类型信息
     typePrint(arrayValue);
 
-    // if arrayValue->getType() is i32**
+    // 如果 arrayValue 的类型是指针类型，则载入指针所指向的值
     if(arrayValue->getType()->getPointerElementType()->isPointerTy()) {
         arrayValue = IRBuilder.CreateLoad(arrayValue->getType()->getPointerElementType(), arrayValue);
         indexList.push_back(indexValue);    
     }
-    // if array 
+    // 如果 arrayValue 的类型是数组类型，则添加索引值
     else if(arrayValue->getType()->getPointerElementType()->isArrayTy()) {
         indexList.push_back(IRBuilder.getInt32(0));
         indexList.push_back(indexValue);    
     }
+    // 如果 arrayValue 的类型既不是指针类型也不是数组类型，则报错
     else{
-        cerr << "[] can just be used to pointer or array" << endl;
+        std::cerr << "[] 只能用于指针或数组" << std::endl;
         return nullptr;
     }
 
+    // 创建一个 GEP 指令来计算元素的地址
     llvm::Value* elePtr = IRBuilder.CreateInBoundsGEP(arrayValue->getType()->getPointerElementType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmparray");
 
+    // 载入并返回元素的值
     return IRBuilder.CreateLoad(elePtr->getType()->getPointerElementType(), elePtr, "tmpvar");
-
-    //return IRBuilder.CreateAlignedLoad(elePtr, 4);
 }
 
-// 返回数组 array[index]的地址用来函数传参
+
+// 该函数获取 array[index] 的地址以用于函数参数传递
 llvm::Value* ArrayElement::getAddr(CodeGenerator &context){
-    cout << "getArrayElementAddr : " << identifier.name << "[]" << endl;
+    std::cout << "正在获取数组元素地址，目标数组：" << identifier.name << "[]" << std::endl;
 
-    llvm::Value* arrayValue = context.FindVariable(identifier.name);
-    if(arrayValue == nullptr){
-        cerr << "undeclared array " << identifier.name << endl;
+    // 在上下文中寻找数组变量，如果找不到，返回错误
+    llvm::Value* arrVal = context.FindVariable(identifier.name);
+    if(!arrVal){
+        std::cerr << "无法找到数组 " << identifier.name << std::endl;
 		return nullptr;
     }
-
-    llvm::Value* indexValue = index.codeGen(context);
-    vector<llvm::Value*> indexList;
-
-    // 如果是一个指针
-    if(arrayValue->getType()->getPointerElementType()->isPointerTy()) {
-        arrayValue = IRBuilder.CreateLoad(arrayValue->getType()->getPointerElementType(), arrayValue);
-        indexList.push_back(indexValue);    
+    // 生成数组索引
+    llvm::Value* idxVal = index.codeGen(context);
+    vector<llvm::Value*> idxVec;
+    // 如果 arrVal 是指针类型
+    if(arrVal->getType()->getPointerElementType()->isPointerTy()) {
+        arrVal = IRBuilder.CreateLoad(arrVal->getType()->getPointerElementType(), arrVal);
+        idxVec.push_back(idxVal);    
     }
-    // 如果是一个数组 
+    // 如果 arrVal 是数组类型
     else {
-        indexList.push_back(IRBuilder.getInt32(0));
-        indexList.push_back(indexValue);    
+        idxVec.push_back(IRBuilder.getInt32(0));
+        idxVec.push_back(idxVal);    
     }
-
-    llvm::Value* elePtr =  IRBuilder.CreateInBoundsGEP(arrayValue->getType()->getPointerElementType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmparray");
-    return elePtr;
-    //return IRBuilder.CreateAlignedLoad(elePtr, 4);
+    // 生成 GEP 指令以计算元素地址，然后返回
+    llvm::Value* elementPtr = IRBuilder.CreateInBoundsGEP(arrVal->getType()->getPointerElementType(), arrVal, llvm::ArrayRef<llvm::Value*>(idxVec), "tmparray");
+    return elementPtr;
 }
 
+// ArrayAssign 函数用于对数组元素进行赋值操作，例如 a[2] = 5;
 llvm::Value* ArrayAssign::codeGen(CodeGenerator &context){
-    cout << "ArrayAssign: " << identifier.name << "[]" << endl;
+    std::cout << "正在进行数组元素赋值操作，目标数组：" << identifier.name << "[]" << std::endl;
 
-    llvm::Value* arrayValue = context.FindVariable(identifier.name);
-    if(arrayValue == nullptr){
-        cerr << "undeclared array " << identifier.name << endl;
+    // 在上下文中寻找数组变量，如果找不到，返回错误
+    llvm::Value* arrVal = context.FindVariable(identifier.name);
+    if(!arrVal){
+        std::cerr << "无法找到数组 " << identifier.name << std::endl;
 		return nullptr;
     }
 
-    llvm::Value* indexValue = index.codeGen(context);
-    vector<llvm::Value*> indexList;
+    // 生成数组索引
+    llvm::Value* idxVal = index.codeGen(context);
+    vector<llvm::Value*> idxVec;
 
-    llvm::outs()<<"arrayIdentifier type:"<<*(arrayValue->getType());
-    cout<<endl;
+    // 打印目标数组的类型
+    llvm::errs() << "目标数组的类型为：";
+    arrVal->getType()->print(llvm::errs());
+    llvm::errs() << '\n';
 
-    // 如果是一个指针
-    if(arrayValue->getType()->getPointerElementType()->isPointerTy()) {
-        arrayValue = IRBuilder.CreateLoad(arrayValue->getType()->getPointerElementType(), arrayValue);
-        indexList.push_back(indexValue);    
+    // 如果 arrVal 是指针类型
+    if(arrVal->getType()->getPointerElementType()->isPointerTy()) {
+        arrVal = IRBuilder.CreateLoad(arrVal->getType()->getPointerElementType(), arrVal);
+        idxVec.push_back(idxVal);    
     }
-    // 如果是一个数组 
+    // 如果 arrVal 是数组类型
     else {
-        indexList.push_back(IRBuilder.getInt32(0));
-        indexList.push_back(indexValue);    
+        idxVec.push_back(IRBuilder.getInt32(0));
+        idxVec.push_back(idxVal);    
     }
-    llvm::Value* left =  IRBuilder.CreateInBoundsGEP(arrayValue->getType()->getPointerElementType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "tmpvar");
-    llvm::Value *right = rhs.codeGen(context);
 
-    llvm::outs()<<*(left->getType()->getPointerElementType());
+    // 使用 GEP 指令计算左值（待赋值元素）的地址
+    llvm::Value* left =  IRBuilder.CreateInBoundsGEP(arrVal->getType()->getPointerElementType(), arrVal, llvm::ArrayRef<llvm::Value*>(idxVec), "tmpvar");
+    
+    // 生成右值（即赋值表达式）
+    llvm::Value* right = rhs.codeGen(context);
 
+    // 检查类型，并在需要时进行类型转换
     if (right->getType() != left->getType()->getPointerElementType())
         right = typeCast(right, left->getType()->getPointerElementType());
 
+    // 执行赋值操作并返回结果
     return IRBuilder.CreateStore(right, left);
-    //return nullptr;
 }
+
 
 llvm::Value* GetAddr::codeGen(CodeGenerator &context){
     cout << "GetAddr : " << rhs.name << endl;
@@ -639,320 +552,322 @@ llvm::Value* GetAddr::codeGen(CodeGenerator &context){
 }
 
 llvm::Value* GetArrayAddr::codeGen(CodeGenerator &context){
-    cout << "get arrayElement Addr:" << rhs.name << "[]" << endl;
+    std::cout << "正在取得数组元素地址：" << rhs.name << "[]" << std::endl;
 
-    llvm::Value* arrayValue = context.FindVariable(rhs.name);
-    if(arrayValue == nullptr){
-        cerr << "undeclared array " << rhs.name << endl;
+    llvm::Value* arrayVal = context.FindVariable(rhs.name);
+    if(arrayVal == nullptr){
+        std::cerr << "未声明的数组 " << rhs.name << std::endl;
 		return nullptr;
     }
-    // llvm::Value* arrayValue = context.getTop()[identifier.name];
-    llvm::Value* indexValue = index.codeGen(context);
-    vector<llvm::Value*> indexList;
 
+    llvm::Value* indexVal = index.codeGen(context);
+    std::vector<llvm::Value*> idxList;
 
-    // 如果是一个指针
-    if(arrayValue->getType()->getPointerElementType()->isPointerTy()) {
-        arrayValue = IRBuilder.CreateLoad(arrayValue->getType()->getPointerElementType(), arrayValue);
-        indexList.push_back(indexValue);    
+    // 如果目标是指针
+    if(arrayVal->getType()->getPointerElementType()->isPointerTy()) {
+        arrayVal = IRBuilder.CreateLoad(arrayVal->getType()->getPointerElementType(), arrayVal);
+        idxList.push_back(indexVal);    
     }
-    // 如果是一个数组 
+    // 如果目标是数组 
     else {
-        indexList.push_back(IRBuilder.getInt32(0));
-        indexList.push_back(indexValue);    
+        idxList.push_back(IRBuilder.getInt32(0));
+        idxList.push_back(indexVal);    
     }
 
-    // get element pointer
-    llvm::Value* elePtr = IRBuilder.CreateInBoundsGEP(arrayValue->getType()->getPointerElementType(), arrayValue, llvm::ArrayRef<llvm::Value*>(indexList), "elePtr");
+    // 获取元素指针
+    llvm::Value* elePtr = IRBuilder.CreateInBoundsGEP(arrayVal->getType()->getPointerElementType(), arrayVal, llvm::ArrayRef<llvm::Value*>(idxList), "elePtr");
     return elePtr;
-    //return nullptr;
 }
 
+
 llvm::Value* Block::codeGen(CodeGenerator &context){
+    // 将新的符号表压入符号表栈中，为这个块创建新的作用域
     context.PushSymbolTable();
-    cout << "statementList:" << statementList.size()  << endl;
+    
+    std::cout << "语句列表大小为：" << statementList.size() << std::endl;
+    
     llvm::Value* tmp = NULL;
+    
+    // 遍历语句列表，对每个语句调用其 codeGen 方法生成对应的 IR
     for(auto stmt : statementList){
-        cout << "Generating code for " << typeid(*stmt).name() << endl;
-        if (context.GetCurrentFunction() != NULL && IRBuilder.GetInsertBlock()->getTerminator())
-         {  
+        std::cout << "正在为 " << typeid(*stmt).name() << " 生成代码" << std::endl;
+        
+        // 检查当前函数是否存在，并且是否已经有一个终结器（例如 return 语句）
+        // 如果已经有了终结器，就无需处理余下的语句，因此跳出循环
+        if (context.GetCurrentFunction() != NULL && IRBuilder.GetInsertBlock()->getTerminator()) {  
              break;
-         }
+        }
+        // 如果语句存在，则调用它的 codeGen 方法生成代码
         else if (stmt){
             stmt->codeGen(context);
         }
     }
-    cout << endl;
+    std::cout << std::endl;
+    
+    // 语句块已经处理完毕，将符号表从符号表栈中弹出，恢复到原先的作用域
     context.PopSymbolTable();
-	return NULL;
+    
+    // 由于块语句本身没有值，所以返回 NULL
+    return NULL;
 }
 
-//已检查
+
+// VariableDeclaration 的 codeGen 方法负责生成变量声明的 LLVM IR 代码
 llvm::Value* VariableDeclaration::codeGen(CodeGenerator &context){
+    // 首先从变量声明中获取对应的 LLVM 类型
     llvm::Type* VarType = type.getLLVMType();
-    llvm::outs() << "Var Decl: Type ";
+
+    llvm::outs() << "变量声明：类型 ";
     VarType->print(llvm::outs());
     llvm::outs() << "\n";
 
     if(context.CurrFunction == NULL){
-        // global variable
-        cout << "declaration global variable " << id.name << endl;
+        // 全局变量
+        std::cout << "声明全局变量 " << id.name << std::endl;
 
         context.ChangeToGlobalBB();
 
-        // if redefine
-        llvm::Value *tmp = context.Module->getGlobalVariable(id.name, true);
-        if(tmp != nullptr){
-            throw logic_error("Redefined Global Variable: " + id.name);
+        // 检查全局变量是否重复定义
+        if(context.Module->getGlobalVariable(id.name, true) != nullptr){
+            throw std::logic_error("全局变量重复定义: " + id.name);
             return NULL;
         }
 
-        // 3rd argument is const or not, which we don't implement
-        auto Alloc = new llvm::GlobalVariable(
-            *(context.Module),
-            VarType,
-            false,
-            llvm::Function::ExternalLinkage,
-            0,
-            id.name
-        );
+        // 创建全局变量
+        auto Alloc = new llvm::GlobalVariable(*(context.Module), VarType, false, llvm::Function::ExternalLinkage, 0, id.name);
 
         llvm::Constant* Initializer;
-        // array
+        // 如果是数组类型
         if(VarType->isArrayTy()){
-            llvm::Type *eleType = VarType->getArrayElementType();
-
-            std::vector<llvm::Constant*> constArrayEle;
-            // create the constant initializer
-            llvm::Constant* constEle = llvm::ConstantInt::get(eleType, 0);
-            int size = VarType->getArrayNumElements();
-            for (int i = 0; i < size; i++) {
-                constArrayEle.push_back(constEle);
-            }
-            Initializer = llvm::ConstantArray::get(llvm::ArrayType::get(eleType, size), constArrayEle);
+            Initializer = createArrayInitializer(VarType);
         }
-        // not an array
+        // 不是数组类型
         else{
-            // if global we check no currfunction
-            // so we use GlobalBB to do Assign
-            Initializer = llvm::ConstantInt::get(VarType, 0);
-            if (assignmentExpr) {
-                Assign ass(id, *assignmentExpr);
-                Initializer = (llvm::Constant *)typeCast((llvm::Value *)ass.codeGen(context), VarType);
-            }
+            Initializer = createVariableInitializer(VarType, context, assignmentExpr);
         }
 
         Alloc->setInitializer(Initializer);
-
         context.ChangeToTmpBB();
 
         return Alloc;
     }
     else{
-        // local variable
-        cout << "declaration local variable " << id.name << endl;
+        // 局部变量
+        std::cout << "声明局部变量 " << id.name << std::endl;
         llvm::Function *Func = context.CurrFunction;
 
-        // declaration in function
-        // create an alloca instruction in the entry block of the current function,
-        // wherever the variable declaration is.
+        // 在函数的入口块创建 alloca 指令来为变量分配空间
         llvm::IRBuilder<> TmpB(&Func->getEntryBlock(), Func->getEntryBlock().begin());
         llvm::AllocaInst* Alloc = TmpB.CreateAlloca(VarType, 0, id.name);
-        if(context.AddVariable(id.name, Alloc) == false) {
-            // 当前域中有该变量, 重复定义
+
+        // 检查变量是否在当前作用域内重复定义
+        if(!context.AddVariable(id.name, Alloc)) {
             Alloc->eraseFromParent();
-            throw logic_error("Redefined Local Variable: " + id.name);
+            throw std::logic_error("局部变量重复定义: " + id.name);
             return NULL;
         }
 
-        // not a array
+        // 如果存在赋值表达式，那么就生成对应的赋值代码
         if (assignmentExpr) {
             Assign ass(id, *assignmentExpr);
             ass.codeGen(context);
         }
 
         return Alloc;
-        /*
-        //Assign the initial value by "store" instruction.
-        if (NewVar->_InitialExpr) {
-            llvm::Value* Initializer = TypeCasting(NewVar->_InitialExpr->codeGen(context), VarType);
-            if (Initializer == NULL) {
-                throw std::logic_error("Initializing variable " + NewVar->_Name + " with value of different type.");
-                return NULL;
-            }
-            IRBuilder.CreateStore(Initializer, Alloc);
-        }
-        */
     }
 }
 
-/*
-// to be implement
-llvm::Value* ExternDeclaration::codeGen(CodeGenerator& context){
-    return NULL;
-}
-*/
+// 创建数组的初始化常量
+llvm::Constant* VariableDeclaration::createArrayInitializer(llvm::Type* VarType){
+    llvm::Type *eleType = VarType->getArrayElementType();
 
-llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context){
-    // get the ArgTypes
-    std::vector<llvm::Type*> ArgTypes;
-    for(auto i: (this->arguments)){
-        llvm::Type* tp = i->type.getLLVMType();
-        // std::cout << "arg_type:"<< i->type.type <<std::endl;
-        if (!tp) {
-            throw std::logic_error("Defining a function " + i->id.name + " using unknown type(s).");
-            return NULL;
-        }
-
-        // check if it is a "void" type
-        if (tp->isVoidTy()){
-            if(arguments.size() > 1){
-                throw std::logic_error("function has more than one arguemnt with void type.");
-                return NULL;
-            }
-            else{
-                // no arguments
-                break;
-            }
-        }
-
-        // when the function argument type is an array type, we don't pass the entire array.
-        // we just pass a pointer pointing to its elements
-        if (tp->isArrayTy()){  
-            tp = tp->getArrayElementType()->getPointerTo();
-        }
-
-        ArgTypes.push_back(tp);
+    std::vector<llvm::Constant*> constArrayEle;
+    llvm::Constant* constEle = llvm::ConstantInt::get(eleType, 0);
+    int size = VarType->getArrayNumElements();
+    for (int i = 0; i < size; i++) {
+        constArrayEle.push_back(constEle);
     }
-    // std::cout << "ArgTypes_size:" << ArgTypes.size()  << std::endl;
 
-    // get return type
-    // array or pointer need to change in parser.y
+    return llvm::ConstantArray::get(llvm::ArrayType::get(eleType, size), constArrayEle);
+}
+
+// 创建变量的初始化常量
+llvm::Constant* VariableDeclaration::createVariableInitializer(llvm::Type* VarType, CodeGenerator& context, Expression* assignmentExpr){
+    llvm::Constant* Initializer = llvm::ConstantInt::get(VarType, 0);
+    if (assignmentExpr) {
+        Assign ass(id, *assignmentExpr);
+        Initializer = static_cast<llvm::Constant *>(typeCast(static_cast<llvm::Value *>(ass.codeGen(context)), VarType));
+    }
+
+    return Initializer;
+}
+
+// FunctionDeclaration的codeGen方法负责生成函数声明的LLVM IR代码
+llvm::Value* FunctionDeclaration::codeGen(CodeGenerator& context) {
+    // 从函数声明中获取参数类型
+    std::vector<llvm::Type*> ArgTypes = getArgTypes(context);
+
+    // 获取返回类型
     llvm::Type* RetType = this->type.getLLVMType();
 
-    // get function type
-    // 3rd argument is whether arg has ...
+    // 获取函数类型
     llvm::FunctionType* FuncType = llvm::FunctionType::get(RetType, ArgTypes, false);
 
-    // create function
+    // 创建函数
     llvm::Function* Func = llvm::Function::Create(FuncType, llvm::GlobalValue::ExternalLinkage, this->id.name, context.Module);
-    // context.AddFunction(this->id.name, Func);
 
-    // implement function block
-
-    // create a new basic block to start insertion into. global Context
+    // 创建一个新的基本块作为函数体的入口
     llvm::BasicBlock* FuncBlock = llvm::BasicBlock::Create(Context, "entry", Func);
     IRBuilder.SetInsertPoint(FuncBlock);
 
-    // create allocated space for arguments.
-	// this variable table is only used to store the arguments of the function
+    // 创建参数对应的存储空间
+    createArgAllocs(context, Func, ArgTypes);
+
+    // 生成函数体的代码
+    generateFuncBody(context, Func);
+
+    return NULL;
+}
+
+// 从函数声明中获取参数类型
+std::vector<llvm::Type*> FunctionDeclaration::getArgTypes(CodeGenerator& context) {
+    std::vector<llvm::Type*> ArgTypes;
+    for(auto i: this->arguments) {
+        llvm::Type* tp = i->type.getLLVMType();
+        if (!tp) {
+            throw std::logic_error("使用未知类型定义函数 " + i->id.name);
+            return {};
+        }
+        if (tp->isVoidTy()){
+            if(arguments.size() > 1){
+                throw std::logic_error("函数有多个参数类型为void.");
+                return {};
+            }
+            else{
+                break;
+            }
+        }
+        // 如果函数参数类型为数组类型，则传递指向其元素的指针，而不是整个数组
+        if (tp->isArrayTy()){  
+            tp = tp->getArrayElementType()->getPointerTo();
+        }
+        ArgTypes.push_back(tp);
+    }
+    return ArgTypes;
+}
+
+// 创建函数参数对应的存储空间
+void FunctionDeclaration::createArgAllocs(CodeGenerator& context, llvm::Function* Func, std::vector<llvm::Type*>& ArgTypes) {
     context.PushSymbolTable();
     size_t Index = 0;
     for (auto ArgIter = Func->arg_begin(); ArgIter < Func->arg_end(); ArgIter++, Index++) {
-        // Create alloc
+        // 在函数的入口块创建 alloca 指令来为参数分配空间
         llvm::IRBuilder<> TmpB(&Func->getEntryBlock(), Func->getEntryBlock().begin());
         auto Alloc = TmpB.CreateAlloca(ArgTypes[Index], 0, this->arguments[Index]->id.name);
 
-        //Create alloca
-        // auto Alloc = CreateEntryBlockAlloca(Func, this->arguments[Index]->id.name, ArgTypes[Index]);
-        // //Assign the value by "store" instruction
-        // IRBuilder.CreateStore(ArgIter, Alloc);
-
-        // Assign the value by "store" instruction
-        //  cout << "1111" <<endl;
-
         IRBuilder.CreateStore(ArgIter, Alloc);
-        // Add to the symbol table
+
         context.AddVariable(this->arguments[Index]->id.name, Alloc);
-        //   cout << this->arguments[Index]->id.name <<endl;
     }
-    //Generate code of the function body
+}
+
+// 生成函数体的代码
+void FunctionDeclaration::generateFuncBody(CodeGenerator& context, llvm::Function* Func) {
     context.EnterFunction(Func);
     context.PushSymbolTable();
     this->block.codeGen(context);
     context.PopSymbolTable();
     context.LeaveFunction();
-    context.PopSymbolTable();	// why we need to pop out an extra variable table?
-
-    return NULL;
 }
 
+// ExpressionStatement的codeGen方法负责生成表达式语句的LLVM IR代码
 llvm::Value* ExpressionStatement::codeGen(CodeGenerator &context){
+    // 在控制台打印出当前正在生成的语句类型，帮助调试
     cout << "Generate Expression Statement" << endl;
+    // 生成表达式的代码
     return expression.codeGen(context);
 }
 
+// ReturnStatement的codeGen方法负责生成返回语句的LLVM IR代码
 llvm::Value* ReturnStatement::codeGen(CodeGenerator &context){
+    // 在控制台打印出当前正在生成的语句类型，帮助调试
     cout << "Generate Return Statement" << endl;
+
+    // 获取当前的函数上下文，如果没有就报错
     llvm::Function* Func = context.GetCurrentFunction();
     if(Func == nullptr){
         throw std::logic_error("Return statement with no function body");
         return NULL;
     }
+
+    // 如果没有表达式（即没有返回值），则生成返回void的代码；如果有表达式，则生成返回该表达式值的代码
     if(expression == nullptr){
-        // here in minic use a bool var hasReturn 
         if (Func->getReturnType()->isVoidTy()){
             return IRBuilder.CreateRetVoid();
-        }
-        else{
+        }else{
             throw std::logic_error("should return void");
             return NULL;
         }
     }else{
+        // 生成表达式的代码，并进行类型转换，确保返回的类型与函数声明的返回类型匹配
         llvm::Value *ret = this->expression->codeGen(context);
         llvm::Value *RetVal = typeCast(ret, Func->getReturnType());
         if (RetVal == NULL) {
             throw std::logic_error("The type of return value doesn't match");
             return NULL;
-        }
-        else{
+        }else{
             return IRBuilder.CreateRet(RetVal);
         }
     }
 }
 
-// Create an unconditional branch if the current block doesn't have a terminator.
-// This function is safer than IRBuilder.CreateBr(llvm::BasicBlock* BB),
-// because if the current block already has a terminator, it does nothing.
-// For example, when generating if-statement, we create three blocks: ThenBB, ElseBB, MergeBB.
-// At the end of ThenBB and ElseBB, an unconditional branch to MergeBB needs to be created respectively,
-// UNLESS ThenBB or ElseBB is already terminated.
-// e.g.
+
+// TerminateBlockByBr方法用于在当前基本块（如果它还没有终止符）的末尾创建一个无条件分支到给定的基本块BB
+// 这个方法比直接使用IRBuilder.CreateBr(llvm::BasicBlock* BB)更安全，因为如果当前块已经有一个终止符，它不会做任何事情
+// 例如，在生成if语句时，我们创建了三个块：ThenBB，ElseBB和MergeBB
+// 在ThenBB和ElseBB的末尾，需要分别创建一个到MergeBB的无条件分支，除非ThenBB或ElseBB已经终止
+// 如：
 //	if (i) break;
 //	else continue;
+// 在这种情况下，ThenBB和ElseBB都已经有了终止符，所以不需要再添加分支
 llvm::BranchInst* TerminateBlockByBr(llvm::BasicBlock* BB) {
-	//If not terminated, jump to the target block
+	//如果当前插入块没有终止符，那么创建一个到目标块BB的无条件分支
 	if (!IRBuilder.GetInsertBlock()->getTerminator())
 		return IRBuilder.CreateBr(BB);
 	else
 		return NULL;
 }
 
+
+
 /*
 llvm::Value* LoopStatement::codeGen(CodeGenerator &context){ }
 */
 
+// IfStatement::codeGen函数用于生成LLVM中间代码，表示if语句
+// 其首先对条件进行求值，并创建对应的Then、Else和Merge基本块
+// 然后在Then和Else基本块中分别生成相应的代码
 llvm::Value* IfStatement::codeGen(CodeGenerator &context){
+    // 打印一条消息，说明正在生成if语句
     cout << "create if statement " << endl;
-    // evaluate condition
+    // 在这里，我们首先计算条件的值
     llvm::Value* Condition = this->condition.codeGen(context);
-
-    // check condition
+    // 然后我们检查条件是否可以转换为布尔值
+    // 如果不能转换，我们抛出一个异常并返回NULL
     if (( Condition = typeCast(Condition, IRBuilder.getInt1Ty()) ) == NULL) {
         throw std::logic_error("condition type can not cast to bool");
         return NULL;
     }
-
-    //Create "Then", "Else" and "Merge" block
+    // 然后我们创建三个基本块：ThenBB，ElseBB和MergeBB
+    // 这三个基本块分别用于存放if语句中的then部分，else部分，以及if语句结束后的代码
     llvm::Function* CurrentFunc = context.GetCurrentFunction();
     llvm::BasicBlock* ThenBB = llvm::BasicBlock::Create(Context, "Then");
     llvm::BasicBlock* ElseBB = llvm::BasicBlock::Create(Context, "Else");
     llvm::BasicBlock* MergeBB = llvm::BasicBlock::Create(Context, "Merge");
 
-    //Create a branch instruction corresponding to this if statement
+    // 然后我们创建一个条件分支指令，如果条件为真，就跳转到ThenBB，否则跳转到ElseBB
     IRBuilder.CreateCondBr(Condition, ThenBB, ElseBB);
-
-    //Generate code in the "Then" block
+    // 在ThenBB中生成then部分的代码
     CurrentFunc->getBasicBlockList().push_back(ThenBB);
     IRBuilder.SetInsertPoint(ThenBB);
     context.PushSymbolTable();
@@ -960,7 +875,7 @@ llvm::Value* IfStatement::codeGen(CodeGenerator &context){
     context.PopSymbolTable();
     TerminateBlockByBr(MergeBB);
 
-    //Generate code in the "Else" block
+    // 在ElseBB中生成else部分的代码，如果有的话
     CurrentFunc->getBasicBlockList().push_back(ElseBB);
     IRBuilder.SetInsertPoint(ElseBB);
     if(else_next){
@@ -970,8 +885,7 @@ llvm::Value* IfStatement::codeGen(CodeGenerator &context){
     }
     TerminateBlockByBr(MergeBB);
 
-    //Finish "Merge" block
-    /* The hasNPredecessorsOrMore() method is used to determine if the Merge block has at least one predecessor (i.e., if it was actually used).  */
+    // 如果MergeBB有至少一个前驱（即，它被使用了），我们就需要生成MergeBB的代码
     if (MergeBB->hasNPredecessorsOrMore(1)) {
         CurrentFunc->getBasicBlockList().push_back(MergeBB);
         IRBuilder.SetInsertPoint(MergeBB);
@@ -979,178 +893,171 @@ llvm::Value* IfStatement::codeGen(CodeGenerator &context){
     return NULL;
 }
 
+
+// WhileStatement::codeGen方法用于将while语句转换为LLVM IR代码。
+// 首先，它会创建一个条件检查块（WhileCondBB）、一个循环体块（WhileLoopBB）和一个循环结束块（WhileEndBB）。
+// 然后，它会在WhileCondBB中生成对应于循环条件的代码，并在WhileLoopBB中生成对应于循环体的代码。
 llvm::Value* WhileStatement::codeGen(CodeGenerator &context){
+    // 获得当前函数
     llvm::Function* CurrentFunc = context.GetCurrentFunction();
 
+    // 创建WhileCondBB、WhileLoopBB和WhileEndBB基本块
     llvm::BasicBlock* WhileCondBB = llvm::BasicBlock::Create(Context, "WhileCond");
     llvm::BasicBlock* WhileLoopBB = llvm::BasicBlock::Create(Context, "WhileLoop");
     llvm::BasicBlock* WhileEndBB = llvm::BasicBlock::Create(Context, "WhileEnd");
 
-    // we need a unconditional branch to get in the loop
+    // 创建一个无条件跳转至WhileCondBB的分支
     IRBuilder.CreateBr(WhileCondBB);
 
+    // 在WhileCondBB中生成条件代码
     CurrentFunc->getBasicBlockList().push_back(WhileCondBB);
     IRBuilder.SetInsertPoint(WhileCondBB);
-
-    // evaluate condition
     llvm::Value* Condition = this->condition.codeGen(context);
 
-    // check condition
+    // 检查条件是否可以转换为布尔值
     if (( Condition = typeCast(Condition, IRBuilder.getInt1Ty()) ) == NULL) {
         throw std::logic_error("condition type can not cast to bool");
         return NULL;
     }
 
+    // 创建一个条件分支，如果条件为真，则跳转至WhileLoopBB，否则跳转至WhileEndBB
     IRBuilder.CreateCondBr(Condition, WhileLoopBB, WhileEndBB);
-    //Generate code in the "WhileLoop" block
+
+    // 在WhileLoopBB中生成循环体的代码
     CurrentFunc->getBasicBlockList().push_back(WhileLoopBB);
     IRBuilder.SetInsertPoint(WhileLoopBB);
-
     context.EnterLoop(WhileCondBB, WhileEndBB);
     context.PushSymbolTable();
     this->LoopBody.codeGen(context);
     context.PopSymbolTable();
     context.LeaveLoop();
 
-    // point: end in while condBB
+    // 如果当前块未终止，则创建一个无条件跳转至WhileCondBB的分支
     TerminateBlockByBr(WhileCondBB);
 
-    //Finish "WhileEnd" block
+    // 在WhileEndBB中生成后续代码
     CurrentFunc->getBasicBlockList().push_back(WhileEndBB);
     IRBuilder.SetInsertPoint(WhileEndBB);
+
     return NULL;
 }
 
+// ForStatement::codeGen方法用于将for语句转换为LLVM IR代码。
+// 首先，它会创建一个条件检查块（ForCondBB）、一个循环体块（ForLoopBB）、一个循环尾部块（ForTailBB）和一个循环结束块（ForEndBB）。
+// 然后，它会在ForCondBB中生成对应于循环条件的代码，在ForLoopBB中生成对应于循环体的代码，以及在ForTailBB中生成对应于循环尾部的代码。
 llvm::Value* ForStatement::codeGen(CodeGenerator &context){
-    cout << "ForStatement"<< endl;
-
+    // 获得当前函数
     llvm::Function* CurrentFunc = context.GetCurrentFunction();
 
+    // 创建ForCondBB、ForLoopBB、ForTailBB和ForEndBB基本块
     llvm::BasicBlock* ForCondBB = llvm::BasicBlock::Create(Context, "ForCond");
     llvm::BasicBlock* ForLoopBB = llvm::BasicBlock::Create(Context, "ForLoop");
     llvm::BasicBlock* ForTailBB = llvm::BasicBlock::Create(Context, "ForTail");
     llvm::BasicBlock* ForEndBB = llvm::BasicBlock::Create(Context, "ForEnd");
 
-    // if (this->Initial) {
+    // 在ForCondBB中生成初始化代码
     context.PushSymbolTable();
-    cout << "For init" << endl;
     this->Initial.codeGen(context);
-    cout << "For end" << endl;
     TerminateBlockByBr(ForCondBB);
 
-    //Generate code in the "ForCond" block
+    // 在ForCondBB中生成条件代码
     CurrentFunc->getBasicBlockList().push_back(ForCondBB);
     IRBuilder.SetInsertPoint(ForCondBB);
-
-
-    // evaluate condition
     llvm::Value* Condition = this->condition.codeGen(context);
 
-    // check condition
+    // 检查条件是否可以转换为布尔值
     if (( Condition = typeCast(Condition, IRBuilder.getInt1Ty()) ) == NULL) {
         throw std::logic_error("condition type can not cast to bool");
         return NULL;
     }
 
+    // 创建一个条件分支，如果条件为真，则跳转至ForLoopBB，否则跳转至ForEndBB
     IRBuilder.CreateCondBr(Condition, ForLoopBB, ForEndBB);
 
-    //Otherwise, it is an unconditional loop condition (always returns true)
-    // IRBuilder.CreateBr(ForLoopBB);
-
-    //Generate code in the "ForLoop" block
+    // 在ForLoopBB中生成循环体的代码
     CurrentFunc->getBasicBlockList().push_back(ForLoopBB);
     IRBuilder.SetInsertPoint(ForLoopBB);
-
-    // here in yjj continue goes to ForTailBB, which maybe wrong
-    // if a "continue" in "for", tha last part of "for" will not be executed
     context.EnterLoop(ForCondBB, ForEndBB);
     context.PushSymbolTable();
     this->LoopBody.codeGen(context);
     context.PopSymbolTable();
     context.LeaveLoop();
 
-    //If not terminated, jump to "ForTail"
+    // 如果当前块未终止，则创建一个无条件跳转至ForTailBB的分支
     TerminateBlockByBr(ForTailBB);
 
-    //Generate code in the "ForTail" block
+    // 在ForTailBB中生成循环尾部的代码，并跳转至ForCondBB
     CurrentFunc->getBasicBlockList().push_back(ForTailBB);
     IRBuilder.SetInsertPoint(ForTailBB);
     this->Tail.codeGen(context);
     IRBuilder.CreateBr(ForCondBB);
 
-    //Finish "ForEnd" block
+    // 在ForEndBB中生成后续代码
     CurrentFunc->getBasicBlockList().push_back(ForEndBB);
     IRBuilder.SetInsertPoint(ForEndBB);
-    // if (this->Initial) {
-        context.PopSymbolTable();
+    context.PopSymbolTable();
+
     return NULL;
 }
 
-// copy in BianaryOp
-llvm::Value* CreateCmpEQ(llvm::Value* left, llvm::Value* right) {
+
+// 函数功能：将两个llvm::Value*转换为相同的类型。如果两者类型不同，则转换为较高的类型（整数->浮点数）。
+std::pair<llvm::Value*, llvm::Value*> CastToSameType(llvm::Value* left, llvm::Value* right) {
     if (left->getType() != right->getType()) {
-        // left or right is float
-        if (left->getType() == llvm::Type::getFloatTy(Context)) {
-            right = typeCast(right, llvm::Type::getFloatTy(Context));
-        } else if (right->getType() == llvm::Type::getFloatTy(Context)) {
+        llvm::Type* leftType = left->getType();
+        llvm::Type* rightType = right->getType();
+        if (leftType == llvm::Type::getFloatTy(Context) || rightType == llvm::Type::getFloatTy(Context)) {
+            // 如果有一个是浮点类型，则两个都转换为浮点类型
             left = typeCast(left, llvm::Type::getFloatTy(Context));
+            right = typeCast(right, llvm::Type::getFloatTy(Context));
+        } else if (leftType == llvm::Type::getInt32Ty(Context) || rightType == llvm::Type::getInt32Ty(Context)) {
+            // 如果有一个是整型，则两个都转换为整型
+            left = typeCast(left, llvm::Type::getInt32Ty(Context));
+            right = typeCast(right, llvm::Type::getInt32Ty(Context));
         } else {
-            // if left or right is int
-            if (left->getType() == llvm::Type::getInt32Ty(Context)) {
-                right = typeCast(right, llvm::Type::getInt32Ty(Context));
-            } else if(right->getType() == llvm::Type::getInt32Ty(Context)) {
-                left = typeCast(left, llvm::Type::getInt32Ty(Context));
-            } else {
-                throw logic_error("cann't use bool in cmp");
-            }
+            throw logic_error("cann't use bool in cmp");
         }
     }
-    if(left->getType() == llvm::Type::getFloatTy(Context))
-        return IRBuilder.CreateFCmpOEQ(left, right, "fcmptmp");
-    else 
-        return IRBuilder.CreateICmpEQ(left, right, "icmptmp");
+    return std::make_pair(left, right);
 }
 
-// just copy yjj
+// 函数功能：创建一个比较两个llvm::Value*是否相等的表达式。如果两者类型不同，则自动进行类型转换。
+llvm::Value* CreateCmpEQ(llvm::Value* left, llvm::Value* right) {
+    std::tie(left, right) = CastToSameType(left, right);
+    return left->getType() == llvm::Type::getFloatTy(Context) ? 
+           IRBuilder.CreateFCmpOEQ(left, right, "fcmptmp") :  // 如果是浮点类型，则使用CreateFCmpOEQ
+           IRBuilder.CreateICmpEQ(left, right, "icmptmp");    // 如果是整型，则使用CreateICmpEQ
+}
+
+// 函数功能：生成Switch语句的代码
 llvm::Value* SwitchStatement::codeGen(CodeGenerator &context){
+    // 初始化
     llvm::Function* CurrentFunc = context.GetCurrentFunction();
     llvm::Value* Matches = this->matches.codeGen(context);
 
-    //Create one block for each case statement.
-    std::vector<llvm::BasicBlock*> CaseBB;
-    for (int i = 0; i < this->caseList.size(); i++){
-        CaseBB.push_back(llvm::BasicBlock::Create(Context, "Case" + std::to_string(i)));
-    }
-    //Create an extra block for SwitchEnd
-    CaseBB.push_back(llvm::BasicBlock::Create(Context, "SwitchEnd"));
-
-    //Create one block for each comparison.
-    std::vector<llvm::BasicBlock*> ComparisonBB;
-    ComparisonBB.push_back(IRBuilder.GetInsertBlock());
-    for (int i = 1; i < this->caseList.size(); i++){
-        ComparisonBB.push_back(llvm::BasicBlock::Create(Context, "Comparison" + std::to_string(i)));
-    }
-    ComparisonBB.push_back(CaseBB.back());
-
-    //Generate branches
+    // 为每个case和对比准备blocks
+    std::vector<llvm::BasicBlock*> CaseBB(this->caseList.size() + 1);
+    std::vector<llvm::BasicBlock*> ComparisonBB(this->caseList.size() + 1);
     for (int i = 0; i < this->caseList.size(); i++) {
-        if (i) {
-            CurrentFunc->getBasicBlockList().push_back(ComparisonBB[i]);
-            IRBuilder.SetInsertPoint(ComparisonBB[i]);
-        }
-        if (this->caseList[i]->condition)	//Have condition
-            IRBuilder.CreateCondBr(
-                CreateCmpEQ(Matches, this->caseList[i]->condition->codeGen(context)),
-                CaseBB[i],
-                ComparisonBB[i + 1]
-            );
-        else									//Default
-            IRBuilder.CreateBr(CaseBB[i]);
+        CaseBB[i] = llvm::BasicBlock::Create(Context, "Case" + std::to_string(i));
+        ComparisonBB[i] = i ? llvm::BasicBlock::Create(Context, "Comparison" + std::to_string(i)) : IRBuilder.GetInsertBlock();
     }
+    CaseBB.back() = llvm::BasicBlock::Create(Context, "SwitchEnd");
+    ComparisonBB.back() = CaseBB.back();
 
-    //Generate code for each case statement
+    // 为每个case生成代码
     context.PushSymbolTable();
     for (int i = 0; i < this->caseList.size(); i++) {
+        // 准备分支
+        CurrentFunc->getBasicBlockList().push_back(ComparisonBB[i]);
+        IRBuilder.SetInsertPoint(ComparisonBB[i]);
+        IRBuilder.CreateCondBr(
+            CreateCmpEQ(Matches, this->caseList[i]->condition->codeGen(context)),
+            CaseBB[i],
+            ComparisonBB[i + 1]
+        );
+
+        // 生成case代码
         CurrentFunc->getBasicBlockList().push_back(CaseBB[i]);
         IRBuilder.SetInsertPoint(CaseBB[i]);
         context.EnterLoop(CaseBB[i + 1], CaseBB.back());
@@ -1159,7 +1066,7 @@ llvm::Value* SwitchStatement::codeGen(CodeGenerator &context){
     }
     context.PopSymbolTable();
 
-    //Finish "SwitchEnd" block
+    // 完成"SwitchEnd"块
     if (CaseBB.back()->hasNPredecessorsOrMore(1)) {
         CurrentFunc->getBasicBlockList().push_back(CaseBB.back());
         IRBuilder.SetInsertPoint(CaseBB.back());
@@ -1167,22 +1074,14 @@ llvm::Value* SwitchStatement::codeGen(CodeGenerator &context){
     return NULL;
 }
 
+// 函数功能：生成Case语句的代码
 llvm::Value* CaseStatement::codeGen(CodeGenerator &context){
-    // //Generate the statements, one by one.
-    // for (auto& stmt : this->body.statementList){
-    //     if (IRBuilder.GetInsertBlock()->getTerminator())
-    //         break;
-    //     else if (stmt)
-    //         stmt->codeGen(context);
-    // }
-
-    body.codeGen(context);
-
-    //If not terminated, jump to the next case block
+    this->body.codeGen(context);
     TerminateBlockByBr(context.GetConditionBlock());
     return NULL;
 }
 
+// 函数功能：生成Break语句的代码
 llvm::Value* BreakStatement::codeGen(CodeGenerator &context){
     cout << "break,codegen" << endl;
     llvm::BasicBlock* BreakPoint = context.GetEndBlock();
@@ -1193,6 +1092,7 @@ llvm::Value* BreakStatement::codeGen(CodeGenerator &context){
     return NULL;
 }
 
+// 函数功能：生成Continue语句的代码
 llvm::Value* ContinueStatement::codeGen(CodeGenerator &context){
 		llvm::BasicBlock* ContinuePoint = context.GetEndBlock();
 		if (ContinuePoint)
