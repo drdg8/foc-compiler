@@ -183,17 +183,15 @@ llvm::Value* Identifier::codeGen(CodeGenerator& context) {
     llvm::outs() << "identifier type:" << *tp << "\n";
     llvm::Value* res = nullptr;
     if(tp->isArrayTy()) {
-        vector<llvm::Value*> indexList;
-        indexList.push_back(IRBuilder.getInt32(0));
-        indexList.push_back(IRBuilder.getInt32(0));
-        // the first argument is a pointer to the base address of the array, and the remaining arguments are the indices of the element to access.
-        res = IRBuilder.CreateInBoundsGEP(var->getType()->getPointerElementType(), var, llvm::ArrayRef<llvm::Value*>(indexList), "arrayPtr");
+        std::vector<llvm::Value*> indices = {IRBuilder.getInt32(0), IRBuilder.getInt32(0)};
+        res = IRBuilder.CreateConstGEP2_32(tp, var, 0, 0, "arrayPtr");
     }
     else {
-        res = new llvm::LoadInst(tp, var, "LoadInst", false, IRBuilder.GetInsertBlock());
+        res = IRBuilder.CreateLoad(tp, var, "LoadInst");
     }
     return res;
 }
+
 
 // 为scanf函数生成参数
 vector<llvm::Value *> *getScanfArgs(CodeGenerator& context,vector<Expression*> args){

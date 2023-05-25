@@ -183,7 +183,7 @@ WhileEnd:                                         ; preds = %WhileCond
   %LoadInst5 = load i32, i32* %N, align 4
   %1 = sub i32 %LoadInst5, 1
   store i32 %1, i32* %right, align 4
-  %arrayPtr = getelementptr inbounds [1000000 x i32], [1000000 x i32]* %B, i32 0, i32 0
+  %arrayPtr = getelementptr [1000000 x i32], [1000000 x i32]* %B, i32 0, i32 0
   %LoadInst6 = load i32, i32* %left, align 4
   %LoadInst7 = load i32, i32* %right, align 4
   call void @quicksort(i32* %arrayPtr, i32 %LoadInst6, i32 %LoadInst7)
