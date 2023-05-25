@@ -35,20 +35,15 @@ extern llvm::IRBuilder<> IRBuilder; //定义全局IRbuilder
 //symbol table的定义
 class Symbol{
 public:
-    Symbol(void) : _Value(NULL),_Function(NULL), Type(UNDEFINED) {}
-    Symbol(llvm::Function* Func) : _Value(NULL),_Function(Func), Type(FUNCTION) {}
-    Symbol(llvm::Value* Value) : _Value(Value),_Function(NULL), Type(VARIABLE) { }
+    Symbol(void) : _Value(NULL), Type(UNDEFINED) {}
+    Symbol(llvm::Value* Value) : _Value(Value),Type(VARIABLE) { }
     llvm::Value* GetVariable(void) { return this->Type == VARIABLE ? _Value : NULL; }
-    llvm::Function* GetFunction(void) { return this->Type == FUNCTION ? _Function : NULL; }
 public:
     llvm::Value* _Value;
-    llvm::Function* _Function;
     enum{
-        FUNCTION,
         VARIABLE,
         UNDEFINED
     } Type;   
-    // llvm::Type* Type;   
 };
 
 class CodeGenerator{
@@ -75,10 +70,6 @@ class CodeGenerator{
         void PushSymbolTable(void);
 
         void PopSymbolTable(void);
-
-        llvm::Function* FindFunction(std::string Name);
-
-        bool AddFunction(std::string Name, llvm::Function* Function);
 
         llvm::Value* FindVariable(std::string Name);
 

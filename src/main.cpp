@@ -87,4 +87,6 @@ int main(int argc, const char* argv[]){
 
     //将目标代码写入output file中
     generator->GenIR(OutputObjectFile);
+
+    
 }
