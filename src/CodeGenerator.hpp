@@ -55,7 +55,7 @@ class CodeGenerator{
         llvm::Function* CurrFunction;	
         // condition block, when "continue;" jump here
         std::vector<llvm::BasicBlock*> ConditionBlockStack;
-        // end block, when "break;" jump here
+        // end block, when "break;" and "continue;" jump here
         std::vector<llvm::BasicBlock*> EndBlockStack;
         llvm::BasicBlock* TmpBB;
         llvm::BasicBlock* GlobalBB;
@@ -65,7 +65,6 @@ class CodeGenerator{
 
     public:
         CodeGenerator(void);
-        //sizeof() 空位，待实现
 
         void PushSymbolTable(void);
 
