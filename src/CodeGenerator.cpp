@@ -28,26 +28,27 @@ CodeGenerator::CodeGenerator(void) :
 }
 
 // 查找变量
-llvm::Value* CodeGenerator::FindVariable(std::string Name) {
-    if (this->SymbolTableStack.size() == 0) return NULL;
-    for (auto TableIter = this->SymbolTableStack.end() - 1; TableIter >= this->SymbolTableStack.begin(); TableIter--) {
-        auto PairIter = (**TableIter).find(Name);
-        if (PairIter != (**TableIter).end())
-            return PairIter->second;
+llvm::Value* CodeGenerator::FindVariable(std::string varName) {
+    if (this->SymbolTableStack.empty()) return nullptr;
+    for (auto tableIter = this->SymbolTableStack.rbegin(); tableIter != this->SymbolTableStack.rend(); ++tableIter) {
+        auto foundVarIter = (*tableIter)->find(varName);
+        if (foundVarIter != (*tableIter)->end())
+            return foundVarIter->second;
     }
-    return this->Module->getGlobalVariable(Name, true);
+    return this->Module->getGlobalVariable(varName, true);
 }
 
 // 添加变量到当前符号表
-bool CodeGenerator::AddVariable(std::string Name, llvm::Value* Variable){
-    if (this->SymbolTableStack.size() == 0) return false;
-    auto& TopTable = *(this->SymbolTableStack.back());
-    auto PairIter = TopTable.find(Name);
-    if (PairIter != TopTable.end())
+bool CodeGenerator::AddVariable(std::string varName, llvm::Value* varValue){
+    if (this->SymbolTableStack.empty()) return false;
+    auto& topTable = *(this->SymbolTableStack.back());
+    auto foundVarIter = topTable.find(varName);
+    if (foundVarIter != topTable.end())
         return false;
-    TopTable[Name] = Variable;
+    topTable[varName] = varValue;
     return true;
 }
+
 
 // 创建并推入一个空的符号表
 void CodeGenerator::PushSymbolTable(void) {
