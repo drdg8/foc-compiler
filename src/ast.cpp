@@ -439,12 +439,11 @@ llvm::Value* ArrayElement::codeGen(CodeGenerator &context){
     // 如果 arrayValue 的类型是指针类型，则载入指针所指向的值
     if(arrayValue->getType()->getPointerElementType()->isPointerTy()) {
         arrayValue = IRBuilder.CreateLoad(arrayValue->getType()->getPointerElementType(), arrayValue);
-        indexList.push_back(indexValue);    
+        indexList = {indexValue};    
     }
     // 如果 arrayValue 的类型是数组类型，则添加索引值
     else if(arrayValue->getType()->getPointerElementType()->isArrayTy()) {
-        indexList.push_back(IRBuilder.getInt32(0));
-        indexList.push_back(indexValue);    
+        indexList = {IRBuilder.getInt32(0),indexValue};
     }
     // 如果 arrayValue 的类型既不是指针类型也不是数组类型，则报错
     else{
@@ -511,12 +510,11 @@ llvm::Value* ArrayAssign::codeGen(CodeGenerator &context){
     // 如果 arrVal 是指针类型
     if(arrVal->getType()->getPointerElementType()->isPointerTy()) {
         arrVal = IRBuilder.CreateLoad(arrVal->getType()->getPointerElementType(), arrVal);
-        idxVec.push_back(idxVal);    
+        idxVec = {idxVal};    
     }
     // 如果 arrVal 是数组类型
     else {
-        idxVec.push_back(IRBuilder.getInt32(0));
-        idxVec.push_back(idxVal);    
+        idxVec = {IRBuilder.getInt32(0),idxVal};
     }
 
     // 使用 GEP 指令计算左值（待赋值元素）的地址
@@ -560,12 +558,11 @@ llvm::Value* GetArrayAddr::codeGen(CodeGenerator &context){
     // 如果目标是指针
     if(arrayVal->getType()->getPointerElementType()->isPointerTy()) {
         arrayVal = IRBuilder.CreateLoad(arrayVal->getType()->getPointerElementType(), arrayVal);
-        idxList.push_back(indexVal);    
+        idxList = {indexVal};
     }
     // 如果目标是数组 
     else {
-        idxList.push_back(IRBuilder.getInt32(0));
-        idxList.push_back(indexVal);    
+        idxList = {IRBuilder.getInt32(0),indexVal};
     }
 
     // 获取元素指针
