@@ -32,22 +32,32 @@ void quicksort(int A[10], int left, int right) {
 
 int main()
 {
-int B[1000000];
-int N;
-scanf("%d", &N);
-int i = 0;
-while(i < N) {
-scanf("%d", &B[i]);
-i = i + 1;
+// int B[1000000];
+// int N;
+// scanf("%d", &N);
+// int i = 0;
+// while(i < N) {
+// scanf("%d", &B[i]);
+// i = i + 1;
+// }
+// int left = 0;
+// int right = N - 1;
+// quicksort(B, left, right);
+// i = 0;
+// while(i < N) {
+// printf("%d\n", B[i]);
+// i = i + 1;
+// }
+int i=0;
+int b = 1;
+while(i<1){
+   
+    if(i == 0){
+         i = i+1;
+        continue;
+    }
+    b = 0;
 }
-int left = 0;
-int right = N - 1;
-quicksort(B, left, right);
-i = 0;
-while(i < N) {
-printf("%d\n", B[i]);
-i = i + 1;
-}
-
+printf("%d",b);
 return 0;
 }
