@@ -1,0 +1,2 @@
+parser.y: warning: 33 shift/reduce conflicts [-Wconflicts-sr]
+parser.y: note: rerun with option '-Wcounterexamples' to generate conflict counterexamples
