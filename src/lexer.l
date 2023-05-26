@@ -33,7 +33,7 @@
 [a-zA-Z_][a-zA-Z0-9_]*  {SAVE_IDENTIFIER;  return IDENTIFIER;}//标识符
 [0-9]+\.[0-9]* 			    {SAVE_DOUBLE; return REAL;}//浮点
 [0-9]+					        {SAVE_INTEGER; return INTEGER;}//整型
-\'"[^\\']"\'          {SAVE_CHAR; return CHARACTER;}//字符
+\'.\'|\'\\.\'         {SAVE_CHAR; return CHARACTER;}//字符
 \"(\\.|[^"\\])*\"       {SAVE_STRING; return STRING; }//字符串
 "&&"                    return TOKEN(AND);//逻辑运算符
 "||"                    return TOKEN(OR); 

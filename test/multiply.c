@@ -1,4 +1,3 @@
-#include <stdio.h>
 
 int A[200000];
 int B[200000];

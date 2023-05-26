@@ -11,14 +11,14 @@ int main() {
 
     // Switch Case
     switch (a) {
-        case 10:
+        case 10:{
             printf("a is 10\n");
             break;
-        case 5:
+        }
+        case 5:{
             printf("a is 5\n");
             break;
-        default:
-            printf("a is neither 10 nor 5\n");
+        }
     }
 
     return 0;

@@ -1,4 +1,3 @@
-#include <stdio.h>
 
 void quicksort(int A[10], int left, int right) {
     int i;
