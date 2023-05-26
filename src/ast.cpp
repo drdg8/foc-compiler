@@ -459,34 +459,6 @@ llvm::Value* ArrayElement::codeGen(CodeGenerator &context){
 }
 
 
-// 该函数获取 array[index] 的地址以用于函数参数传递
-llvm::Value* ArrayElement::getAddr(CodeGenerator &context){
-    std::cout << "正在获取数组元素地址，目标数组：" << identifier.name << "[]" << std::endl;
-
-    // 在上下文中寻找数组变量，如果找不到，返回错误
-    llvm::Value* arrVal = context.FindVariable(identifier.name);
-    if(!arrVal){
-        std::cerr << "无法找到数组 " << identifier.name << std::endl;
-		return nullptr;
-    }
-    // 生成数组索引
-    llvm::Value* idxVal = index.codeGen(context);
-    vector<llvm::Value*> idxVec;
-    // 如果 arrVal 是指针类型
-    if(arrVal->getType()->getPointerElementType()->isPointerTy()) {
-        arrVal = IRBuilder.CreateLoad(arrVal->getType()->getPointerElementType(), arrVal);
-        idxVec.push_back(idxVal);    
-    }
-    // 如果 arrVal 是数组类型
-    else {
-        idxVec.push_back(IRBuilder.getInt32(0));
-        idxVec.push_back(idxVal);    
-    }
-    // 生成 GEP 指令以计算元素地址，然后返回
-    llvm::Value* elementPtr = IRBuilder.CreateInBoundsGEP(arrVal->getType()->getPointerElementType(), arrVal, llvm::ArrayRef<llvm::Value*>(idxVec), "tmparray");
-    return elementPtr;
-}
-
 // ArrayAssign 函数用于对数组元素进行赋值操作，例如 a[2] = 5;
 llvm::Value* ArrayAssign::codeGen(CodeGenerator &context){
     std::cout << "正在进行数组元素赋值操作，目标数组：" << identifier.name << "[]" << std::endl;

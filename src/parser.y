@@ -96,6 +96,7 @@
 %left CEQ CNE CLT CLE CGT CGE
 %left PLUS MINUS
 %left MUL DIV
+%nonassoc UMINUS
 
 
 
@@ -256,6 +257,7 @@
 		  ;
 
     const_value : INTEGER { $$ = new Integer($1); }//const值
+    | MINUS  INTEGER { $$ = new Integer(-$1);} %prec UMINUS
 		| REAL { $$ = new Double($1); }
     | CHARACTER { $$ = new Char($1);}
     | STRING { $$ = new String(*$1); }
