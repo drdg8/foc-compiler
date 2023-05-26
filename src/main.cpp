@@ -66,19 +66,7 @@ int main(int argc, const char* argv[]){
         }
         
     }    
-    //处理-s选项
-    auto it_s = argMap.find("s");
-    if(it_s != argMap.end()){
-        std::string OutputAssemblyFile = it_s->second;
-        if(OutputAssemblyFile.length() <= 2 || OutputAssemblyFile.substr(OutputAssemblyFile.length() - 2) != ".s")
-        {
-            OutputAssemblyFile = OutputAssemblyFile + ".s";
-        }
-        
-        // Convert LLVM IR to RISC-V assembly code
-        std::string command = "llc -march=riscv32 " + OutputObjectFile + " -filetype=asm -o " + OutputAssemblyFile;
-        system(command.c_str());
-    }
+    
 
 
     std::cout <<OutputObjectFile << std::endl;
@@ -108,5 +96,17 @@ int main(int argc, const char* argv[]){
     //将目标代码写入output file中
     generator->GenIR(OutputObjectFile);
 
-    
+    //处理-s选项
+    auto it_s = argMap.find("s");
+    if(it_s != argMap.end()){
+        std::string OutputAssemblyFile = it_s->second;
+        if(OutputAssemblyFile.length() <= 2 || OutputAssemblyFile.substr(OutputAssemblyFile.length() - 2) != ".s")
+        {
+            OutputAssemblyFile = OutputAssemblyFile + ".s";
+        }
+        
+        // Convert LLVM IR to RISC-V assembly code
+        std::string command = "llc -march=riscv32 " + OutputObjectFile + " -filetype=asm -o " + OutputAssemblyFile;
+        system(command.c_str());
+    }
 }

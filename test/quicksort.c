@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 void quicksort(int A[10], int left, int right) {
     int i;
     int j;
@@ -32,22 +34,22 @@ void quicksort(int A[10], int left, int right) {
 
 int main()
 {
-int B[1000000];
-int N;
-scanf("%d", &N);
-int i = 0;
-while(i < N) {
-scanf("%d", &B[i]);
-i = i + 1;
-}
-int left = 0;
-int right = N - 1;
-// quicksort(B, left, right);
-i = 0;
-while(i < N) {
-printf("%d\n", B[i]);
-i = i + 1;
-}
-
-return 0;
+    int B[1000000];
+    int N;
+    scanf("%d", &N);
+    int i = 0;
+    while(i < N) {
+        scanf("%d", &B[i]);
+        i = i + 1;
+    }
+    int left = 0;
+    int right = N - 1;
+    quicksort(B, left, right);
+    i = 0;
+    while(i < N) {
+        printf("%d\n", B[i]);
+        i = i + 1;
+    }
+    
+    return 0;
 }
