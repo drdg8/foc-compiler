@@ -1057,7 +1057,7 @@ llvm::Value* BreakStatement::codeGen(CodeGenerator &context){
 
 // 函数功能：生成Continue语句的代码
 llvm::Value* ContinueStatement::codeGen(CodeGenerator &context){
-		llvm::BasicBlock* ContinuePoint = context.GetEndBlock();
+		llvm::BasicBlock* ContinuePoint = context.GetConditionBlock();
 		if (ContinuePoint)
 			IRBuilder.CreateBr(ContinuePoint);
 		else
